@@ -53,6 +53,8 @@ export type Database = {
           id: string
           lipsync_price_per_30s: number
           music_price: number
+          nda_full_multiplier: number | null
+          nda_partial_multiplier: number | null
           revisions_4_price: number
           revisions_8_price: number
           scenario_price_per_min: number
@@ -67,6 +69,8 @@ export type Database = {
           id?: string
           lipsync_price_per_30s?: number
           music_price?: number
+          nda_full_multiplier?: number | null
+          nda_partial_multiplier?: number | null
           revisions_4_price?: number
           revisions_8_price?: number
           scenario_price_per_min?: number
@@ -81,6 +85,8 @@ export type Database = {
           id?: string
           lipsync_price_per_30s?: number
           music_price?: number
+          nda_full_multiplier?: number | null
+          nda_partial_multiplier?: number | null
           revisions_4_price?: number
           revisions_8_price?: number
           scenario_price_per_min?: number
@@ -89,8 +95,39 @@ export type Database = {
         }
         Relationships: []
       }
+      hero_stats: {
+        Row: {
+          created_at: string
+          id: string
+          is_visible: boolean | null
+          label: string
+          sort_order: number | null
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_visible?: boolean | null
+          label: string
+          sort_order?: number | null
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_visible?: boolean | null
+          label?: string
+          sort_order?: number | null
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       project_requests: {
         Row: {
+          attachments: string[] | null
           audio_options: string[] | null
           budget_estimate: number | null
           created_at: string
@@ -108,6 +145,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          attachments?: string[] | null
           audio_options?: string[] | null
           budget_estimate?: number | null
           created_at?: string
@@ -125,6 +163,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          attachments?: string[] | null
           audio_options?: string[] | null
           budget_estimate?: number | null
           created_at?: string
@@ -215,6 +254,42 @@ export type Database = {
           id?: string
           updated_at?: string
           value?: string
+        }
+        Relationships: []
+      }
+      social_links: {
+        Row: {
+          created_at: string
+          icon: string
+          id: string
+          is_visible: boolean | null
+          location: string
+          name: string
+          sort_order: number | null
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          icon: string
+          id?: string
+          is_visible?: boolean | null
+          location?: string
+          name: string
+          sort_order?: number | null
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          icon?: string
+          id?: string
+          is_visible?: boolean | null
+          location?: string
+          name?: string
+          sort_order?: number | null
+          updated_at?: string
+          url?: string
         }
         Relationships: []
       }

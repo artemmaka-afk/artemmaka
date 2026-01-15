@@ -9,6 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AIToolsManager } from '@/components/admin/AIToolsManager';
 import { ProjectsManager } from '@/components/admin/ProjectsManager';
 import { SiteContentManager } from '@/components/admin/SiteContentManager';
+import { HeroStatsManager } from '@/components/admin/HeroStatsManager';
+import { SocialLinksManager } from '@/components/admin/SocialLinksManager';
+import { AvailabilityManager } from '@/components/admin/AvailabilityManager';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 
 interface CalculatorConfig {
@@ -349,6 +352,10 @@ export default function Admin() {
               <TabsTrigger value="content" className="gap-2">
                 <Palette className="w-4 h-4" />
                 <span className="hidden sm:inline">Контент</span>
+              </TabsTrigger>
+              <TabsTrigger value="hero" className="gap-2">
+                <Palette className="w-4 h-4" />
+                <span className="hidden sm:inline">Шапка</span>
               </TabsTrigger>
               <TabsTrigger value="calculator" className="gap-2">
                 <DollarSign className="w-4 h-4" />

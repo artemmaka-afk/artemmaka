@@ -1,13 +1,19 @@
 import { motion } from 'framer-motion';
-import { Send, Instagram, Youtube, Globe, ArrowDown, Loader2 } from 'lucide-react';
-import { stats, socialLinks } from '@/lib/constants';
-import { useSiteContent } from '@/hooks/useSiteData';
+import { Send, Instagram, Youtube, Globe, ArrowDown, Loader2, Link } from 'lucide-react';
+import { useSiteContent, useHeroStats, useSocialLinks } from '@/hooks/useSiteData';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Send,
   Instagram,
   Youtube,
   Globe,
+  Link,
+};
+
+const statusConfig = {
+  available: { color: 'bg-emerald-500', text: 'Открыт для заказов' },
+  medium: { color: 'bg-yellow-500', text: 'Средняя загрузка' },
+  busy: { color: 'bg-red-500', text: 'Высокая нагрузка' },
 };
 
 const containerVariants = {
@@ -31,7 +37,11 @@ const itemVariants = {
 };
 
 export function Hero() {
-  const { data: siteContent, isLoading } = useSiteContent();
+  const { data: siteContent, isLoading: contentLoading } = useSiteContent();
+  const { data: stats, isLoading: statsLoading } = useHeroStats();
+  const { data: socialLinks, isLoading: linksLoading } = useSocialLinks();
+
+  const isLoading = contentLoading || statsLoading || linksLoading;
 
   // Get content from DB with fallbacks
   const getContent = (id: string, fallback: string) => {
@@ -41,6 +51,14 @@ export function Hero() {
   const name = getContent('artist_name', 'Артём Макаров');
   const title = getContent('artist_title', 'AI Artist / Генеративный художник');
   const tagline = getContent('artist_tagline', 'Создаю фотореалистичные видео и изображения с помощью нейросетей');
+  const availabilityStatus = getContent('availability_status', 'available') as keyof typeof statusConfig;
+  const statusInfo = statusConfig[availabilityStatus] || statusConfig.available;
+
+  // Filter visible stats
+  const visibleStats = stats?.filter(s => s.is_visible) || [];
+  
+  // Filter header social links
+  const headerLinks = socialLinks?.filter(l => l.is_visible && (l.location === 'header' || l.location === 'both')) || [];
 
   if (isLoading) {
     return (
@@ -86,13 +104,13 @@ export function Hero() {
         initial="hidden"
         animate="visible"
       >
-        {/* Eyebrow */}
+        {/* Eyebrow - Availability Status */}
         <motion.div 
           variants={itemVariants}
           className="inline-flex items-center gap-2 px-4 py-2 glass rounded-full mb-8"
         >
-          <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-          <span className="text-sm font-medium text-muted-foreground">Открыт для заказов</span>
+          <span className={`w-2 h-2 ${statusInfo.color} rounded-full animate-pulse`} />
+          <span className="text-sm font-medium text-muted-foreground">{statusInfo.text}</span>
         </motion.div>
 
         {/* Main Title */}
@@ -118,47 +136,51 @@ export function Hero() {
           {tagline}
         </motion.p>
 
-        {/* Stats */}
-        <motion.div 
-          variants={itemVariants}
-          className="flex flex-wrap items-center justify-center gap-6 md:gap-10 mb-10"
-        >
-          {stats.map((stat, index) => (
-            <motion.div 
-              key={index}
-              className="glass px-6 py-4 rounded-2xl text-center"
-              whileHover={{ scale: 1.05, y: -2 }}
-              transition={{ type: 'spring', stiffness: 400 }}
-            >
-              <div className="text-2xl md:text-3xl font-bold gradient-text">{stat.value}</div>
-              <div className="text-sm text-muted-foreground">{stat.label}</div>
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {/* Social Links */}
-        <motion.div 
-          variants={itemVariants}
-          className="flex items-center justify-center gap-3 mb-10"
-        >
-          {socialLinks.map((link) => {
-            const Icon = iconMap[link.icon];
-            return (
-              <motion.a
-                key={link.name}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="glass glass-hover p-4 rounded-2xl group"
-                aria-label={link.name}
-                whileHover={{ scale: 1.1, y: -2 }}
-                whileTap={{ scale: 0.95 }}
+        {/* Stats from DB */}
+        {visibleStats.length > 0 && (
+          <motion.div 
+            variants={itemVariants}
+            className="flex flex-wrap items-center justify-center gap-6 md:gap-10 mb-10"
+          >
+            {visibleStats.map((stat) => (
+              <motion.div 
+                key={stat.id}
+                className="glass px-6 py-4 rounded-2xl text-center"
+                whileHover={{ scale: 1.05, y: -2 }}
+                transition={{ type: 'spring', stiffness: 400 }}
               >
-                <Icon className="w-5 h-5 text-muted-foreground group-hover:text-violet-400 transition-colors" />
-              </motion.a>
-            );
-          })}
-        </motion.div>
+                <div className="text-2xl md:text-3xl font-bold gradient-text">{stat.value}</div>
+                <div className="text-sm text-muted-foreground">{stat.label}</div>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+
+        {/* Social Links from DB */}
+        {headerLinks.length > 0 && (
+          <motion.div 
+            variants={itemVariants}
+            className="flex items-center justify-center gap-3 mb-10"
+          >
+            {headerLinks.map((link) => {
+              const Icon = iconMap[link.icon] || Link;
+              return (
+                <motion.a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="glass glass-hover p-4 rounded-2xl group"
+                  aria-label={link.name}
+                  whileHover={{ scale: 1.1, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Icon className="w-5 h-5 text-muted-foreground group-hover:text-violet-400 transition-colors" />
+                </motion.a>
+              );
+            })}
+          </motion.div>
+        )}
 
         {/* CTA Buttons */}
         <motion.div 
