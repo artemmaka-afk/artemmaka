@@ -14,7 +14,102 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      calculator_config: {
+        Row: {
+          base_frame_price: number
+          created_at: string
+          deadline_10_multiplier: number
+          deadline_20_multiplier: number
+          id: string
+          lipsync_price_per_30s: number
+          music_price: number
+          revisions_4_price: number
+          revisions_8_price: number
+          updated_at: string
+          volume_discount_percent: number
+        }
+        Insert: {
+          base_frame_price?: number
+          created_at?: string
+          deadline_10_multiplier?: number
+          deadline_20_multiplier?: number
+          id?: string
+          lipsync_price_per_30s?: number
+          music_price?: number
+          revisions_4_price?: number
+          revisions_8_price?: number
+          updated_at?: string
+          volume_discount_percent?: number
+        }
+        Update: {
+          base_frame_price?: number
+          created_at?: string
+          deadline_10_multiplier?: number
+          deadline_20_multiplier?: number
+          id?: string
+          lipsync_price_per_30s?: number
+          music_price?: number
+          revisions_4_price?: number
+          revisions_8_price?: number
+          updated_at?: string
+          volume_discount_percent?: number
+        }
+        Relationships: []
+      }
+      project_requests: {
+        Row: {
+          audio_options: string[] | null
+          budget_estimate: number | null
+          created_at: string
+          deadline: string | null
+          duration_seconds: number | null
+          email: string | null
+          id: string
+          name: string
+          pace: string | null
+          phone: string | null
+          project_description: string
+          revisions: string | null
+          status: string
+          telegram: string | null
+          updated_at: string
+        }
+        Insert: {
+          audio_options?: string[] | null
+          budget_estimate?: number | null
+          created_at?: string
+          deadline?: string | null
+          duration_seconds?: number | null
+          email?: string | null
+          id?: string
+          name: string
+          pace?: string | null
+          phone?: string | null
+          project_description: string
+          revisions?: string | null
+          status?: string
+          telegram?: string | null
+          updated_at?: string
+        }
+        Update: {
+          audio_options?: string[] | null
+          budget_estimate?: number | null
+          created_at?: string
+          deadline?: string | null
+          duration_seconds?: number | null
+          email?: string | null
+          id?: string
+          name?: string
+          pace?: string | null
+          phone?: string | null
+          project_description?: string
+          revisions?: string | null
+          status?: string
+          telegram?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
