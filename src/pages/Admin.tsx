@@ -522,6 +522,19 @@ export default function Admin() {
               </div>
             </TabsContent>
 
+            {/* Hero Section Tab */}
+            <TabsContent value="hero" className="space-y-6">
+              <div className="glass-card p-4 sm:p-6">
+                <AvailabilityManager />
+              </div>
+              <div className="glass-card p-4 sm:p-6">
+                <HeroStatsManager />
+              </div>
+              <div className="glass-card p-4 sm:p-6">
+                <SocialLinksManager />
+              </div>
+            </TabsContent>
+
             {/* Calculator Tab */}
             <TabsContent value="calculator">
               <div className="glass-card p-4 sm:p-6 space-y-6">

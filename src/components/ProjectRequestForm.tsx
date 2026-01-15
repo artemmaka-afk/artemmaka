@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Send, User, MessageSquare, CheckCircle, Loader2 } from 'lucide-react';
+import { Send, User, MessageSquare, CheckCircle, Loader2, Paperclip, X, Upload } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -10,12 +10,76 @@ import { toast } from 'sonner';
 export function ProjectRequestForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     name: '',
     telegram: '',
     email: '',
     project_description: '',
   });
+
+  const handleFileSelect = (selectedFiles: FileList | null) => {
+    if (!selectedFiles) return;
+    const newFiles = Array.from(selectedFiles);
+    // Limit to 5 files, max 10MB each
+    const validFiles = newFiles.filter(file => {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error(`Файл ${file.name} слишком большой (макс. 10MB)`);
+        return false;
+      }
+      return true;
+    });
+    setFiles(prev => [...prev, ...validFiles].slice(0, 5));
+  };
+
+  const removeFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    handleFileSelect(e.dataTransfer.files);
+  }, []);
+
+  const uploadFiles = async (): Promise<string[]> => {
+    const urls: string[] = [];
+    
+    for (const file of files) {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `attachments/${fileName}`;
+
+      const { error } = await supabase.storage
+        .from('request-attachments')
+        .upload(filePath, file);
+
+      if (error) {
+        console.error('Error uploading file:', error);
+        continue;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('request-attachments')
+        .getPublicUrl(filePath);
+
+      urls.push(publicUrl);
+    }
+
+    return urls;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,11 +97,18 @@ export function ProjectRequestForm() {
     setIsSubmitting(true);
 
     try {
+      // Upload files first
+      let attachmentUrls: string[] = [];
+      if (files.length > 0) {
+        attachmentUrls = await uploadFiles();
+      }
+
       const { error } = await supabase.from('project_requests').insert({
         name: formData.name.trim(),
         telegram: formData.telegram.trim() || null,
         email: formData.email.trim() || null,
         project_description: formData.project_description.trim(),
+        attachments: attachmentUrls.length > 0 ? attachmentUrls : null,
       });
 
       if (error) throw error;
@@ -50,6 +121,12 @@ export function ProjectRequestForm() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
 
   if (isSubmitted) {
@@ -77,6 +154,7 @@ export function ProjectRequestForm() {
           onClick={() => {
             setIsSubmitted(false);
             setFormData({ name: '', telegram: '', email: '', project_description: '' });
+            setFiles([]);
           }}
         >
           Отправить ещё одну заявку
@@ -169,6 +247,74 @@ export function ProjectRequestForm() {
               className="bg-white/5 border-white/10 focus:border-violet-500/50 min-h-[120px] resize-none"
               required
             />
+          </div>
+
+          {/* File Upload */}
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm font-medium">
+              <Paperclip className="w-4 h-4 text-violet-400" />
+              Прикрепить файлы (до 5 файлов, макс. 10MB каждый)
+            </label>
+            
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+              className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${
+                isDragging 
+                  ? 'border-violet-500 bg-violet-500/10' 
+                  : 'border-white/20 hover:border-white/40 bg-white/5'
+              }`}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                onChange={(e) => handleFileSelect(e.target.files)}
+                className="hidden"
+                accept="image/*,video/*,.pdf,.doc,.docx,.txt"
+              />
+              <Upload className={`w-8 h-8 mx-auto mb-2 ${isDragging ? 'text-violet-400' : 'text-muted-foreground'}`} />
+              <p className="text-sm text-muted-foreground">
+                {isDragging ? 'Отпустите для загрузки' : 'Перетащите файлы сюда или нажмите для выбора'}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Изображения, видео, PDF, документы
+              </p>
+            </div>
+
+            {/* File List */}
+            {files.length > 0 && (
+              <div className="space-y-2 mt-3">
+                {files.map((file, index) => (
+                  <div 
+                    key={index}
+                    className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Paperclip className="w-4 h-4 text-violet-400 flex-shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate">{file.name}</p>
+                        <p className="text-xs text-muted-foreground">{formatFileSize(file.size)}</p>
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeFile(index);
+                      }}
+                      className="h-8 w-8 p-0 hover:bg-red-500/20 hover:text-red-400"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <Button 
