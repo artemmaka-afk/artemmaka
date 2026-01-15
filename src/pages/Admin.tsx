@@ -60,37 +60,28 @@ export default function Admin() {
     let isMounted = true;
     let safetyTimer: number | undefined;
 
-  const checkAdminRole = async (userId: string) => {
+    const checkAdminRole = async (userId: string) => {
       try {
-        console.log('Checking admin role for userId:', userId);
-        
-        // Используем функцию has_role, которая обходит RLS
-        const { data, error } = await supabase.rpc('has_role', {
-          _user_id: userId,
-          _role: 'admin'
+        // Надёжная проверка через backend-функцию (не зависит от RLS на клиенте)
+        const { data: sessionData } = await supabase.auth.getSession();
+        const accessToken = sessionData.session?.access_token;
+        if (!accessToken) return false;
+
+        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/check-admin`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
         });
 
-        if (error) {
-          console.error('Error checking admin role via has_role:', error);
-          
-          // Fallback на прямой запрос
-          const { data: roles, error: selectError } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', userId)
-            .eq('role', 'admin')
-            .maybeSingle();
-            
-          if (selectError) {
-            console.error('Error in fallback check:', selectError);
-            return false;
-          }
-          console.log('Fallback roles result:', roles);
-          return !!roles;
+        if (!res.ok) {
+          console.error('check-admin failed:', await res.text());
+          return false;
         }
-        
-        console.log('has_role result:', data);
-        return data === true;
+
+        const json = await res.json();
+        return json?.isAdmin === true;
       } catch (err) {
         console.error('Exception checking admin role:', err);
         return false;
@@ -109,6 +100,7 @@ export default function Admin() {
         setUser(session?.user ?? null);
 
         if (session?.user) {
+          // userId берём из session, но функция сама валидирует токен
           const adminStatus = await checkAdminRole(session.user.id);
           if (isMounted) setIsAdmin(adminStatus);
         } else {
