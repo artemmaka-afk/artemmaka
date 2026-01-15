@@ -56,42 +56,75 @@ export default function Admin() {
   const [isRegisterMode, setIsRegisterMode] = useState(false);
 
   useEffect(() => {
-    // Listen for auth changes
+    let isMounted = true;
+
+    const checkAdminRole = async (userId: string) => {
+      try {
+        const { data: roles, error } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', userId)
+          .eq('role', 'admin')
+          .maybeSingle();
+        
+        if (error) {
+          console.error('Error checking admin role:', error);
+          return false;
+        }
+        return !!roles;
+      } catch (err) {
+        console.error('Exception checking admin role:', err);
+        return false;
+      }
+    };
+
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!isMounted) return;
+      
+      console.log('Auth state change:', event, session?.user?.email);
+      
+      // Update user state immediately
       setUser(session?.user ?? null);
+      
       if (session?.user) {
-        // Check if user is admin
-        const { data: roles } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .eq('role', 'admin')
-          .maybeSingle();
-        
-        setIsAdmin(!!roles);
+        const adminStatus = await checkAdminRole(session.user.id);
+        if (isMounted) {
+          setIsAdmin(adminStatus);
+          setIsLoading(false);
+        }
       } else {
-        setIsAdmin(false);
+        if (isMounted) {
+          setIsAdmin(false);
+          setIsLoading(false);
+        }
       }
-      setIsLoading(false);
     });
 
-    // Get initial session
+    // THEN get the initial session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!isMounted) return;
+      
+      console.log('Initial session:', session?.user?.email);
+      
       setUser(session?.user ?? null);
+      
       if (session?.user) {
-        const { data: roles } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', session.user.id)
-          .eq('role', 'admin')
-          .maybeSingle();
-        
-        setIsAdmin(!!roles);
+        const adminStatus = await checkAdminRole(session.user.id);
+        if (isMounted) {
+          setIsAdmin(adminStatus);
+        }
       }
-      setIsLoading(false);
+      
+      if (isMounted) {
+        setIsLoading(false);
+      }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
