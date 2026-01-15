@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AIToolsManager } from '@/components/admin/AIToolsManager';
 import { ProjectsManager } from '@/components/admin/ProjectsManager';
 import { SiteContentManager } from '@/components/admin/SiteContentManager';
+import { useAdminAuth } from '@/hooks/useAdminAuth';
 
 interface CalculatorConfig {
   id: string;
@@ -43,10 +44,8 @@ interface ProjectRequest {
 type StatusFilter = 'all' | 'new' | 'in_progress' | 'done';
 
 export default function Admin() {
-  const [user, setUser] = useState<any>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [isAdminChecking, setIsAdminChecking] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, isAdmin, isLoading, login, register, logout } = useAdminAuth();
+  
   const [config, setConfig] = useState<CalculatorConfig | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [requests, setRequests] = useState<ProjectRequest[]>([]);
@@ -58,101 +57,6 @@ export default function Admin() {
   const [isRegisterMode, setIsRegisterMode] = useState(false);
 
   useEffect(() => {
-    let isMounted = true;
-    let safetyTimer: number | undefined;
-
-    const checkAdminRole = async (userId: string) => {
-      try {
-        // Надёжная проверка через backend-функцию (не зависит от RLS на клиенте)
-        const { data: sessionData } = await supabase.auth.getSession();
-        const accessToken = sessionData.session?.access_token;
-        if (!accessToken) return false;
-
-        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/check-admin`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-
-        if (!res.ok) {
-          console.error('check-admin failed:', await res.text());
-          return false;
-        }
-
-        const json = await res.json();
-        return json?.isAdmin === true;
-      } catch (err) {
-        console.error('Exception checking admin role:', err);
-        return false;
-      }
-    };
-
-    // Safety net: никогда не зависаем в вечном лоадере
-    safetyTimer = window.setTimeout(() => {
-      if (isMounted) setIsLoading(false);
-    }, 4000);
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (!isMounted) return;
-
-      try {
-        setUser(session?.user ?? null);
-
-        if (session?.user) {
-          setIsAdminChecking(true);
-          // userId берём из session, но функция сама валидирует токен
-          const adminStatus = await checkAdminRole(session.user.id);
-          if (isMounted) setIsAdmin(adminStatus);
-          if (isMounted) setIsAdminChecking(false);
-        } else {
-          if (isMounted) setIsAdmin(false);
-          if (isMounted) setIsAdminChecking(false);
-        }
-      } catch (e) {
-        console.error('Auth state change handler error:', e);
-        if (isMounted) setIsAdmin(false);
-        if (isMounted) setIsAdminChecking(false);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    });
-
-    (async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) console.error('getSession error:', error);
-        if (!isMounted) return;
-
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          setIsAdminChecking(true);
-          const adminStatus = await checkAdminRole(session.user.id);
-          if (isMounted) setIsAdmin(adminStatus);
-          if (isMounted) setIsAdminChecking(false);
-        } else {
-          if (isMounted) setIsAdminChecking(false);
-        }
-      } catch (e) {
-        console.error('getSession exception:', e);
-        if (isMounted) {
-          setIsAdmin(false);
-          setIsAdminChecking(false);
-        }
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    })();
-
-    return () => {
-      isMounted = false;
-      if (safetyTimer) window.clearTimeout(safetyTimer);
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  useEffect(() => {
     if (isAdmin) {
       fetchConfig();
       fetchRequests();
@@ -162,67 +66,19 @@ export default function Admin() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsAuthLoading(true);
-    
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-
-    if (error) {
-      toast.error('Ошибка входа: ' + error.message);
-    } else {
-      toast.success('Успешный вход!');
-    }
+    await login(email, password);
     setIsAuthLoading(false);
   };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsAuthLoading(true);
-    
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { emailRedirectTo: window.location.origin },
-    });
-
-    if (error) {
-      toast.error('Ошибка регистрации: ' + error.message);
-      setIsAuthLoading(false);
-      return;
-    }
-
-    if (data.session) {
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/assign-first-admin`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${data.session.access_token}`,
-            },
-          }
-        );
-        
-        const result = await response.json();
-        
-        if (result.isAdmin) {
-          toast.success('Вы зарегистрированы как администратор!');
-        } else {
-          toast.success('Регистрация успешна!');
-        }
-      } catch (err) {
-        console.error('Error calling assign-first-admin:', err);
-        toast.success('Регистрация успешна!');
-      }
-    } else {
-      toast.success('Регистрация успешна! Проверьте почту для подтверждения.');
-    }
-    
+    await register(email, password);
     setIsAuthLoading(false);
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    toast.info('Вы вышли из системы');
+    await logout();
   };
 
   const fetchConfig = async () => {
@@ -340,7 +196,7 @@ export default function Admin() {
     });
   };
 
-  if (isLoading || (user && isAdminChecking)) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background mesh-background noise-overlay flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-violet-400" />

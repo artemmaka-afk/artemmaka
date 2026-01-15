@@ -1,11 +1,13 @@
-import { useState } from 'react';
-import { Plus, Pencil, Trash2, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Plus, Pencil, Trash2, Loader2, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
-import { useProjects, useProjectMutations, useAITools, type Project } from '@/hooks/useSiteData';
+import { useProjects, useProjectMutations, useAITools, type Project, type ContentBlock } from '@/hooks/useSiteData';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { ContentBlocksEditor } from './ContentBlocksEditor';
 
 function slugify(text: string): string {
   return text
@@ -14,6 +16,91 @@ function slugify(text: string): string {
     .replace(/\s+/g, '-')
     .replace(/--+/g, '-')
     .trim();
+}
+
+function FileUploadInput({
+  value,
+  onChange,
+  accept,
+  label,
+  bucket = 'project-media',
+}: {
+  value: string;
+  onChange: (url: string) => void;
+  accept: string;
+  label: string;
+  bucket?: string;
+}) {
+  const [isUploading, setIsUploading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const maxSize = file.type.startsWith('video/') ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast.error(`Файл слишком большой. Максимум: ${maxSize / 1024 / 1024}MB`);
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage.from(bucket).upload(fileName, file);
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(fileName);
+      onChange(publicUrl);
+      toast.success('Файл загружен');
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast.error('Ошибка загрузки: ' + error.message);
+    } finally {
+      setIsUploading(false);
+      if (inputRef.current) inputRef.current.value = '';
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <label className="text-sm font-medium">{label}</label>
+      <div className="flex gap-2">
+        <Input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="URL или загрузите файл"
+          className="bg-white/5 border-white/10 flex-1"
+        />
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={() => inputRef.current?.click()}
+          disabled={isUploading}
+          className="flex-shrink-0"
+        >
+          {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+        </Button>
+        <input ref={inputRef} type="file" accept={accept} onChange={handleFileChange} className="hidden" />
+      </div>
+      {value && (
+        <div className="flex items-center gap-2 p-2 bg-white/5 rounded-lg">
+          {value.match(/\.(mp4|webm|mov|gif)$/i) ? (
+            <video src={value} className="w-16 h-12 object-cover rounded" muted />
+          ) : (
+            <img src={value} alt="Preview" className="w-16 h-12 object-cover rounded" />
+          )}
+          <span className="text-xs text-muted-foreground flex-1 truncate">{value}</span>
+          <Button type="button" variant="ghost" size="sm" onClick={() => onChange('')} className="h-6 w-6 p-0">
+            <X className="w-3 h-3" />
+          </Button>
+        </div>
+      )}
+    </div>
+  );
 }
 
 function ProjectForm({
@@ -39,6 +126,7 @@ function ProjectForm({
   const [tags, setTags] = useState(project?.tags?.join(', ') || '');
   const [selectedTools, setSelectedTools] = useState<string[]>(project?.ai_tools || []);
   const [isPublished, setIsPublished] = useState(project?.is_published ?? true);
+  const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>(project?.content_blocks || []);
 
   const handleTitleChange = (value: string) => {
     setTitle(value);
@@ -48,10 +136,8 @@ function ProjectForm({
   };
 
   const toggleTool = (toolName: string) => {
-    setSelectedTools(prev =>
-      prev.includes(toolName)
-        ? prev.filter(t => t !== toolName)
-        : [...prev, toolName]
+    setSelectedTools((prev) =>
+      prev.includes(toolName) ? prev.filter((t) => t !== toolName) : [...prev, toolName]
     );
   };
 
@@ -66,16 +152,19 @@ function ProjectForm({
       video_preview: videoPreview || null,
       year: year || null,
       duration: duration || null,
-      tags: tags.split(',').map(t => t.trim()).filter(Boolean),
+      tags: tags
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean),
       ai_tools: selectedTools,
       is_published: isPublished,
       sort_order: project?.sort_order || 0,
-      content_blocks: project?.content_blocks || [],
+      content_blocks: contentBlocks,
     });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+    <form onSubmit={handleSubmit} className="space-y-4 max-h-[75vh] overflow-y-auto pr-2">
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <label className="text-sm font-medium">Название *</label>
@@ -140,30 +229,24 @@ function ProjectForm({
         />
       </div>
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium">URL превью (изображение)</label>
-        <Input
-          value={thumbnail}
-          onChange={(e) => setThumbnail(e.target.value)}
-          placeholder="https://..."
-          className="bg-white/5 border-white/10"
-        />
-      </div>
+      <FileUploadInput
+        value={thumbnail}
+        onChange={setThumbnail}
+        accept="image/*"
+        label="Превью (изображение)"
+      />
 
-      <div className="space-y-2">
-        <label className="text-sm font-medium">URL видео-превью</label>
-        <Input
-          value={videoPreview}
-          onChange={(e) => setVideoPreview(e.target.value)}
-          placeholder="https://..."
-          className="bg-white/5 border-white/10"
-        />
-      </div>
+      <FileUploadInput
+        value={videoPreview}
+        onChange={setVideoPreview}
+        accept="video/*,.gif"
+        label="Видео-превью"
+      />
 
       <div className="space-y-2">
         <label className="text-sm font-medium">AI Инструменты</label>
         <div className="flex flex-wrap gap-2 p-3 bg-white/5 rounded-lg border border-white/10">
-          {aiTools.map(tool => (
+          {aiTools.map((tool) => (
             <button
               key={tool.id}
               type="button"
@@ -186,6 +269,11 @@ function ProjectForm({
           <div className="text-xs text-muted-foreground">Виден на сайте</div>
         </div>
         <Switch checked={isPublished} onCheckedChange={setIsPublished} />
+      </div>
+
+      {/* Content Blocks Editor */}
+      <div className="border-t border-white/10 pt-4">
+        <ContentBlocksEditor blocks={contentBlocks} onChange={setContentBlocks} />
       </div>
 
       <div className="flex gap-2 pt-4 sticky bottom-0 bg-background pb-2">
@@ -234,17 +322,20 @@ export function ProjectsManager() {
           <h3 className="text-lg font-semibold">Проекты</h3>
           <p className="text-sm text-muted-foreground">Управляйте портфолио</p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={(open) => {
-          setIsDialogOpen(open);
-          if (!open) setEditingProject(null);
-        }}>
+        <Dialog
+          open={isDialogOpen}
+          onOpenChange={(open) => {
+            setIsDialogOpen(open);
+            if (!open) setEditingProject(null);
+          }}
+        >
           <DialogTrigger asChild>
             <Button size="sm" className="gap-2 bg-gradient-violet">
               <Plus className="w-4 h-4" />
               Добавить
             </Button>
           </DialogTrigger>
-          <DialogContent className="glass-card border-white/10 max-w-2xl">
+          <DialogContent className="glass-card border-white/10 max-w-3xl max-h-[90vh]">
             <DialogHeader>
               <DialogTitle>{editingProject ? 'Редактировать проект' : 'Новый проект'}</DialogTitle>
             </DialogHeader>
@@ -269,8 +360,11 @@ export function ProjectsManager() {
             <p className="text-sm">Добавьте первый проект</p>
           </div>
         ) : (
-          projects?.map(project => (
-            <div key={project.id} className="flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/10">
+          projects?.map((project) => (
+            <div
+              key={project.id}
+              className="flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/10"
+            >
               {project.thumbnail && (
                 <img
                   src={project.thumbnail}
@@ -286,10 +380,15 @@ export function ProjectsManager() {
                       Скрыт
                     </span>
                   )}
+                  {project.content_blocks?.length > 0 && (
+                    <span className="px-2 py-0.5 text-[10px] bg-violet-500/20 text-violet-400 rounded">
+                      {project.content_blocks.length} блоков
+                    </span>
+                  )}
                 </div>
                 <p className="text-sm text-muted-foreground truncate">{project.subtitle}</p>
                 <div className="flex gap-1.5 mt-2 flex-wrap">
-                  {project.tags?.slice(0, 3).map(tag => (
+                  {project.tags?.slice(0, 3).map((tag) => (
                     <span key={tag} className="px-2 py-0.5 text-[10px] font-mono bg-white/5 rounded">
                       {tag}
                     </span>
