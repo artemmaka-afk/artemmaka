@@ -60,20 +60,37 @@ export default function Admin() {
     let isMounted = true;
     let safetyTimer: number | undefined;
 
-    const checkAdminRole = async (userId: string) => {
+  const checkAdminRole = async (userId: string) => {
       try {
-        const { data: roles, error } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', userId)
-          .eq('role', 'admin')
-          .maybeSingle();
+        console.log('Checking admin role for userId:', userId);
+        
+        // Используем функцию has_role, которая обходит RLS
+        const { data, error } = await supabase.rpc('has_role', {
+          _user_id: userId,
+          _role: 'admin'
+        });
 
         if (error) {
-          console.error('Error checking admin role:', error);
-          return false;
+          console.error('Error checking admin role via has_role:', error);
+          
+          // Fallback на прямой запрос
+          const { data: roles, error: selectError } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', userId)
+            .eq('role', 'admin')
+            .maybeSingle();
+            
+          if (selectError) {
+            console.error('Error in fallback check:', selectError);
+            return false;
+          }
+          console.log('Fallback roles result:', roles);
+          return !!roles;
         }
-        return !!roles;
+        
+        console.log('has_role result:', data);
+        return data === true;
       } catch (err) {
         console.error('Exception checking admin role:', err);
         return false;
