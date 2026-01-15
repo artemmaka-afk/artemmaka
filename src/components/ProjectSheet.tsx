@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { X, ExternalLink, Clock, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Project, ContentBlock } from '@/lib/constants';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
@@ -9,7 +10,6 @@ interface ProjectSheetProps {
 }
 
 function renderMarkdown(text: string): React.ReactNode {
-  // Simple markdown parser for bold and italic
   const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
   return parts.map((part, index) => {
     if (part.startsWith('**') && part.endsWith('**')) {
@@ -22,27 +22,37 @@ function renderMarkdown(text: string): React.ReactNode {
   });
 }
 
-function ContentBlockRenderer({ block }: { block: ContentBlock }) {
+function ContentBlockRenderer({ block, index }: { block: ContentBlock; index: number }) {
   const [comparePosition, setComparePosition] = useState(50);
   const [isPlaying, setIsPlaying] = useState(false);
 
   switch (block.type) {
     case 'text':
       return (
-        <div className="prose prose-invert max-w-none">
+        <motion.div 
+          className="prose prose-invert max-w-none"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.1 }}
+        >
           <p className="text-lg leading-relaxed text-muted-foreground">
             {renderMarkdown(block.content || '')}
           </p>
-        </div>
+        </motion.div>
       );
 
     case 'image':
       return (
-        <figure className="space-y-3">
+        <motion.figure 
+          className="space-y-3"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.1 }}
+        >
           <div className="relative overflow-hidden rounded-2xl">
             <img
               src={block.src}
-              alt={block.caption || 'Project image'}
+              alt={block.caption || 'Изображение проекта'}
               className="w-full h-auto object-cover"
               loading="lazy"
             />
@@ -52,12 +62,17 @@ function ContentBlockRenderer({ block }: { block: ContentBlock }) {
               {block.caption}
             </figcaption>
           )}
-        </figure>
+        </motion.figure>
       );
 
     case 'video':
       return (
-        <figure className="space-y-3">
+        <motion.figure 
+          className="space-y-3"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.1 }}
+        >
           <div className="relative overflow-hidden rounded-2xl glass-card">
             <video
               src={block.src}
@@ -81,33 +96,35 @@ function ContentBlockRenderer({ block }: { block: ContentBlock }) {
               {block.caption}
             </figcaption>
           )}
-        </figure>
+        </motion.figure>
       );
 
     case 'comparison':
       return (
-        <figure className="space-y-4">
+        <motion.figure 
+          className="space-y-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.1 }}
+        >
           <div className="relative overflow-hidden rounded-2xl aspect-video">
-            {/* Before Image */}
             <img
               src={block.beforeSrc}
-              alt="Before"
+              alt="До"
               className="absolute inset-0 w-full h-full object-cover"
             />
             
-            {/* After Image with Clip */}
             <div
               className="absolute inset-0 overflow-hidden"
               style={{ clipPath: `inset(0 ${100 - comparePosition}% 0 0)` }}
             >
               <img
                 src={block.afterSrc}
-                alt="After"
+                alt="После"
                 className="absolute inset-0 w-full h-full object-cover"
               />
             </div>
 
-            {/* Slider */}
             <div
               className="absolute inset-y-0 w-1 bg-white/80 cursor-ew-resize"
               style={{ left: `${comparePosition}%`, transform: 'translateX(-50%)' }}
@@ -118,7 +135,6 @@ function ContentBlockRenderer({ block }: { block: ContentBlock }) {
               </div>
             </div>
 
-            {/* Invisible slider input */}
             <input
               type="range"
               min="0"
@@ -128,12 +144,11 @@ function ContentBlockRenderer({ block }: { block: ContentBlock }) {
               className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize"
             />
 
-            {/* Labels */}
             <div className="absolute bottom-4 left-4 px-3 py-1 text-xs font-mono bg-black/50 backdrop-blur-md rounded-full">
-              Before
+              До
             </div>
             <div className="absolute bottom-4 right-4 px-3 py-1 text-xs font-mono bg-white/20 backdrop-blur-md rounded-full">
-              After
+              После
             </div>
           </div>
           {block.caption && (
@@ -141,7 +156,7 @@ function ContentBlockRenderer({ block }: { block: ContentBlock }) {
               {block.caption}
             </figcaption>
           )}
-        </figure>
+        </motion.figure>
       );
 
     default:
@@ -167,82 +182,89 @@ export function ProjectSheet({ project, onClose }: ProjectSheetProps) {
         side="right" 
         className="w-full sm:max-w-2xl lg:max-w-3xl p-0 bg-background border-l border-white/10 overflow-y-auto"
       >
-        {project && (
-          <article className="min-h-full">
-            {/* Hero Video/Image */}
-            <div className="relative aspect-video">
-              <video
-                src={project.videoPreview}
-                className="w-full h-full object-cover"
-                autoPlay
-                muted
-                loop
-                playsInline
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
-              
-              {/* Close Button */}
-              <button
-                onClick={onClose}
-                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center border border-white/20 hover:bg-black/70 transition-colors"
-                aria-label="Close"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Content */}
-            <div className="px-6 py-8 space-y-8">
-              {/* Header */}
-              <header className="space-y-4">
-                <div className="flex items-center gap-4 text-sm text-muted-foreground font-mono">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-4 h-4" />
-                    {project.year}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    {project.duration}
-                  </span>
-                </div>
+        <AnimatePresence>
+          {project && (
+            <motion.article 
+              className="min-h-full"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 50 }}
+              transition={{ duration: 0.3 }}
+            >
+              {/* Hero Video/Image */}
+              <div className="relative aspect-video">
+                <video
+                  src={project.videoPreview}
+                  className="w-full h-full object-cover"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
                 
-                <h1 className="text-3xl md:text-4xl font-bold">{project.title}</h1>
-                <p className="text-xl text-muted-foreground">{project.subtitle}</p>
-
-                {/* Tags */}
-                <div className="flex flex-wrap gap-2">
-                  {project.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-4 py-2 text-sm font-mono bg-white/5 rounded-full border border-white/10"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </header>
-
-              {/* Story Content */}
-              <div className="space-y-8">
-                {project.contentBlocks.map((block, index) => (
-                  <ContentBlockRenderer key={index} block={block} />
-                ))}
+                <motion.button
+                  onClick={onClose}
+                  className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center border border-white/20"
+                  aria-label="Закрыть"
+                  whileHover={{ scale: 1.1, backgroundColor: 'rgba(0,0,0,0.7)' }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <X className="w-5 h-5" />
+                </motion.button>
               </div>
 
-              {/* Footer CTA */}
-              <footer className="pt-8 border-t border-white/10">
-                <a
-                  href="#calculator"
-                  onClick={onClose}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-violet rounded-xl font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
-                >
-                  Commission Similar Work
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-              </footer>
-            </div>
-          </article>
-        )}
+              {/* Content */}
+              <div className="px-6 py-8 space-y-8">
+                <header className="space-y-4">
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground font-mono">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-4 h-4" />
+                      {project.year}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-4 h-4" />
+                      {project.duration}
+                    </span>
+                  </div>
+                  
+                  <h1 className="text-3xl md:text-4xl font-bold">{project.title}</h1>
+                  <p className="text-xl text-muted-foreground">{project.subtitle}</p>
+
+                  <div className="flex flex-wrap gap-2">
+                    {project.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-4 py-2 text-sm font-mono bg-white/5 rounded-full border border-white/10"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </header>
+
+                <div className="space-y-8">
+                  {project.contentBlocks.map((block, index) => (
+                    <ContentBlockRenderer key={index} block={block} index={index} />
+                  ))}
+                </div>
+
+                <footer className="pt-8 border-t border-white/10">
+                  <motion.a
+                    href="#calculator"
+                    onClick={onClose}
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-violet rounded-xl font-semibold text-primary-foreground"
+                    whileHover={{ scale: 1.02, boxShadow: '0 0 30px hsl(263 70% 58% / 0.3)' }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    Заказать похожий проект
+                    <ExternalLink className="w-4 h-4" />
+                  </motion.a>
+                </footer>
+              </div>
+            </motion.article>
+          )}
+        </AnimatePresence>
       </SheetContent>
     </Sheet>
   );

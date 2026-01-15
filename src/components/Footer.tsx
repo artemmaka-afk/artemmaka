@@ -1,22 +1,84 @@
-import { Heart } from 'lucide-react';
-import { artistInfo } from '@/lib/constants';
+import { motion } from 'framer-motion';
+import { Send, Heart, Mail, ArrowUpRight } from 'lucide-react';
+import { artistInfo, socialLinks } from '@/lib/constants';
 
 export function Footer() {
   return (
-    <footer className="py-12 px-6 border-t border-white/10">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="text-muted-foreground text-sm">
-          © {new Date().getFullYear()} {artistInfo.name}. All rights reserved.
-        </div>
-        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-          Made with <Heart className="w-4 h-4 text-red-500 mx-1" fill="currentColor" /> using AI
-        </div>
-        <a
-          href="/admin"
-          className="text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+    <footer className="py-16 px-6 border-t border-white/10">
+      <div className="max-w-7xl mx-auto">
+        {/* CTA Section */}
+        <motion.div 
+          className="glass-card p-8 md:p-12 mb-12 text-center"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
         >
-          Admin
-        </a>
+          <h3 className="text-2xl md:text-3xl font-bold mb-4">
+            Готовы создать <span className="gradient-text">что-то особенное</span>?
+          </h3>
+          <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
+            Свяжитесь со мной, чтобы обсудить ваш проект. Отвечаю в течение 24 часов.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <motion.a
+              href={`https://t.me/${artistInfo.telegram.replace('@', '')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-8 py-4 bg-gradient-violet rounded-2xl font-semibold text-primary-foreground"
+              whileHover={{ scale: 1.02, boxShadow: '0 0 40px hsl(263 70% 58% / 0.4)' }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Send className="w-5 h-5" />
+              Написать в Telegram
+            </motion.a>
+            <motion.a
+              href={`mailto:${artistInfo.email}`}
+              className="flex items-center gap-2 px-8 py-4 glass glass-hover rounded-2xl font-semibold"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Mail className="w-5 h-5" />
+              {artistInfo.email}
+            </motion.a>
+          </div>
+        </motion.div>
+
+        {/* Bottom Section */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="text-muted-foreground text-sm">
+            © {new Date().getFullYear()} {artistInfo.name}. Все права защищены.
+          </div>
+          
+          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+            Сделано с <Heart className="w-4 h-4 text-red-500 mx-1" fill="currentColor" /> с помощью AI
+          </div>
+
+          <div className="flex items-center gap-4">
+            {socialLinks.map((link) => (
+              <motion.a
+                key={link.name}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 text-sm"
+                whileHover={{ x: 2 }}
+              >
+                {link.name}
+                <ArrowUpRight className="w-3 h-3" />
+              </motion.a>
+            ))}
+          </div>
+        </div>
+
+        {/* Admin Link */}
+        <div className="mt-8 text-center">
+          <a
+            href="/admin"
+            className="text-xs text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors"
+          >
+            Админ-панель
+          </a>
+        </div>
       </div>
     </footer>
   );
