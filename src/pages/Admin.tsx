@@ -53,6 +53,7 @@ export default function Admin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isAuthLoading, setIsAuthLoading] = useState(false);
+  const [isRegisterMode, setIsRegisterMode] = useState(false);
 
   useEffect(() => {
     // Listen for auth changes
@@ -113,6 +114,27 @@ export default function Admin() {
       toast.error('Ошибка входа: ' + error.message);
     } else {
       toast.success('Успешный вход!');
+    }
+    setIsAuthLoading(false);
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsAuthLoading(true);
+    
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: window.location.origin,
+      },
+    });
+
+    if (error) {
+      toast.error('Ошибка регистрации: ' + error.message);
+    } else {
+      toast.success('Регистрация успешна! Теперь войдите.');
+      setIsRegisterMode(false);
     }
     setIsAuthLoading(false);
   };
@@ -245,7 +267,7 @@ export default function Admin() {
     );
   }
 
-  // Login form
+  // Login/Register form
   if (!user) {
     return (
       <div className="min-h-screen bg-background mesh-background noise-overlay flex items-center justify-center px-4">
@@ -254,11 +276,15 @@ export default function Admin() {
             <div className="w-16 h-16 rounded-2xl bg-violet-500/20 flex items-center justify-center mx-auto mb-4">
               <LogIn className="w-8 h-8 text-violet-400" />
             </div>
-            <h1 className="text-2xl font-bold">Вход в админ-панель</h1>
-            <p className="text-sm text-muted-foreground mt-2">Введите данные для входа</p>
+            <h1 className="text-2xl font-bold">
+              {isRegisterMode ? 'Регистрация' : 'Вход в админ-панель'}
+            </h1>
+            <p className="text-sm text-muted-foreground mt-2">
+              {isRegisterMode ? 'Создайте аккаунт' : 'Введите данные для входа'}
+            </p>
           </div>
           
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={isRegisterMode ? handleRegister : handleLogin} className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Email</label>
               <Input
@@ -279,6 +305,7 @@ export default function Admin() {
                 placeholder="••••••••"
                 className="bg-white/5 border-white/10"
                 required
+                minLength={6}
               />
             </div>
             <Button 
@@ -286,11 +313,27 @@ export default function Admin() {
               className="w-full bg-gradient-violet hover:opacity-90"
               disabled={isAuthLoading}
             >
-              {isAuthLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Войти'}
+              {isAuthLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : isRegisterMode ? (
+                'Зарегистрироваться'
+              ) : (
+                'Войти'
+              )}
             </Button>
           </form>
           
-          <div className="mt-6 text-center">
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => setIsRegisterMode(!isRegisterMode)}
+              className="text-sm text-violet-400 hover:text-violet-300 transition-colors"
+            >
+              {isRegisterMode ? 'Уже есть аккаунт? Войти' : 'Нет аккаунта? Зарегистрироваться'}
+            </button>
+          </div>
+          
+          <div className="mt-4 text-center">
             <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               ← Вернуться на сайт
             </Link>
