@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Clock } from 'lucide-react';
-import { projects, Project } from '@/lib/constants';
+import { projects, Project, aiTools } from '@/lib/constants';
 import { ProjectSheet } from './ProjectSheet';
 
 interface ProjectCardProps {
@@ -29,6 +29,25 @@ const cardVariants = {
     transition: { duration: 0.4 }
   }
 };
+
+function AIToolBadge({ toolName }: { toolName: string }) {
+  const tool = aiTools.find(t => t.name === toolName);
+  if (!tool) return null;
+  
+  return (
+    <div className="flex items-center gap-1 px-1.5 py-0.5 bg-black/40 backdrop-blur-sm rounded-md border border-white/10">
+      <img 
+        src={tool.logo} 
+        alt={tool.name} 
+        className="w-3 h-3 object-contain rounded-sm"
+        onError={(e) => {
+          e.currentTarget.style.display = 'none';
+        }}
+      />
+      <span className="text-[9px] font-mono text-white/80">{tool.name}</span>
+    </div>
+  );
+}
 
 function ProjectCard({ project, index, onSelect }: ProjectCardProps) {
   const [isHovered, setIsHovered] = useState(false);
@@ -101,6 +120,15 @@ function ProjectCard({ project, index, onSelect }: ProjectCardProps) {
 
           {/* Bottom - Info */}
           <div>
+            {/* AI Tools used */}
+            {project.aiTools && project.aiTools.length > 0 && (
+              <div className="flex flex-wrap gap-1 mb-2">
+                {project.aiTools.slice(0, 3).map((tool) => (
+                  <AIToolBadge key={tool} toolName={tool} />
+                ))}
+              </div>
+            )}
+            
             <div className="flex items-center gap-1.5 mb-1.5">
               <Clock className="w-3 h-3 text-muted-foreground" />
               <span className="text-[10px] sm:text-xs text-muted-foreground font-mono">{project.duration}</span>
@@ -146,7 +174,7 @@ export function PortfolioGrid() {
           transition={{ duration: 0.5 }}
         >
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3">
-            Избранные <span className="gradient-text">работы</span>
+            Избранные <span className="gradient-text">проекты</span>
           </h2>
           <p className="text-muted-foreground text-sm sm:text-base max-w-xl mx-auto">
             Коллекция AI-генерированных видео, анимаций и визуальных экспериментов
