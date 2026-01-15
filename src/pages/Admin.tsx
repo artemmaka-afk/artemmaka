@@ -122,7 +122,7 @@ export default function Admin() {
     e.preventDefault();
     setIsAuthLoading(true);
     
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -132,10 +132,39 @@ export default function Admin() {
 
     if (error) {
       toast.error('Ошибка регистрации: ' + error.message);
-    } else {
-      toast.success('Регистрация успешна! Теперь войдите.');
-      setIsRegisterMode(false);
+      setIsAuthLoading(false);
+      return;
     }
+
+    // If signup successful and we have a session, try to assign admin role
+    if (data.session) {
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/assign-first-admin`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${data.session.access_token}`,
+            },
+          }
+        );
+        
+        const result = await response.json();
+        
+        if (result.isAdmin) {
+          toast.success('Вы зарегистрированы как администратор!');
+        } else {
+          toast.success('Регистрация успешна!');
+        }
+      } catch (err) {
+        console.error('Error calling assign-first-admin:', err);
+        toast.success('Регистрация успешна!');
+      }
+    } else {
+      toast.success('Регистрация успешна! Проверьте почту для подтверждения.');
+    }
+    
     setIsAuthLoading(false);
   };
 
