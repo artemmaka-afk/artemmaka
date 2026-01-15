@@ -45,6 +45,7 @@ type StatusFilter = 'all' | 'new' | 'in_progress' | 'done';
 export default function Admin() {
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdminChecking, setIsAdminChecking] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [config, setConfig] = useState<CalculatorConfig | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -100,15 +101,19 @@ export default function Admin() {
         setUser(session?.user ?? null);
 
         if (session?.user) {
+          setIsAdminChecking(true);
           // userId берём из session, но функция сама валидирует токен
           const adminStatus = await checkAdminRole(session.user.id);
           if (isMounted) setIsAdmin(adminStatus);
+          if (isMounted) setIsAdminChecking(false);
         } else {
           if (isMounted) setIsAdmin(false);
+          if (isMounted) setIsAdminChecking(false);
         }
       } catch (e) {
         console.error('Auth state change handler error:', e);
         if (isMounted) setIsAdmin(false);
+        if (isMounted) setIsAdminChecking(false);
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -122,11 +127,19 @@ export default function Admin() {
 
         setUser(session?.user ?? null);
         if (session?.user) {
+          setIsAdminChecking(true);
           const adminStatus = await checkAdminRole(session.user.id);
           if (isMounted) setIsAdmin(adminStatus);
+          if (isMounted) setIsAdminChecking(false);
+        } else {
+          if (isMounted) setIsAdminChecking(false);
         }
       } catch (e) {
         console.error('getSession exception:', e);
+        if (isMounted) {
+          setIsAdmin(false);
+          setIsAdminChecking(false);
+        }
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -327,7 +340,7 @@ export default function Admin() {
     });
   };
 
-  if (isLoading) {
+  if (isLoading || (user && isAdminChecking)) {
     return (
       <div className="min-h-screen bg-background mesh-background noise-overlay flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-violet-400" />
