@@ -1,29 +1,18 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Alex Volkov | AI Video Artist</title>
-    <meta name="description" content="Award-winning AI video artist crafting impossible worlds through artificial intelligence. Specializing in generative video content, motion design, and experimental storytelling." />
-    <meta name="author" content="Alex Volkov" />
-    <meta name="keywords" content="AI video, AI art, generative art, Midjourney, Runway, motion design, video artist" />
-
-    <meta property="og:title" content="Alex Volkov | AI Video Artist" />
-    <meta property="og:description" content="Crafting impossible worlds through artificial intelligence. Portfolio of AI-generated videos, animations, and visual experiments." />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Alex Volkov | AI Video Artist" />
-    <meta name="twitter:description" content="Crafting impossible worlds through artificial intelligence." />
-    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
-
-    <link rel="canonical" href="https://alexvolkov.ai" />
-    <meta name="theme-color" content="#09090b" />
+    <title>Redirecting…</title>
+    <meta name="robots" content="noindex" />
   </head>
-
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // SPA fallback for direct deep links on static hosting.
+      // Store the original path and reload the app at "/".
+      sessionStorage.setItem('lovable_redirect_path', location.pathname + location.search + location.hash);
+      location.replace('/');
+    </script>
   </body>
 </html>
+

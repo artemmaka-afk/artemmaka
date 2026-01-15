@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, ArrowRight, User, Film, Image, Workflow, Mail } from 'lucide-react';
 import { artistInfo, videoTechStack, imageTechStack, pipelineSteps, skills } from '@/lib/constants';
@@ -23,21 +24,42 @@ const cardVariants = {
   }
 };
 
+function getInitials(name: string) {
+  const parts = name.split(/\s+/).filter(Boolean);
+  const first = parts[0]?.[0] ?? name[0] ?? '?';
+  const second = parts.length > 1 ? parts[1]?.[0] : name[1];
+  return (first + (second ?? '')).toUpperCase();
+}
+
 function TechItem({ name, logo }: { name: string; logo: string }) {
+  const [hasError, setHasError] = useState(false);
+  const initials = getInitials(name);
+
   return (
     <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-xl border border-white/10 flex-shrink-0">
-      <img 
-        src={logo} 
-        alt={name} 
-        className="w-5 h-5 object-contain rounded"
-        onError={(e) => {
-          e.currentTarget.style.display = 'none';
-        }}
-      />
+      {!hasError ? (
+        <img
+          src={logo}
+          alt={name}
+          className="w-5 h-5 object-contain rounded"
+          loading="lazy"
+          onError={() => setHasError(true)}
+        />
+      ) : (
+        <div
+          className="w-5 h-5 rounded flex items-center justify-center bg-white/10 border border-white/10"
+          aria-hidden="true"
+        >
+          <span className="text-[9px] font-mono text-muted-foreground leading-none">
+            {initials}
+          </span>
+        </div>
+      )}
       <span className="font-mono text-sm whitespace-nowrap">{name}</span>
     </div>
   );
 }
+
 
 // Бесконечный маркер с CSS анимацией
 function InfiniteMarquee({ items, direction = 'left', duration = 20 }: { 

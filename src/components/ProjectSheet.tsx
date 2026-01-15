@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ExternalLink, Clock, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Project, ContentBlock, getAIToolByName } from '@/lib/constants';
+import { Project, ContentBlock } from '@/lib/constants';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 
 interface ProjectSheetProps {
@@ -10,24 +10,13 @@ interface ProjectSheetProps {
 }
 
 function AIToolBadge({ name }: { name: string }) {
-  const tool = getAIToolByName(name);
-  
   return (
     <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">
-      {tool && (
-        <img 
-          src={tool.logo} 
-          alt={name} 
-          className="w-4 h-4 object-contain rounded"
-          onError={(e) => {
-            e.currentTarget.style.display = 'none';
-          }}
-        />
-      )}
       <span className="text-xs font-mono">{name}</span>
     </div>
   );
 }
+
 
 function renderMarkdown(text: string): React.ReactNode {
   const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
