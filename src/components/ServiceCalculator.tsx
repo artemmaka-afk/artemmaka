@@ -1,31 +1,81 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calculator, Clock, Sparkles, Volume2, RefreshCcw, CalendarClock, Send } from 'lucide-react';
-import { calculatorDefaults } from '@/lib/constants';
+import { Calculator, Clock, Sparkles, Volume2, RefreshCcw, CalendarClock, Send, Percent } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
+import { supabase } from '@/integrations/supabase/client';
+
+interface CalculatorConfig {
+  base_frame_price: number;
+  music_price: number;
+  lipsync_price_per_30s: number;
+  revisions_4_price: number;
+  revisions_8_price: number;
+  deadline_20_multiplier: number;
+  deadline_10_multiplier: number;
+  volume_discount_percent: number;
+}
+
+const defaultConfig: CalculatorConfig = {
+  base_frame_price: 3000,
+  music_price: 10000,
+  lipsync_price_per_30s: 5000,
+  revisions_4_price: 20000,
+  revisions_8_price: 50000,
+  deadline_20_multiplier: 2,
+  deadline_10_multiplier: 3,
+  volume_discount_percent: 15,
+};
 
 export function ServiceCalculator() {
+  const [config, setConfig] = useState<CalculatorConfig>(defaultConfig);
   const [duration, setDuration] = useState(30);
-  const [pace, setPace] = useState('dynamic');
-  const [audio, setAudio] = useState('client');
-  const [revisions, setRevisions] = useState('2');
-  const [deadline, setDeadline] = useState('30');
+  const [pace, setPace] = useState<'standard' | 'dynamic' | 'ultra'>('dynamic');
+  const [hasMusic, setHasMusic] = useState(false);
+  const [hasLipsync, setHasLipsync] = useState(false);
+  const [revisions, setRevisions] = useState<'2' | '4' | '8'>('2');
+  const [deadline, setDeadline] = useState<'30' | '20' | '10'>('30');
 
-  // Custom slider logic: 1-second steps up to 60s, then 10-second steps
+  // Загружаем конфиг из базы
+  useEffect(() => {
+    const fetchConfig = async () => {
+      const { data } = await supabase
+        .from('calculator_config')
+        .select('*')
+        .limit(1)
+        .maybeSingle();
+      
+      if (data) {
+        setConfig({
+          base_frame_price: data.base_frame_price,
+          music_price: data.music_price,
+          lipsync_price_per_30s: data.lipsync_price_per_30s,
+          revisions_4_price: data.revisions_4_price,
+          revisions_8_price: data.revisions_8_price,
+          deadline_20_multiplier: Number(data.deadline_20_multiplier),
+          deadline_10_multiplier: Number(data.deadline_10_multiplier),
+          volume_discount_percent: data.volume_discount_percent,
+        });
+      }
+    };
+    fetchConfig();
+  }, []);
+
+  // Слайдер: до 60 сек — шаг 10 сек, после 60 — шаг 30 сек
   const handleSliderChange = (value: number[]) => {
     const raw = value[0];
-    if (raw <= 60) {
-      setDuration(raw);
+    if (raw <= 6) {
+      // 0-6 → 0-60 секунд (шаг 10)
+      setDuration(raw * 10);
     } else {
-      // Map 61-114 to 70-600 in steps of 10
-      const stepsAbove60 = raw - 60;
-      setDuration(60 + stepsAbove60 * 10);
+      // 7-24 → 90-600 секунд (шаг 30)
+      const stepsAbove60 = raw - 6;
+      setDuration(60 + stepsAbove60 * 30);
     }
   };
 
   const getSliderValue = () => {
-    if (duration <= 60) return duration;
-    return 60 + Math.round((duration - 60) / 10);
+    if (duration <= 60) return Math.round(duration / 10);
+    return 6 + Math.round((duration - 60) / 30);
   };
 
   const formatDuration = (seconds: number) => {
@@ -36,38 +86,55 @@ export function ServiceCalculator() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Конфигурация темпа (секунды на кадр)
+  const paceConfig = {
+    standard: { label: 'Стандарт', secondsPerFrame: 4 },
+    dynamic: { label: 'Динамичный', secondsPerFrame: 2 },
+    ultra: { label: 'Ультра', secondsPerFrame: 0.5 },
+  };
+
   const calculation = useMemo(() => {
-    const paceOption = calculatorDefaults.paceOptions.find((p) => p.value === pace)!;
-    const audioOption = calculatorDefaults.audioOptions.find((a) => a.value === audio)!;
-    const revisionOption = calculatorDefaults.revisionOptions.find((r) => r.value === revisions)!;
-    const deadlineOption = calculatorDefaults.deadlineOptions.find((d) => d.value === deadline)!;
+    const paceData = paceConfig[pace];
+    
+    // Количество кадров
+    const frames = Math.ceil(duration / paceData.secondsPerFrame);
+    const baseFrameCost = frames * config.base_frame_price;
 
-    const frames = Math.ceil(duration / paceOption.secondsPerFrame);
-    const baseFrameCost = frames * calculatorDefaults.basePrice;
-
+    // Аудио
     let audioCost = 0;
-    if (audio === 'lipsync') {
-      audioCost = Math.ceil(duration / 30) * 5000;
-    } else {
-      audioCost = audioOption.price || 0;
+    if (hasMusic) {
+      audioCost += config.music_price;
+    }
+    if (hasLipsync) {
+      audioCost += Math.ceil(duration / 30) * config.lipsync_price_per_30s;
     }
 
-    const revisionCost = revisionOption.price;
+    // Правки
+    let revisionCost = 0;
+    if (revisions === '4') revisionCost = config.revisions_4_price;
+    if (revisions === '8') revisionCost = config.revisions_8_price;
+
+    // Множитель дедлайна
+    let deadlineMultiplier = 1;
+    if (deadline === '20') deadlineMultiplier = config.deadline_20_multiplier;
+    if (deadline === '10') deadlineMultiplier = config.deadline_10_multiplier;
+
     const subtotal = baseFrameCost + audioCost + revisionCost;
-    const total = Math.round(subtotal * deadlineOption.multiplier);
-    const marketPrice = Math.round(total * 1.2);
+    const regularPrice = Math.round(subtotal * deadlineMultiplier);
+    
+    // Скидка за объём (применяется только если duration > 60 или выбраны доп опции)
+    const hasVolumeBonus = duration > 60 || hasMusic || hasLipsync || revisions !== '2';
+    const discountPercent = hasVolumeBonus ? config.volume_discount_percent : 0;
+    const discountedPrice = Math.round(regularPrice * (1 - discountPercent / 100));
 
     return {
       frames,
-      baseFrameCost,
-      audioCost,
-      revisionCost,
-      subtotal,
-      deadlineMultiplier: deadlineOption.multiplier,
-      total,
-      marketPrice,
+      regularPrice,
+      discountedPrice,
+      discountPercent,
+      hasDiscount: discountPercent > 0,
     };
-  }, [duration, pace, audio, revisions, deadline]);
+  }, [duration, pace, hasMusic, hasLipsync, revisions, deadline, config]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('ru-RU').format(price) + ' ₽';
@@ -87,11 +154,11 @@ export function ServiceCalculator() {
   };
 
   return (
-    <section id="calculator" className="relative py-20 px-6">
+    <section id="calculator" className="relative py-20 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
         {/* Section Header */}
         <motion.div 
-          className="text-center mb-12"
+          className="text-center mb-8 sm:mb-12"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -110,7 +177,7 @@ export function ServiceCalculator() {
         </motion.div>
 
         <motion.div 
-          className="glass-card p-6 md:p-8 space-y-8"
+          className="glass-card p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
@@ -119,98 +186,122 @@ export function ServiceCalculator() {
           {/* Duration Slider */}
           <motion.div variants={itemVariants} className="space-y-4">
             <div className="flex items-center justify-between">
-              <label className="flex items-center gap-2 font-medium">
+              <label className="flex items-center gap-2 font-medium text-sm sm:text-base">
                 <Clock className="w-4 h-4 text-violet-400" />
                 Длительность видео
               </label>
-              <span className="text-2xl font-bold font-mono gradient-text">
+              <span className="text-xl sm:text-2xl font-bold font-mono gradient-text">
                 {formatDuration(duration)}
               </span>
             </div>
             <Slider
               value={[getSliderValue()]}
               onValueChange={handleSliderChange}
-              min={1}
-              max={114}
+              min={0}
+              max={24}
               step={1}
               className="py-2"
             />
             <div className="flex justify-between text-xs text-muted-foreground font-mono">
-              <span>1 сек</span>
+              <span>0 сек</span>
               <span>1 мин</span>
               <span>10 мин</span>
             </div>
           </motion.div>
 
           {/* Pace Radio */}
-          <motion.div variants={itemVariants} className="space-y-4">
-            <label className="flex items-center gap-2 font-medium">
+          <motion.div variants={itemVariants} className="space-y-3 sm:space-y-4">
+            <label className="flex items-center gap-2 font-medium text-sm sm:text-base">
               <Sparkles className="w-4 h-4 text-violet-400" />
               Темп монтажа
             </label>
-            <div className="grid grid-cols-3 gap-3">
-              {calculatorDefaults.paceOptions.map((option) => (
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              {(Object.entries(paceConfig) as [typeof pace, typeof paceConfig.standard][]).map(([value, data]) => (
                 <motion.button
-                  key={option.value}
-                  onClick={() => setPace(option.value)}
-                  className={`p-4 rounded-2xl border transition-all text-center ${
-                    pace === option.value
+                  key={value}
+                  onClick={() => setPace(value)}
+                  className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all text-center ${
+                    pace === value
                       ? 'bg-violet-500/20 border-violet-500/50 text-foreground'
                       : 'bg-white/5 border-white/10 text-muted-foreground hover:border-white/20'
                   }`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <div className="font-semibold">{option.label}</div>
-                  <div className="text-xs font-mono mt-1">×{option.multiplier}</div>
+                  <div className="font-semibold text-xs sm:text-sm">{data.label}</div>
+                  <div className="text-[10px] sm:text-xs font-mono mt-1">{data.secondsPerFrame} сек/кадр</div>
                 </motion.button>
               ))}
             </div>
           </motion.div>
 
-          {/* Audio Select */}
-          <motion.div variants={itemVariants} className="space-y-4">
-            <label className="flex items-center gap-2 font-medium">
+          {/* Audio Checkboxes */}
+          <motion.div variants={itemVariants} className="space-y-3 sm:space-y-4">
+            <label className="flex items-center gap-2 font-medium text-sm sm:text-base">
               <Volume2 className="w-4 h-4 text-violet-400" />
               Озвучка
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {calculatorDefaults.audioOptions.map((option) => (
-                <motion.button
-                  key={option.value}
-                  onClick={() => setAudio(option.value)}
-                  className={`p-4 rounded-2xl border transition-all text-left ${
-                    audio === option.value
-                      ? 'bg-violet-500/20 border-violet-500/50 text-foreground'
-                      : 'bg-white/5 border-white/10 text-muted-foreground hover:border-white/20'
-                  }`}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <div className="font-semibold">{option.label}</div>
-                  <div className="text-xs font-mono mt-1">
-                    {option.price !== undefined 
-                      ? option.price === 0 ? 'Бесплатно' : `+${formatPrice(option.price)}`
-                      : `+${formatPrice(option.pricePerUnit!)}/${option.unitSeconds} сек`
-                    }
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+              <motion.button
+                onClick={() => setHasMusic(!hasMusic)}
+                className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all text-left ${
+                  hasMusic
+                    ? 'bg-violet-500/20 border-violet-500/50 text-foreground'
+                    : 'bg-white/5 border-white/10 text-muted-foreground hover:border-white/20'
+                }`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="flex items-center gap-2">
+                  <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                    hasMusic ? 'bg-violet-500 border-violet-500' : 'border-white/30'
+                  }`}>
+                    {hasMusic && <span className="text-white text-xs">✓</span>}
                   </div>
-                </motion.button>
-              ))}
+                  <span className="font-semibold text-sm">AI Музыка</span>
+                </div>
+                <div className="text-[10px] sm:text-xs font-mono mt-1 ml-6">+{formatPrice(config.music_price)}</div>
+              </motion.button>
+
+              <motion.button
+                onClick={() => setHasLipsync(!hasLipsync)}
+                className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all text-left ${
+                  hasLipsync
+                    ? 'bg-violet-500/20 border-violet-500/50 text-foreground'
+                    : 'bg-white/5 border-white/10 text-muted-foreground hover:border-white/20'
+                }`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <div className="flex items-center gap-2">
+                  <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                    hasLipsync ? 'bg-violet-500 border-violet-500' : 'border-white/30'
+                  }`}>
+                    {hasLipsync && <span className="text-white text-xs">✓</span>}
+                  </div>
+                  <span className="font-semibold text-sm">Липсинк</span>
+                </div>
+                <div className="text-[10px] sm:text-xs font-mono mt-1 ml-6">+{formatPrice(config.lipsync_price_per_30s)}/30 сек</div>
+              </motion.button>
             </div>
           </motion.div>
 
           {/* Revisions */}
-          <motion.div variants={itemVariants} className="space-y-4">
-            <label className="flex items-center gap-2 font-medium">
+          <motion.div variants={itemVariants} className="space-y-3 sm:space-y-4">
+            <label className="flex items-center gap-2 font-medium text-sm sm:text-base">
               <RefreshCcw className="w-4 h-4 text-violet-400" />
               Правки
             </label>
-            <div className="grid grid-cols-3 gap-3">
-              {calculatorDefaults.revisionOptions.map((option) => (
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              {[
+                { value: '2' as const, label: '2 круга', price: 0 },
+                { value: '4' as const, label: '4 круга', price: config.revisions_4_price },
+                { value: '8' as const, label: '8 кругов', price: config.revisions_8_price },
+              ].map((option) => (
                 <motion.button
                   key={option.value}
                   onClick={() => setRevisions(option.value)}
-                  className={`p-4 rounded-2xl border transition-all text-center ${
+                  className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all text-center ${
                     revisions === option.value
                       ? 'bg-violet-500/20 border-violet-500/50 text-foreground'
                       : 'bg-white/5 border-white/10 text-muted-foreground hover:border-white/20'
@@ -218,8 +309,8 @@ export function ServiceCalculator() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <div className="font-semibold">{option.label}</div>
-                  <div className="text-xs font-mono mt-1">
+                  <div className="font-semibold text-xs sm:text-sm">{option.label}</div>
+                  <div className="text-[10px] sm:text-xs font-mono mt-1">
                     {option.price === 0 ? 'Включено' : `+${formatPrice(option.price)}`}
                   </div>
                 </motion.button>
@@ -228,17 +319,21 @@ export function ServiceCalculator() {
           </motion.div>
 
           {/* Deadline */}
-          <motion.div variants={itemVariants} className="space-y-4">
-            <label className="flex items-center gap-2 font-medium">
+          <motion.div variants={itemVariants} className="space-y-3 sm:space-y-4">
+            <label className="flex items-center gap-2 font-medium text-sm sm:text-base">
               <CalendarClock className="w-4 h-4 text-violet-400" />
               Срочность
             </label>
-            <div className="grid grid-cols-3 gap-3">
-              {calculatorDefaults.deadlineOptions.map((option) => (
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              {[
+                { value: '30' as const, label: '30 дней', multiplier: 1 },
+                { value: '20' as const, label: '20 дней', multiplier: config.deadline_20_multiplier },
+                { value: '10' as const, label: '10 дней', multiplier: config.deadline_10_multiplier },
+              ].map((option) => (
                 <motion.button
                   key={option.value}
                   onClick={() => setDeadline(option.value)}
-                  className={`p-4 rounded-2xl border transition-all text-center ${
+                  className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all text-center ${
                     deadline === option.value
                       ? 'bg-violet-500/20 border-violet-500/50 text-foreground'
                       : 'bg-white/5 border-white/10 text-muted-foreground hover:border-white/20'
@@ -246,8 +341,8 @@ export function ServiceCalculator() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <div className="font-semibold">{option.label}</div>
-                  <div className="text-xs font-mono mt-1">
+                  <div className="font-semibold text-xs sm:text-sm">{option.label}</div>
+                  <div className="text-[10px] sm:text-xs font-mono mt-1">
                     {option.multiplier === 1 ? 'Стандарт' : `×${option.multiplier}`}
                   </div>
                 </motion.button>
@@ -258,60 +353,53 @@ export function ServiceCalculator() {
           {/* Calculation Summary */}
           <motion.div 
             variants={itemVariants}
-            className="pt-6 border-t border-white/10 space-y-4"
+            className="pt-6 border-t border-white/10"
           >
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Кадров ({calculation.frames})</span>
-                <span className="font-mono">{formatPrice(calculation.baseFrameCost)}</span>
-              </div>
-              {calculation.audioCost > 0 && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Озвучка</span>
-                  <span className="font-mono">+{formatPrice(calculation.audioCost)}</span>
-                </div>
-              )}
-              {calculation.revisionCost > 0 && (
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Доп. правки</span>
-                  <span className="font-mono">+{formatPrice(calculation.revisionCost)}</span>
-                </div>
-              )}
-              {calculation.deadlineMultiplier > 1 && (
-                <div className="flex justify-between text-violet-400">
-                  <span>Срочность</span>
-                  <span className="font-mono">×{calculation.deadlineMultiplier}</span>
-                </div>
-              )}
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 pt-4 border-t border-white/10">
-              <div>
-                <div className="flex items-center gap-3 mb-1">
-                  <span className="text-sm text-muted-foreground line-through">
-                    Рыночная: {formatPrice(calculation.marketPrice)}
+            <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
+              <div className="w-full sm:w-auto">
+                {/* Обычная цена */}
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-sm text-muted-foreground">Обычная цена:</span>
+                  <span className={`font-mono ${calculation.hasDiscount ? 'line-through text-muted-foreground' : 'text-xl font-bold gradient-text'}`}>
+                    {formatPrice(calculation.regularPrice)}
                   </span>
                 </div>
-                <div className="text-sm text-muted-foreground mb-1">Итоговая стоимость</div>
+                
+                {/* Цена со скидкой */}
+                {calculation.hasDiscount && (
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1 px-2 py-1 bg-green-500/20 rounded-lg">
+                      <Percent className="w-3 h-3 text-green-400" />
+                      <span className="text-xs font-bold text-green-400">-{calculation.discountPercent}%</span>
+                    </div>
+                    <span className="text-sm text-muted-foreground">Со скидкой:</span>
+                  </div>
+                )}
+                
                 <motion.div 
-                  className="text-4xl md:text-5xl font-bold gradient-text font-mono"
-                  key={calculation.total}
+                  className="text-3xl sm:text-4xl md:text-5xl font-bold gradient-text font-mono mt-1"
+                  key={calculation.discountedPrice}
                   initial={{ scale: 1.1, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: 'spring', stiffness: 300 }}
                 >
-                  {formatPrice(calculation.total)}
+                  {formatPrice(calculation.hasDiscount ? calculation.discountedPrice : calculation.regularPrice)}
                 </motion.div>
+                
+                <div className="text-xs text-muted-foreground mt-2">
+                  Кадров: {calculation.frames} • {formatDuration(duration)}
+                </div>
               </div>
+              
               <motion.a
                 href="https://t.me/artemmak_ai"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-8 py-4 bg-gradient-violet rounded-xl font-semibold text-primary-foreground"
+                className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gradient-violet rounded-xl font-semibold text-primary-foreground text-sm sm:text-base"
                 whileHover={{ scale: 1.02, boxShadow: '0 0 40px hsl(263 70% 58% / 0.4)' }}
                 whileTap={{ scale: 0.98 }}
               >
-                <Send className="w-5 h-5" />
+                <Send className="w-4 sm:w-5 h-4 sm:h-5" />
                 Обсудить проект
               </motion.a>
             </div>
