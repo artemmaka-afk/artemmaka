@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Save, DollarSign, Film, Loader2, RefreshCcw, LogIn, LogOut, Inbox, Eye, CheckCircle, Clock } from 'lucide-react';
+import { ArrowLeft, Save, DollarSign, Film, Loader2, RefreshCcw, LogIn, LogOut, Inbox, Eye, CheckCircle, Clock, Palette, Cpu } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { projects } from '@/lib/constants';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AIToolsManager } from '@/components/admin/AIToolsManager';
+import { ProjectsManager } from '@/components/admin/ProjectsManager';
+import { SiteContentManager } from '@/components/admin/SiteContentManager';
 
 interface CalculatorConfig {
   id: string;
@@ -49,7 +51,6 @@ export default function Admin() {
   const [requests, setRequests] = useState<ProjectRequest[]>([]);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   
-  // Auth state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isAuthLoading, setIsAuthLoading] = useState(false);
@@ -78,13 +79,9 @@ export default function Admin() {
       }
     };
 
-    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (!isMounted) return;
       
-      console.log('Auth state change:', event, session?.user?.email);
-      
-      // Update user state immediately
       setUser(session?.user ?? null);
       
       if (session?.user) {
@@ -101,11 +98,8 @@ export default function Admin() {
       }
     });
 
-    // THEN get the initial session
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!isMounted) return;
-      
-      console.log('Initial session:', session?.user?.email);
       
       setUser(session?.user ?? null);
       
@@ -138,10 +132,7 @@ export default function Admin() {
     e.preventDefault();
     setIsAuthLoading(true);
     
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       toast.error('Ошибка входа: ' + error.message);
@@ -158,9 +149,7 @@ export default function Admin() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        emailRedirectTo: window.location.origin,
-      },
+      options: { emailRedirectTo: window.location.origin },
     });
 
     if (error) {
@@ -169,7 +158,6 @@ export default function Admin() {
       return;
     }
 
-    // If signup successful and we have a session, try to assign admin role
     if (data.session) {
       try {
         const response = await fetch(
@@ -227,7 +215,7 @@ export default function Admin() {
         deadline_20_multiplier: Number(data.deadline_20_multiplier),
         deadline_10_multiplier: Number(data.deadline_10_multiplier),
         volume_discount_percent: data.volume_discount_percent,
-        scenario_price_per_min: (data as any).scenario_price_per_min ?? 20000,
+        scenario_price_per_min: data.scenario_price_per_min,
       });
     }
   };
@@ -329,7 +317,6 @@ export default function Admin() {
     );
   }
 
-  // Login/Register form
   if (!user) {
     return (
       <div className="min-h-screen bg-background mesh-background noise-overlay flex items-center justify-center px-4">
@@ -405,7 +392,6 @@ export default function Admin() {
     );
   }
 
-  // Not admin
   if (!isAdmin) {
     return (
       <div className="min-h-screen bg-background mesh-background noise-overlay flex items-center justify-center px-4">
@@ -432,7 +418,6 @@ export default function Admin() {
   return (
     <div className="min-h-screen bg-background mesh-background noise-overlay">
       <div className="relative z-10">
-        {/* Header */}
         <header className="border-b border-white/10 px-4 sm:px-6 py-4">
           <div className="max-w-6xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -461,18 +446,26 @@ export default function Admin() {
 
         <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
           <Tabs defaultValue="requests" className="space-y-6">
-            <TabsList className="bg-white/5 border border-white/10">
+            <TabsList className="bg-white/5 border border-white/10 flex-wrap h-auto gap-1 p-1">
               <TabsTrigger value="requests" className="gap-2">
                 <Inbox className="w-4 h-4" />
-                Заявки
-              </TabsTrigger>
-              <TabsTrigger value="calculator" className="gap-2">
-                <DollarSign className="w-4 h-4" />
-                Калькулятор
+                <span className="hidden sm:inline">Заявки</span>
               </TabsTrigger>
               <TabsTrigger value="projects" className="gap-2">
                 <Film className="w-4 h-4" />
-                Проекты
+                <span className="hidden sm:inline">Проекты</span>
+              </TabsTrigger>
+              <TabsTrigger value="ai-tools" className="gap-2">
+                <Cpu className="w-4 h-4" />
+                <span className="hidden sm:inline">Нейронки</span>
+              </TabsTrigger>
+              <TabsTrigger value="content" className="gap-2">
+                <Palette className="w-4 h-4" />
+                <span className="hidden sm:inline">Контент</span>
+              </TabsTrigger>
+              <TabsTrigger value="calculator" className="gap-2">
+                <DollarSign className="w-4 h-4" />
+                <span className="hidden sm:inline">Калькулятор</span>
               </TabsTrigger>
             </TabsList>
 
@@ -485,7 +478,6 @@ export default function Admin() {
                     <p className="text-sm text-muted-foreground">Всего: {requests.length}</p>
                   </div>
                   
-                  {/* Status Filter */}
                   <div className="flex gap-2 flex-wrap">
                     <Button
                       variant={statusFilter === 'all' ? 'default' : 'outline'}
@@ -547,7 +539,6 @@ export default function Admin() {
                             </div>
                           </div>
                           
-                          {/* Status Change Buttons */}
                           <div className="flex gap-1">
                             {request.status !== 'new' && (
                               <Button
@@ -582,7 +573,6 @@ export default function Admin() {
                           </div>
                         </div>
 
-                        {/* Contact Info */}
                         <div className="flex flex-wrap gap-3 text-sm">
                           {request.email && (
                             <a href={`mailto:${request.email}`} className="text-violet-400 hover:underline">
@@ -601,12 +591,10 @@ export default function Admin() {
                           )}
                         </div>
 
-                        {/* Description */}
                         <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                           {request.project_description}
                         </p>
 
-                        {/* Budget */}
                         {request.budget_estimate && (
                           <div className="text-sm font-mono text-green-400">
                             Бюджет: {new Intl.NumberFormat('ru-RU').format(request.budget_estimate)} ₽
@@ -616,6 +604,27 @@ export default function Admin() {
                     ))}
                   </div>
                 )}
+              </div>
+            </TabsContent>
+
+            {/* Projects Tab */}
+            <TabsContent value="projects">
+              <div className="glass-card p-4 sm:p-6">
+                <ProjectsManager />
+              </div>
+            </TabsContent>
+
+            {/* AI Tools Tab */}
+            <TabsContent value="ai-tools">
+              <div className="glass-card p-4 sm:p-6">
+                <AIToolsManager />
+              </div>
+            </TabsContent>
+
+            {/* Site Content Tab */}
+            <TabsContent value="content">
+              <div className="glass-card p-4 sm:p-6">
+                <SiteContentManager />
               </div>
             </TabsContent>
 
@@ -640,7 +649,6 @@ export default function Admin() {
 
                 {config && (
                   <div className="space-y-6">
-                    {/* Базовые цены */}
                     <div className="space-y-4">
                       <h3 className="text-sm font-medium text-muted-foreground border-b border-white/10 pb-2">
                         Базовые цены
@@ -667,7 +675,6 @@ export default function Admin() {
                       </div>
                     </div>
 
-                    {/* Липсинк и правки */}
                     <div className="space-y-4">
                       <h3 className="text-sm font-medium text-muted-foreground border-b border-white/10 pb-2">
                         Дополнительные услуги
@@ -703,7 +710,6 @@ export default function Admin() {
                       </div>
                     </div>
 
-                    {/* Множители срочности */}
                     <div className="space-y-4">
                       <h3 className="text-sm font-medium text-muted-foreground border-b border-white/10 pb-2">
                         Множители срочности
@@ -733,54 +739,6 @@ export default function Admin() {
                     </div>
                   </div>
                 )}
-              </div>
-            </TabsContent>
-
-            {/* Projects Tab */}
-            <TabsContent value="projects">
-              <div className="glass-card p-4 sm:p-6 space-y-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center">
-                    <Film className="w-5 h-5 text-violet-400" />
-                  </div>
-                  <div>
-                    <h2 className="text-lg font-semibold">Проекты</h2>
-                    <p className="text-sm text-muted-foreground">Управление портфолио</p>
-                  </div>
-                </div>
-
-                <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
-                  {projects.map((project) => (
-                    <div
-                      key={project.id}
-                      className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10"
-                    >
-                      <img
-                        src={project.thumbnail}
-                        alt={project.title}
-                        className="w-12 h-16 object-cover rounded-lg flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-sm truncate">{project.title}</h3>
-                        <p className="text-xs text-muted-foreground truncate">{project.subtitle}</p>
-                        <div className="flex gap-1.5 mt-1.5">
-                          {project.tags.slice(0, 2).map((tag) => (
-                            <span
-                              key={tag}
-                              className="px-1.5 py-0.5 text-[10px] font-mono bg-white/5 rounded"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <p className="text-xs text-muted-foreground text-center pt-4 border-t border-white/10">
-                  Проекты загружаются из локальных данных. Для редактирования подключите CMS.
-                </p>
               </div>
             </TabsContent>
           </Tabs>

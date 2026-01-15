@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_tools: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          logo: string
+          name: string
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          logo: string
+          name: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          logo?: string
+          name?: string
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       calculator_config: {
         Row: {
           base_frame_price: number
@@ -110,6 +140,81 @@ export type Database = {
           status?: string
           telegram?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          ai_tools: string[] | null
+          content_blocks: Json | null
+          created_at: string
+          duration: string | null
+          id: string
+          is_published: boolean | null
+          slug: string
+          sort_order: number | null
+          subtitle: string | null
+          tags: string[] | null
+          thumbnail: string | null
+          title: string
+          updated_at: string
+          video_preview: string | null
+          year: string | null
+        }
+        Insert: {
+          ai_tools?: string[] | null
+          content_blocks?: Json | null
+          created_at?: string
+          duration?: string | null
+          id?: string
+          is_published?: boolean | null
+          slug: string
+          sort_order?: number | null
+          subtitle?: string | null
+          tags?: string[] | null
+          thumbnail?: string | null
+          title: string
+          updated_at?: string
+          video_preview?: string | null
+          year?: string | null
+        }
+        Update: {
+          ai_tools?: string[] | null
+          content_blocks?: Json | null
+          created_at?: string
+          duration?: string | null
+          id?: string
+          is_published?: boolean | null
+          slug?: string
+          sort_order?: number | null
+          subtitle?: string | null
+          tags?: string[] | null
+          thumbnail?: string | null
+          title?: string
+          updated_at?: string
+          video_preview?: string | null
+          year?: string | null
+        }
+        Relationships: []
+      }
+      site_content: {
+        Row: {
+          description: string | null
+          id: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          description?: string | null
+          id: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          updated_at?: string
+          value?: string
         }
         Relationships: []
       }
