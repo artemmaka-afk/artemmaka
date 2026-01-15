@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
-import { Send, Instagram, Youtube, Globe, ArrowDown } from 'lucide-react';
-import { artistInfo, stats, socialLinks } from '@/lib/constants';
+import { Send, Instagram, Youtube, Globe, ArrowDown, Loader2 } from 'lucide-react';
+import { stats, socialLinks } from '@/lib/constants';
+import { useSiteContent } from '@/hooks/useSiteData';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Send,
@@ -30,6 +31,25 @@ const itemVariants = {
 };
 
 export function Hero() {
+  const { data: siteContent, isLoading } = useSiteContent();
+
+  // Get content from DB with fallbacks
+  const getContent = (id: string, fallback: string) => {
+    return siteContent?.find(c => c.id === id)?.value || fallback;
+  };
+
+  const name = getContent('artist_name', 'Артём Макаров');
+  const title = getContent('artist_title', 'AI Artist / Генеративный художник');
+  const tagline = getContent('artist_tagline', 'Создаю фотореалистичные видео и изображения с помощью нейросетей');
+
+  if (isLoading) {
+    return (
+      <section className="relative min-h-screen flex flex-col items-center justify-center px-6 py-20">
+        <Loader2 className="w-8 h-8 animate-spin text-violet-400" />
+      </section>
+    );
+  }
+
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center px-6 py-20">
       {/* Animated gradient orbs */}
@@ -80,14 +100,14 @@ export function Hero() {
           variants={itemVariants}
           className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-4"
         >
-          <span className="block text-foreground">{artistInfo.name}</span>
+          <span className="block text-foreground">{name}</span>
         </motion.h1>
 
         <motion.p 
           variants={itemVariants}
           className="text-xl md:text-2xl gradient-text font-semibold mb-4"
         >
-          {artistInfo.title}
+          {title}
         </motion.p>
 
         {/* Tagline */}
@@ -95,7 +115,7 @@ export function Hero() {
           variants={itemVariants}
           className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8"
         >
-          {artistInfo.tagline}
+          {tagline}
         </motion.p>
 
         {/* Stats */}

@@ -1,10 +1,12 @@
-import { useState } from 'react';
-import { Plus, Pencil, Trash2, Film, Image, Loader2 } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Plus, Pencil, Trash2, Film, Image, Loader2, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAITools, useAIToolMutations, type AITool } from '@/hooks/useSiteData';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 function ToolForm({ 
   tool, 
@@ -20,6 +22,50 @@ function ToolForm({
   const [name, setName] = useState(tool?.name || '');
   const [logo, setLogo] = useState(tool?.logo || '');
   const [category, setCategory] = useState<'video' | 'image'>(tool?.category || 'video');
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Пожалуйста, выберите изображение');
+      return;
+    }
+
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Размер файла не должен превышать 2MB');
+      return;
+    }
+
+    setIsUploading(true);
+    
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('ai-logos')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('ai-logos')
+        .getPublicUrl(fileName);
+
+      setLogo(publicUrl);
+      toast.success('Логотип загружен');
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast.error('Ошибка загрузки: ' + error.message);
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,22 +90,56 @@ function ToolForm({
           required
         />
       </div>
+      
       <div className="space-y-2">
-        <label className="text-sm font-medium">URL логотипа</label>
-        <Input
-          value={logo}
-          onChange={(e) => setLogo(e.target.value)}
-          placeholder="https://..."
-          className="bg-white/5 border-white/10"
-          required
-        />
+        <label className="text-sm font-medium">Логотип</label>
+        <div className="flex gap-2">
+          <Input
+            value={logo}
+            onChange={(e) => setLogo(e.target.value)}
+            placeholder="URL или загрузите файл"
+            className="bg-white/5 border-white/10 flex-1"
+            required
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+            className="flex-shrink-0"
+          >
+            {isUploading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Upload className="w-4 h-4" />
+            )}
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+        </div>
         {logo && (
           <div className="flex items-center gap-2 p-2 bg-white/5 rounded-lg">
             <img src={logo} alt="Preview" className="w-8 h-8 object-contain rounded" />
-            <span className="text-xs text-muted-foreground">Предпросмотр</span>
+            <span className="text-xs text-muted-foreground flex-1 truncate">{logo}</span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setLogo('')}
+              className="h-6 w-6 p-0"
+            >
+              <X className="w-3 h-3" />
+            </Button>
           </div>
         )}
       </div>
+      
       <div className="space-y-2">
         <label className="text-sm font-medium">Категория</label>
         <Select value={category} onValueChange={(v) => setCategory(v as 'video' | 'image')}>
@@ -72,8 +152,9 @@ function ToolForm({
           </SelectContent>
         </Select>
       </div>
+      
       <div className="flex gap-2 pt-4">
-        <Button type="submit" className="flex-1 bg-gradient-violet" disabled={isLoading}>
+        <Button type="submit" className="flex-1 bg-gradient-violet" disabled={isLoading || isUploading}>
           {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Сохранить'}
         </Button>
         <Button type="button" variant="outline" onClick={onCancel}>

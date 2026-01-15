@@ -56,6 +56,8 @@ export function useAITools() {
       if (error) throw error;
       return data as AITool[];
     },
+    staleTime: 0, // Always fetch fresh data
+    gcTime: 5 * 60 * 1000, // Keep in cache for 5 minutes
   });
 }
 
@@ -77,6 +79,8 @@ export function useProjects() {
         content_blocks: (p.content_blocks as unknown as ContentBlock[]) || [],
       })) as Project[];
     },
+    staleTime: 0,
+    gcTime: 5 * 60 * 1000,
   });
 }
 
@@ -92,7 +96,15 @@ export function useSiteContent() {
       if (error) throw error;
       return data as SiteContent[];
     },
+    staleTime: 0,
+    gcTime: 5 * 60 * 1000,
   });
+}
+
+// Helper to get site content value
+export function useSiteContentValue(id: string, fallback: string = '') {
+  const { data } = useSiteContent();
+  return data?.find(c => c.id === id)?.value || fallback;
 }
 
 // Mutations for AI Tools

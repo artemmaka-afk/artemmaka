@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, ArrowRight, User, Film, Image, Workflow, Mail } from 'lucide-react';
-import { artistInfo, videoTechStack, imageTechStack, pipelineSteps, skills } from '@/lib/constants';
+import { MapPin, ArrowRight, User, Film, Image, Workflow, Mail, Loader2 } from 'lucide-react';
+import { pipelineSteps } from '@/lib/constants';
+import { useAITools, useSiteContent } from '@/hooks/useSiteData';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -69,6 +70,14 @@ function InfiniteMarquee({ items, direction = 'left', duration = 20 }: {
 }) {
   const doubledItems = [...items, ...items];
   
+  if (items.length === 0) {
+    return (
+      <div className="flex items-center justify-center py-4 text-muted-foreground text-sm">
+        Нет инструментов
+      </div>
+    );
+  }
+  
   return (
     <div className="relative overflow-hidden">
       <div 
@@ -105,6 +114,34 @@ function SectionLabel({ icon: Icon, text }: { icon: React.ElementType; text: str
 }
 
 export function BentoAbout() {
+  const { data: aiTools, isLoading: toolsLoading } = useAITools();
+  const { data: siteContent, isLoading: contentLoading } = useSiteContent();
+
+  // Get content from DB with fallbacks
+  const getContent = (id: string, fallback: string) => {
+    return siteContent?.find(c => c.id === id)?.value || fallback;
+  };
+
+  const bio = getContent('artist_bio', 'Занимаюсь генерацией фотореалистичных видео и изображений для промо, сюжетных и рекламных проектов.');
+  const email = getContent('artist_email', 'artem@makarov.ai');
+  const location = getContent('artist_location', 'Москва, Россия');
+
+  // Split AI tools by category from DB
+  const videoTools = aiTools?.filter(t => t.category === 'video').map(t => ({ name: t.name, logo: t.logo })) || [];
+  const imageTools = aiTools?.filter(t => t.category === 'image').map(t => ({ name: t.name, logo: t.logo })) || [];
+
+  const isLoading = toolsLoading || contentLoading;
+
+  if (isLoading) {
+    return (
+      <section id="about" className="relative py-20 px-6">
+        <div className="max-w-7xl mx-auto flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-violet-400" />
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section id="about" className="relative py-20 px-6">
       <div className="max-w-7xl mx-auto">
@@ -138,7 +175,7 @@ export function BentoAbout() {
             <div className="overflow-hidden">
               <SectionLabel icon={User} text="О себе" />
               <p className="text-sm sm:text-base md:text-lg leading-relaxed text-muted-foreground break-words">
-                {artistInfo.bio}
+                {bio}
               </p>
             </div>
             <div className="flex items-center gap-2 text-violet-400 mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -154,8 +191,8 @@ export function BentoAbout() {
             whileHover={{ scale: 1.02, y: -2 }}
           >
             <MapPin className="w-6 h-6 text-violet-400 mb-2" />
-            <div className="text-sm font-semibold">Москва</div>
-            <div className="text-xs text-muted-foreground">Россия</div>
+            <div className="text-sm font-semibold">{location.split(',')[0]}</div>
+            <div className="text-xs text-muted-foreground">{location.split(',')[1]?.trim() || 'Россия'}</div>
           </motion.div>
 
           {/* Card 3: Experience - Small */}
@@ -175,7 +212,7 @@ export function BentoAbout() {
             whileHover={{ scale: 1.01 }}
           >
             <SectionLabel icon={Film} text="Стек для видео" />
-            <InfiniteMarquee items={videoTechStack} direction="left" duration={25} />
+            <InfiniteMarquee items={videoTools} direction="left" duration={25} />
           </motion.div>
 
           {/* Card 5: Image Tech Stack Marquee - Medium */}
@@ -185,7 +222,7 @@ export function BentoAbout() {
             whileHover={{ scale: 1.01 }}
           >
             <SectionLabel icon={Image} text="Стек для изображений" />
-            <InfiniteMarquee items={imageTechStack} direction="right" duration={30} />
+            <InfiniteMarquee items={imageTools} direction="right" duration={30} />
           </motion.div>
 
           {/* Card 6: Pipeline - Wide */}
@@ -234,7 +271,7 @@ export function BentoAbout() {
 
           {/* Card 8: Email */}
           <motion.a
-            href={`mailto:${artistInfo.email}`}
+            href={`mailto:${email}`}
             variants={cardVariants}
             className="lg:col-span-4 glass-card p-5 flex items-center justify-between group cursor-pointer"
             whileHover={{ scale: 1.01, y: -2 }}
@@ -242,7 +279,7 @@ export function BentoAbout() {
             <div>
               <SectionLabel icon={Mail} text="Связаться" />
               <div className="font-mono text-lg group-hover:text-violet-400 transition-colors">
-                {artistInfo.email}
+                {email}
               </div>
             </div>
             <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-violet-400 group-hover:translate-x-1 transition-all" />
