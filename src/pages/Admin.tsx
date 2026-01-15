@@ -58,6 +58,7 @@ export default function Admin() {
 
   useEffect(() => {
     let isMounted = true;
+    let safetyTimer: number | undefined;
 
     const checkAdminRole = async (userId: string) => {
       try {
@@ -67,7 +68,7 @@ export default function Admin() {
           .eq('user_id', userId)
           .eq('role', 'admin')
           .maybeSingle();
-        
+
         if (error) {
           console.error('Error checking admin role:', error);
           return false;
@@ -79,44 +80,52 @@ export default function Admin() {
       }
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    // Safety net: никогда не зависаем в вечном лоадере
+    safetyTimer = window.setTimeout(() => {
+      if (isMounted) setIsLoading(false);
+    }, 4000);
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (!isMounted) return;
-      
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        const adminStatus = await checkAdminRole(session.user.id);
-        if (isMounted) {
-          setIsAdmin(adminStatus);
-          setIsLoading(false);
+
+      try {
+        setUser(session?.user ?? null);
+
+        if (session?.user) {
+          const adminStatus = await checkAdminRole(session.user.id);
+          if (isMounted) setIsAdmin(adminStatus);
+        } else {
+          if (isMounted) setIsAdmin(false);
         }
-      } else {
-        if (isMounted) {
-          setIsAdmin(false);
-          setIsLoading(false);
-        }
+      } catch (e) {
+        console.error('Auth state change handler error:', e);
+        if (isMounted) setIsAdmin(false);
+      } finally {
+        if (isMounted) setIsLoading(false);
       }
     });
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!isMounted) return;
-      
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        const adminStatus = await checkAdminRole(session.user.id);
-        if (isMounted) {
-          setIsAdmin(adminStatus);
+    (async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) console.error('getSession error:', error);
+        if (!isMounted) return;
+
+        setUser(session?.user ?? null);
+        if (session?.user) {
+          const adminStatus = await checkAdminRole(session.user.id);
+          if (isMounted) setIsAdmin(adminStatus);
         }
+      } catch (e) {
+        console.error('getSession exception:', e);
+      } finally {
+        if (isMounted) setIsLoading(false);
       }
-      
-      if (isMounted) {
-        setIsLoading(false);
-      }
-    });
+    })();
 
     return () => {
       isMounted = false;
+      if (safetyTimer) window.clearTimeout(safetyTimer);
       subscription.unsubscribe();
     };
   }, []);

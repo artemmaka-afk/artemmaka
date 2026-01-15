@@ -118,8 +118,9 @@ export function useAIToolMutations() {
         .upsert(tool, { onConflict: 'id' });
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ai-tools'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['ai-tools'] });
+      await queryClient.refetchQueries({ queryKey: ['ai-tools'] });
       toast.success('Инструмент сохранён');
     },
     onError: (error: Error) => {
@@ -132,8 +133,9 @@ export function useAIToolMutations() {
       const { error } = await supabase.from('ai_tools').delete().eq('id', id);
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ai-tools'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['ai-tools'] });
+      await queryClient.refetchQueries({ queryKey: ['ai-tools'] });
       toast.success('Инструмент удалён');
     },
     onError: (error: Error) => {
@@ -155,8 +157,9 @@ export function useProjectMutations() {
         .upsert(project as any, { onConflict: 'id' });
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['projects'] });
+      await queryClient.refetchQueries({ queryKey: ['projects'] });
       toast.success('Проект сохранён');
     },
     onError: (error: Error) => {
@@ -169,8 +172,9 @@ export function useProjectMutations() {
       const { error } = await supabase.from('projects').delete().eq('id', id);
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['projects'] });
+      await queryClient.refetchQueries({ queryKey: ['projects'] });
       toast.success('Проект удалён');
     },
     onError: (error: Error) => {
@@ -187,14 +191,16 @@ export function useSiteContentMutations() {
   
   const update = useMutation({
     mutationFn: async ({ id, value }: { id: string; value: string }) => {
+      // UPDATE может «тихо» не затронуть строки (0 rows affected) —
+      // поэтому делаем UPSERT, чтобы гарантировать запись.
       const { error } = await supabase
         .from('site_content')
-        .update({ value })
-        .eq('id', id);
+        .upsert({ id, value }, { onConflict: 'id' });
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['site-content'] });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['site-content'] });
+      await queryClient.refetchQueries({ queryKey: ['site-content'] });
       toast.success('Контент обновлён');
     },
     onError: (error: Error) => {
