@@ -1,3 +1,5 @@
+// ============= Типы данных =============
+
 export interface ContentBlock {
   type: 'text' | 'image' | 'video' | 'comparison';
   content?: string;
@@ -19,152 +21,247 @@ export interface Project {
   contentBlocks: ContentBlock[];
 }
 
+// ============= Данные художника =============
+
+export const artistInfo = {
+  name: 'Артём Макаров',
+  title: 'AI Video Artist & Creative Director',
+  tagline: 'Создаю визуальные миры с помощью нейросетей',
+  bio: 'Я специализируюсь на создании сложных нарративных видео с использованием передовых AI-технологий. Каждый проект — это уникальное сочетание искусственного интеллекта и человеческого видения.',
+  email: 'artem@makarov.ai',
+  telegram: '@artemmak_ai',
+  location: 'Москва, Россия'
+};
+
+export const stats = [
+  { value: '50+', label: 'Проектов' },
+  { value: '3', label: 'Года в AI' },
+  { value: 'TOP 10', label: 'Creators' }
+];
+
+export const techStack = [
+  { name: 'Midjourney', icon: '🎨' },
+  { name: 'Runway Gen-3', icon: '🎬' },
+  { name: 'ComfyUI', icon: '⚙️' },
+  { name: 'After Effects', icon: '✨' },
+  { name: 'Stable Diffusion', icon: '🖼️' },
+  { name: 'DaVinci Resolve', icon: '🎥' }
+];
+
+export const pipelineSteps = [
+  { step: 1, title: 'Идея', description: 'Концепция и сценарий' },
+  { step: 2, title: 'Генерация', description: 'AI создаёт визуал' },
+  { step: 3, title: 'Анимация', description: 'Оживляем кадры' },
+  { step: 4, title: 'Монтаж', description: 'Финальная сборка' }
+];
+
+// ============= Социальные сети =============
+
+export const socialLinks = [
+  { name: 'Telegram', url: 'https://t.me/artemmak_ai', icon: 'Send' },
+  { name: 'Instagram', url: 'https://instagram.com/artemmak_ai', icon: 'Instagram' },
+  { name: 'YouTube', url: 'https://youtube.com/@artemmak_ai', icon: 'Youtube' },
+  { name: 'Behance', url: 'https://behance.net/artemmak', icon: 'Globe' }
+];
+
+// ============= Портфолио проектов =============
+
 export const projects: Project[] = [
   {
-    id: 'neon-samurai',
-    title: 'Neon Samurai in Moscow',
-    subtitle: 'Cyberpunk Short Film',
+    id: 'cyberpunk-moscow',
+    title: 'Киберпанк Москва',
+    subtitle: 'Футуристический короткометражный фильм',
     thumbnail: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80',
     videoPreview: 'https://cdn.coverr.co/videos/coverr-neon-city-at-night-4267/1080p.mp4',
-    tags: ['Midjourney', 'Runway Gen-3', 'After Effects'],
+    tags: ['#AI', '#Video', '#Commercial'],
     year: '2024',
     duration: '2:45',
     contentBlocks: [
       {
         type: 'text',
-        content: '**Neon Samurai** is a passion project that explores the fusion of traditional Japanese warrior culture with a dystopian cyberpunk Moscow. The film follows a lone warrior navigating through rain-soaked streets illuminated by holographic advertisements.'
+        content: '**Киберпанк Москва** — это экспериментальный проект, исследующий будущее столицы через призму нейросетей. Каждый кадр создан с использованием Midjourney v6 и анимирован в Runway Gen-3.'
       },
       {
         type: 'image',
         src: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=1200&q=80',
-        caption: 'Initial concept frame generated in Midjourney v6'
+        caption: 'Концепт-арт: Москва-Сити 2077'
       },
       {
         type: 'text',
-        content: 'The visual language draws heavily from *Blade Runner* and *Ghost in the Shell*, while incorporating uniquely Russian architectural elements. Every frame was carefully crafted to maintain a balance between **chaos and serenity**.'
+        content: 'Визуальный язык вдохновлён *Blade Runner* и *Ghost in the Shell*, но с уникальной русской эстетикой. Неоновые вывески на кириллице, футуристические версии знакомых зданий.'
       },
       {
         type: 'video',
         src: 'https://cdn.coverr.co/videos/coverr-neon-city-at-night-4267/1080p.mp4',
-        caption: 'Final rendered sequence - Act II'
+        caption: 'Финальный рендер — Акт II'
       },
       {
         type: 'comparison',
         beforeSrc: 'https://images.unsplash.com/photo-1480796927426-f609979314bd?w=800&q=80',
         afterSrc: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80',
-        caption: 'Before/After: AI enhancement process'
+        caption: 'До/После: AI-обработка'
       }
     ]
   },
   {
-    id: 'digital-fashion',
-    title: 'Digital Fashion Week',
-    subtitle: 'AI-Generated Clothing Showcase',
+    id: 'fashion-show-2026',
+    title: 'Fashion Show 2026',
+    subtitle: 'AI-генерированная коллекция одежды',
     thumbnail: 'https://images.unsplash.com/photo-1558171813-4c088753af8f?w=800&q=80',
     videoPreview: 'https://cdn.coverr.co/videos/coverr-fashion-model-walking-8556/1080p.mp4',
-    tags: ['Stable Diffusion', 'Runway Gen-3', 'DaVinci Resolve'],
+    tags: ['#AI', '#Fashion', '#Art'],
     year: '2024',
     duration: '4:20',
     contentBlocks: [
       {
         type: 'text',
-        content: '**Digital Fashion Week** reimagines haute couture through the lens of artificial intelligence. This project showcases 12 completely AI-generated fashion collections, each representing a different emotion.'
+        content: '**Fashion Show 2026** — полностью AI-генерированный показ мод с 12 коллекциями, каждая из которых представляет определённую эмоцию.'
       },
       {
         type: 'image',
         src: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=1200&q=80',
-        caption: 'Collection I: Ethereal Dreams'
+        caption: 'Коллекция I: Эфирные Сны'
       },
       {
         type: 'text',
-        content: 'Working with *Stable Diffusion XL* and custom LoRA models, we trained the AI on decades of fashion photography. The result is a seamless blend of **impossible fabrics** and gravity-defying silhouettes.'
+        content: 'С использованием *Stable Diffusion XL* и кастомных LoRA-моделей мы обучили AI на десятилетиях модной фотографии. Результат — **невозможные ткани** и силуэты, игнорирующие гравитацию.'
       },
       {
         type: 'video',
         src: 'https://cdn.coverr.co/videos/coverr-fashion-model-walking-8556/1080p.mp4',
-        caption: 'Runway animation generated with Runway Gen-3'
+        caption: 'Анимация подиума в Runway Gen-3'
       },
       {
         type: 'comparison',
         beforeSrc: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=800&q=80',
         afterSrc: 'https://images.unsplash.com/photo-1558171813-4c088753af8f?w=800&q=80',
-        caption: 'Style transfer comparison'
+        caption: 'Стиль-трансфер'
       }
     ]
   },
   {
-    id: 'abstract-dreams',
-    title: 'Abstract Dreams',
-    subtitle: 'Surreal Fluid Animations',
+    id: 'abstract-dream',
+    title: 'Абстрактный Сон',
+    subtitle: 'Сюрреалистические флюид-анимации',
     thumbnail: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80',
     videoPreview: 'https://cdn.coverr.co/videos/coverr-colorful-abstract-background-4689/1080p.mp4',
-    tags: ['TouchDesigner', 'ComfyUI', 'Houdini'],
+    tags: ['#AI', '#Abstract', '#Motion'],
     year: '2023',
     duration: '3:15',
     contentBlocks: [
       {
         type: 'text',
-        content: '**Abstract Dreams** is an exploration of the subconscious through generative art. This piece combines traditional fluid dynamics simulation with AI-driven color theory and composition.'
+        content: '**Абстрактный Сон** — исследование подсознания через генеративное искусство. Комбинация симуляции флюидов и AI-driven теории цвета.'
       },
       {
         type: 'image',
         src: 'https://images.unsplash.com/photo-1634017839464-5c339bbe3f6c?w=1200&q=80',
-        caption: 'Frame study: Emergence'
+        caption: 'Этюд кадра: Emergence'
       },
       {
         type: 'text',
-        content: 'The animation responds to audio frequencies, creating a *synesthetic experience* where sound becomes visible. Each frame contains over **10 million particles** simulated in real-time.'
+        content: 'Анимация реагирует на частоты звука, создавая *синестетический опыт*. Каждый кадр содержит более **10 миллионов частиц**.'
       },
       {
         type: 'video',
         src: 'https://cdn.coverr.co/videos/coverr-colorful-abstract-background-4689/1080p.mp4',
-        caption: 'Final animation loop'
+        caption: 'Финальный луп'
       },
       {
         type: 'comparison',
         beforeSrc: 'https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=800&q=80',
         afterSrc: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80',
-        caption: 'Raw simulation vs. AI-enhanced output'
+        caption: 'Сырая симуляция vs AI-версия'
+      }
+    ]
+  },
+  {
+    id: 'neon-portraits',
+    title: 'Неоновые Портреты',
+    subtitle: 'Серия AI-генерированных портретов',
+    thumbnail: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800&q=80',
+    videoPreview: 'https://cdn.coverr.co/videos/coverr-woman-in-neon-lights-7825/1080p.mp4',
+    tags: ['#AI', '#Portrait', '#Neon'],
+    year: '2024',
+    duration: '1:30',
+    contentBlocks: [
+      {
+        type: 'text',
+        content: '**Неоновые Портреты** — серия работ, исследующих человеческую индивидуальность через неоновое освещение и AI-генерацию.'
+      },
+      {
+        type: 'video',
+        src: 'https://cdn.coverr.co/videos/coverr-woman-in-neon-lights-7825/1080p.mp4',
+        caption: 'Процесс создания'
+      }
+    ]
+  },
+  {
+    id: 'product-viz',
+    title: 'Визуализация Продуктов',
+    subtitle: 'Коммерческая 3D визуализация',
+    thumbnail: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&q=80',
+    videoPreview: 'https://cdn.coverr.co/videos/coverr-gold-rotating-ring-2391/1080p.mp4',
+    tags: ['#Commercial', '#3D', '#Product'],
+    year: '2024',
+    duration: '0:45',
+    contentBlocks: [
+      {
+        type: 'text',
+        content: '**Визуализация Продуктов** — коммерческие ролики для брендов с использованием AI-генерации и классического 3D.'
+      },
+      {
+        type: 'video',
+        src: 'https://cdn.coverr.co/videos/coverr-gold-rotating-ring-2391/1080p.mp4',
+        caption: 'Пример продуктовой съёмки'
+      }
+    ]
+  },
+  {
+    id: 'nature-surreal',
+    title: 'Природа: Сюрреализм',
+    subtitle: 'Фантастические пейзажи',
+    thumbnail: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=800&q=80',
+    videoPreview: 'https://cdn.coverr.co/videos/coverr-waves-crashing-on-rocks-1927/1080p.mp4',
+    tags: ['#AI', '#Nature', '#Surreal'],
+    year: '2023',
+    duration: '2:00',
+    contentBlocks: [
+      {
+        type: 'text',
+        content: '**Природа: Сюрреализм** — переосмысление природных ландшафтов через призму искусственного интеллекта.'
+      },
+      {
+        type: 'video',
+        src: 'https://cdn.coverr.co/videos/coverr-waves-crashing-on-rocks-1927/1080p.mp4',
+        caption: 'Сюрреалистичный океан'
       }
     ]
   }
 ];
 
-export const socialLinks = [
-  { name: 'Instagram', url: 'https://instagram.com', icon: 'Instagram' },
-  { name: 'Twitter', url: 'https://twitter.com', icon: 'Twitter' },
-  { name: 'YouTube', url: 'https://youtube.com', icon: 'Youtube' },
-  { name: 'Behance', url: 'https://behance.net', icon: 'Globe' }
-];
+// ============= Калькулятор цен =============
 
 export const calculatorDefaults = {
   basePrice: 3000,
   paceOptions: [
-    { label: 'Standard', value: 'standard', secondsPerFrame: 4, multiplier: 0.25 },
-    { label: 'Dynamic', value: 'dynamic', secondsPerFrame: 2, multiplier: 0.5 },
-    { label: 'Ultra', value: 'ultra', secondsPerFrame: 0.5, multiplier: 2.0 }
+    { label: 'Стандарт', value: 'standard', secondsPerFrame: 4, multiplier: 0.25 },
+    { label: 'Динамичный', value: 'dynamic', secondsPerFrame: 2, multiplier: 0.5 },
+    { label: 'Ультра', value: 'ultra', secondsPerFrame: 0.5, multiplier: 2.0 }
   ],
   audioOptions: [
-    { label: "Client's Audio", value: 'client', price: 0 },
-    { label: 'AI Generated', value: 'ai', price: 10000 },
-    { label: 'Lipsync', value: 'lipsync', pricePerUnit: 5000, unitSeconds: 30 }
+    { label: 'Своя озвучка', value: 'client', price: 0 },
+    { label: 'AI озвучка', value: 'ai', price: 10000 },
+    { label: 'Липсинк', value: 'lipsync', pricePerUnit: 5000, unitSeconds: 30 }
   ],
   revisionOptions: [
-    { label: '2 Revisions', value: '2', price: 0 },
-    { label: '4 Revisions', value: '4', price: 20000 },
-    { label: '8 Revisions', value: '8', price: 50000 }
+    { label: '2 круга правок', value: '2', price: 0 },
+    { label: '4 круга правок', value: '4', price: 20000 },
+    { label: '8 кругов правок', value: '8', price: 50000 }
   ],
   deadlineOptions: [
-    { label: '30 Days', value: '30', multiplier: 1 },
-    { label: '20 Days', value: '20', multiplier: 2 },
-    { label: '10 Days', value: '10', multiplier: 3 }
+    { label: '30 дней', value: '30', multiplier: 1 },
+    { label: '20 дней', value: '20', multiplier: 2 },
+    { label: '10 дней', value: '10', multiplier: 3 }
   ]
-};
-
-export const artistInfo = {
-  name: 'Alex Volkov',
-  title: 'AI Video Artist',
-  tagline: 'Crafting impossible worlds through artificial intelligence',
-  bio: 'Award-winning AI artist specializing in generative video content, motion design, and experimental storytelling.',
-  email: 'hello@alexvolkov.ai'
 };
