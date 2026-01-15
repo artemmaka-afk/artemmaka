@@ -1,13 +1,30 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Play, Clock } from 'lucide-react';
-import { projects, Project } from '@/lib/constants';
+import { Play, Clock, Loader2 } from 'lucide-react';
+import { Project as ConstantsProject, projects as fallbackProjects } from '@/lib/constants';
+import { useProjects, type Project as DBProject } from '@/hooks/useSiteData';
 import { ProjectSheet } from './ProjectSheet';
 
+// Adapter to transform DB project to constants format for ProjectSheet
+function toConstantsProject(p: DBProject): ConstantsProject {
+  return {
+    id: p.slug,
+    title: p.title,
+    subtitle: p.subtitle || '',
+    thumbnail: p.thumbnail || '',
+    videoPreview: p.video_preview || '',
+    tags: p.tags,
+    year: p.year || '',
+    duration: p.duration || '',
+    aiTools: p.ai_tools,
+    contentBlocks: p.content_blocks,
+  };
+}
+
 interface ProjectCardProps {
-  project: Project;
+  project: ConstantsProject;
   index: number;
-  onSelect: (project: Project) => void;
+  onSelect: (project: ConstantsProject) => void;
 }
 
 const containerVariants = {
@@ -71,17 +88,19 @@ function ProjectCard({ project, index, onSelect }: ProjectCardProps) {
         />
 
         {/* Video Preview */}
-        <video
-          ref={videoRef}
-          src={project.videoPreview}
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
-            isHovered ? 'opacity-100' : 'opacity-0'
-          }`}
-          muted
-          loop
-          playsInline
-          preload="none"
-        />
+        {project.videoPreview && (
+          <video
+            ref={videoRef}
+            src={project.videoPreview}
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+              isHovered ? 'opacity-100' : 'opacity-0'
+            }`}
+            muted
+            loop
+            playsInline
+            preload="none"
+          />
+        )}
 
         {/* Overlay Gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent opacity-90" />
@@ -133,7 +152,23 @@ function ProjectCard({ project, index, onSelect }: ProjectCardProps) {
 }
 
 export function PortfolioGrid() {
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const { data: dbProjects, isLoading } = useProjects();
+  const [selectedProject, setSelectedProject] = useState<ConstantsProject | null>(null);
+
+  // Use DB projects if available and published, fallback to constants
+  const projects = dbProjects && dbProjects.length > 0
+    ? dbProjects.filter(p => p.is_published).map(toConstantsProject)
+    : fallbackProjects;
+
+  if (isLoading) {
+    return (
+      <section id="portfolio" className="relative py-12 sm:py-20 px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-violet-400" />
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="portfolio" className="relative py-12 sm:py-20 px-4 sm:px-6">
@@ -171,6 +206,12 @@ export function PortfolioGrid() {
             />
           ))}
         </motion.div>
+
+        {projects.length === 0 && (
+          <div className="text-center py-20 text-muted-foreground">
+            <p>Нет опубликованных проектов</p>
+          </div>
+        )}
       </div>
 
       {/* Project Sheet */}

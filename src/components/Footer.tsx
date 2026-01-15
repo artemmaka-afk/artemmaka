@@ -1,8 +1,20 @@
 import { motion } from 'framer-motion';
 import { Send, Heart, Mail, ArrowUpRight } from 'lucide-react';
-import { artistInfo, socialLinks } from '@/lib/constants';
+import { socialLinks } from '@/lib/constants';
+import { useSiteContent } from '@/hooks/useSiteData';
 
 export function Footer() {
+  const { data: siteContent } = useSiteContent();
+
+  // Get content from DB with fallbacks
+  const getContent = (id: string, fallback: string) => {
+    return siteContent?.find(c => c.id === id)?.value || fallback;
+  };
+
+  const name = getContent('artist_name', 'Артём Макаров');
+  const email = getContent('artist_email', 'artem@makarov.ai');
+  const telegram = getContent('artist_telegram', '@artemmak_ai');
+
   return (
     <footer className="py-16 px-6 border-t border-white/10">
       <div className="max-w-7xl mx-auto">
@@ -21,7 +33,7 @@ export function Footer() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <motion.a
-              href={`https://t.me/${artistInfo.telegram.replace('@', '')}`}
+              href={`https://t.me/${telegram.replace('@', '')}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-8 py-4 bg-gradient-violet rounded-2xl font-semibold text-primary-foreground"
@@ -32,13 +44,13 @@ export function Footer() {
               Написать в Telegram
             </motion.a>
             <motion.a
-              href={`mailto:${artistInfo.email}`}
+              href={`mailto:${email}`}
               className="flex items-center gap-2 px-8 py-4 glass glass-hover rounded-2xl font-semibold"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
               <Mail className="w-5 h-5" />
-              {artistInfo.email}
+              {email}
             </motion.a>
           </div>
         </motion.div>
@@ -46,7 +58,7 @@ export function Footer() {
         {/* Bottom Section */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="text-muted-foreground text-sm">
-            © {new Date().getFullYear()} {artistInfo.name}. Все права защищены.
+            © {new Date().getFullYear()} {name}. Все права защищены.
           </div>
           
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
