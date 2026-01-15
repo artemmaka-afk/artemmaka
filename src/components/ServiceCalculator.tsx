@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calculator, Clock, Sparkles, Volume2, RefreshCcw, CalendarClock, Send, Percent, FileText } from 'lucide-react';
+import { Calculator, Clock, Sparkles, Volume2, RefreshCcw, CalendarClock, Send, Percent, FileText, Shield } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -14,6 +14,8 @@ interface CalculatorConfig {
   deadline_10_multiplier: number;
   volume_discount_percent: number;
   scenario_price_per_min: number;
+  nda_partial_multiplier: number;
+  nda_full_multiplier: number;
 }
 
 const defaultConfig: CalculatorConfig = {
@@ -26,6 +28,8 @@ const defaultConfig: CalculatorConfig = {
   deadline_10_multiplier: 3,
   volume_discount_percent: 15,
   scenario_price_per_min: 20000,
+  nda_partial_multiplier: 1.3,
+  nda_full_multiplier: 1.5,
 };
 
 export function ServiceCalculator() {
@@ -36,6 +40,7 @@ export function ServiceCalculator() {
   const [hasMusic, setHasMusic] = useState(false);
   const [hasLipsync, setHasLipsync] = useState(false);
   const [revisions, setRevisions] = useState<'2' | '4' | '8'>('2');
+  const [nda, setNda] = useState<'none' | 'partial' | 'full'>('none');
   const [deadline, setDeadline] = useState<'30' | '20' | '10'>('30');
 
   // Загружаем конфиг из базы
@@ -58,6 +63,8 @@ export function ServiceCalculator() {
           deadline_10_multiplier: Number(data.deadline_10_multiplier),
           volume_discount_percent: data.volume_discount_percent,
           scenario_price_per_min: (data as any).scenario_price_per_min ?? 20000,
+          nda_partial_multiplier: data.nda_partial_multiplier ?? 1.3,
+          nda_full_multiplier: data.nda_full_multiplier ?? 1.5,
         });
       }
     };
@@ -123,13 +130,18 @@ export function ServiceCalculator() {
     if (revisions === '4') revisionCost = config.revisions_4_price;
     if (revisions === '8') revisionCost = config.revisions_8_price;
 
+    // Множитель NDA (применяется до скидки)
+    let ndaMultiplier = 1;
+    if (nda === 'partial') ndaMultiplier = config.nda_partial_multiplier;
+    if (nda === 'full') ndaMultiplier = config.nda_full_multiplier;
+
     // Множитель дедлайна
     let deadlineMultiplier = 1;
     if (deadline === '20') deadlineMultiplier = config.deadline_20_multiplier;
     if (deadline === '10') deadlineMultiplier = config.deadline_10_multiplier;
 
     const subtotal = baseFrameCost + scenarioCost + audioCost + revisionCost;
-    const totalBeforeDiscount = Math.round(subtotal * deadlineMultiplier);
+    const totalBeforeDiscount = Math.round(subtotal * ndaMultiplier * deadlineMultiplier);
     
     // Скидка за объём — только для проектов от 2 минут (120 сек)
     // 1-2 мин (60-119 сек): нет скидки
@@ -154,7 +166,7 @@ export function ServiceCalculator() {
       discountPercent,
       hasDiscount: discountPercent > 0,
     };
-  }, [duration, pace, hasScenario, hasMusic, hasLipsync, revisions, deadline, config]);
+  }, [duration, pace, hasScenario, hasMusic, hasLipsync, revisions, nda, deadline, config]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('ru-RU').format(price) + ' ₽';
@@ -333,6 +345,38 @@ export function ServiceCalculator() {
                 </div>
                 <div className="text-[10px] sm:text-xs font-mono mt-1 ml-6">+{formatPrice(config.lipsync_price_per_30s)}/30 сек</div>
               </motion.button>
+            </div>
+          </motion.div>
+
+          {/* NDA */}
+          <motion.div variants={itemVariants} className="space-y-3 sm:space-y-4">
+            <label className="flex items-center gap-2 font-medium text-sm sm:text-base">
+              <Shield className="w-4 h-4 text-violet-400" />
+              NDA (Соглашение о неразглашении)
+            </label>
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              {[
+                { value: 'none' as const, label: 'Не нужен', multiplier: 1 },
+                { value: 'partial' as const, label: 'Частичный', multiplier: config.nda_partial_multiplier },
+                { value: 'full' as const, label: 'Полный', multiplier: config.nda_full_multiplier },
+              ].map((option) => (
+                <motion.button
+                  key={option.value}
+                  onClick={() => setNda(option.value)}
+                  className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all text-center ${
+                    nda === option.value
+                      ? 'bg-violet-500/20 border-violet-500/50 text-foreground'
+                      : 'bg-white/5 border-white/10 text-muted-foreground hover:border-white/20'
+                  }`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="font-semibold text-xs sm:text-sm">{option.label}</div>
+                  <div className="text-[10px] sm:text-xs font-mono mt-1">
+                    {option.multiplier === 1 ? 'Без наценки' : `+${Math.round((option.multiplier - 1) * 100)}%`}
+                  </div>
+                </motion.button>
+              ))}
             </div>
           </motion.div>
 
