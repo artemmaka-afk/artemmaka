@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calculator, Clock, Sparkles, Volume2, RefreshCcw, CalendarClock, Send, Percent } from 'lucide-react';
+import { Calculator, Clock, Sparkles, Volume2, RefreshCcw, CalendarClock, Send, Percent, FileText } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -13,6 +13,7 @@ interface CalculatorConfig {
   deadline_20_multiplier: number;
   deadline_10_multiplier: number;
   volume_discount_percent: number;
+  scenario_price_per_min: number;
 }
 
 const defaultConfig: CalculatorConfig = {
@@ -24,12 +25,14 @@ const defaultConfig: CalculatorConfig = {
   deadline_20_multiplier: 2,
   deadline_10_multiplier: 3,
   volume_discount_percent: 15,
+  scenario_price_per_min: 20000,
 };
 
 export function ServiceCalculator() {
   const [config, setConfig] = useState<CalculatorConfig>(defaultConfig);
   const [duration, setDuration] = useState(30);
   const [pace, setPace] = useState<'standard' | 'dynamic' | 'ultra'>('dynamic');
+  const [hasScenario, setHasScenario] = useState(false);
   const [hasMusic, setHasMusic] = useState(false);
   const [hasLipsync, setHasLipsync] = useState(false);
   const [revisions, setRevisions] = useState<'2' | '4' | '8'>('2');
@@ -54,6 +57,7 @@ export function ServiceCalculator() {
           deadline_20_multiplier: Number(data.deadline_20_multiplier),
           deadline_10_multiplier: Number(data.deadline_10_multiplier),
           volume_discount_percent: data.volume_discount_percent,
+          scenario_price_per_min: (data as any).scenario_price_per_min ?? 20000,
         });
       }
     };
@@ -78,12 +82,13 @@ export function ServiceCalculator() {
     return 6 + Math.round((duration - 60) / 30);
   };
 
+  // Формат длительности: после минуты показывать как "1 мин", "1 мин 30 сек" и т.д.
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     if (mins === 0) return `${secs} сек`;
     if (secs === 0) return `${mins} мин`;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins} мин ${secs} сек`;
   };
 
   // Конфигурация темпа (секунды на кадр)
@@ -100,11 +105,15 @@ export function ServiceCalculator() {
     const frames = Math.ceil(duration / paceData.secondsPerFrame);
     const baseFrameCost = frames * config.base_frame_price;
 
+    // Сценарий: 20 000 за каждую минуту (округление вверх)
+    const scenarioCost = hasScenario ? Math.ceil(duration / 60) * config.scenario_price_per_min : 0;
+
     // Аудио
     let audioCost = 0;
     if (hasMusic) {
       audioCost += config.music_price;
     }
+    // Липсинк: 5000 за каждые 30 секунд, округление вверх
     if (hasLipsync) {
       audioCost += Math.ceil(duration / 30) * config.lipsync_price_per_30s;
     }
@@ -119,22 +128,33 @@ export function ServiceCalculator() {
     if (deadline === '20') deadlineMultiplier = config.deadline_20_multiplier;
     if (deadline === '10') deadlineMultiplier = config.deadline_10_multiplier;
 
-    const subtotal = baseFrameCost + audioCost + revisionCost;
-    const regularPrice = Math.round(subtotal * deadlineMultiplier);
+    const subtotal = baseFrameCost + scenarioCost + audioCost + revisionCost;
+    const totalBeforeDiscount = Math.round(subtotal * deadlineMultiplier);
     
-    // Скидка за объём (применяется только если duration > 60 или выбраны доп опции)
-    const hasVolumeBonus = duration > 60 || hasMusic || hasLipsync || revisions !== '2';
-    const discountPercent = hasVolumeBonus ? config.volume_discount_percent : 0;
-    const discountedPrice = Math.round(regularPrice * (1 - discountPercent / 100));
+    // Скидка за объём — только для проектов от 2 минут (120 сек)
+    // 1-2 мин (60-119 сек): нет скидки
+    // 2-5 мин (120-299 сек): 10%
+    // 5-10 мин (300-599 сек): 15%
+    // 10+ мин (600+ сек): 20%
+    let discountPercent = 0;
+    if (duration >= 600) {
+      discountPercent = 20;
+    } else if (duration >= 300) {
+      discountPercent = 15;
+    } else if (duration >= 120) {
+      discountPercent = 10;
+    }
+    
+    const discountedPrice = Math.round(totalBeforeDiscount * (1 - discountPercent / 100));
 
     return {
       frames,
-      regularPrice,
+      totalBeforeDiscount,
       discountedPrice,
       discountPercent,
       hasDiscount: discountPercent > 0,
     };
-  }, [duration, pace, hasMusic, hasLipsync, revisions, deadline, config]);
+  }, [duration, pace, hasScenario, hasMusic, hasLipsync, revisions, deadline, config]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('ru-RU').format(price) + ' ₽';
@@ -207,6 +227,36 @@ export function ServiceCalculator() {
               <span>1 мин</span>
               <span>10 мин</span>
             </div>
+          </motion.div>
+
+          {/* Scenario Checkbox */}
+          <motion.div variants={itemVariants} className="space-y-3 sm:space-y-4">
+            <label className="flex items-center gap-2 font-medium text-sm sm:text-base">
+              <FileText className="w-4 h-4 text-violet-400" />
+              Сценарий
+            </label>
+            <motion.button
+              onClick={() => setHasScenario(!hasScenario)}
+              className={`w-full p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all text-left ${
+                hasScenario
+                  ? 'bg-violet-500/20 border-violet-500/50 text-foreground'
+                  : 'bg-white/5 border-white/10 text-muted-foreground hover:border-white/20'
+              }`}
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+            >
+              <div className="flex items-center gap-2">
+                <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
+                  hasScenario ? 'bg-violet-500 border-violet-500' : 'border-white/30'
+                }`}>
+                  {hasScenario && <span className="text-white text-xs">✓</span>}
+                </div>
+                <span className="font-semibold text-sm">Написание сценария</span>
+              </div>
+              <div className="text-[10px] sm:text-xs font-mono mt-1 ml-6">
+                +{formatPrice(config.scenario_price_per_min)}/мин ролика
+              </div>
+            </motion.button>
           </motion.div>
 
           {/* Pace Radio */}
@@ -357,34 +407,47 @@ export function ServiceCalculator() {
           >
             <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
               <div className="w-full sm:w-auto">
-                {/* Обычная цена */}
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-sm text-muted-foreground">Обычная цена:</span>
-                  <span className={`font-mono ${calculation.hasDiscount ? 'line-through text-muted-foreground' : 'text-xl font-bold gradient-text'}`}>
-                    {formatPrice(calculation.regularPrice)}
-                  </span>
-                </div>
-                
-                {/* Цена со скидкой */}
-                {calculation.hasDiscount && (
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1 px-2 py-1 bg-green-500/20 rounded-lg">
-                      <Percent className="w-3 h-3 text-green-400" />
-                      <span className="text-xs font-bold text-green-400">-{calculation.discountPercent}%</span>
+                {/* Итоговая цена */}
+                {calculation.hasDiscount ? (
+                  <>
+                    {/* Цена до скидки — зачёркнутая */}
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="font-mono text-xl line-through text-muted-foreground">
+                        {formatPrice(calculation.totalBeforeDiscount)}
+                      </span>
                     </div>
-                    <span className="text-sm text-muted-foreground">Со скидкой:</span>
-                  </div>
+                    
+                    {/* Бейдж скидки */}
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center gap-1 px-2 py-1 bg-green-500/20 rounded-lg">
+                        <Percent className="w-3 h-3 text-green-400" />
+                        <span className="text-xs font-bold text-green-400">-{calculation.discountPercent}%</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">скидка за объём</span>
+                    </div>
+                    
+                    {/* Итоговая цена со скидкой */}
+                    <motion.div 
+                      className="text-3xl sm:text-4xl md:text-5xl font-bold gradient-text font-mono"
+                      key={calculation.discountedPrice}
+                      initial={{ scale: 1.1, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ type: 'spring', stiffness: 300 }}
+                    >
+                      {formatPrice(calculation.discountedPrice)}
+                    </motion.div>
+                  </>
+                ) : (
+                  <motion.div 
+                    className="text-3xl sm:text-4xl md:text-5xl font-bold gradient-text font-mono"
+                    key={calculation.totalBeforeDiscount}
+                    initial={{ scale: 1.1, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: 'spring', stiffness: 300 }}
+                  >
+                    {formatPrice(calculation.totalBeforeDiscount)}
+                  </motion.div>
                 )}
-                
-                <motion.div 
-                  className="text-3xl sm:text-4xl md:text-5xl font-bold gradient-text font-mono mt-1"
-                  key={calculation.discountedPrice}
-                  initial={{ scale: 1.1, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ type: 'spring', stiffness: 300 }}
-                >
-                  {formatPrice(calculation.hasDiscount ? calculation.discountedPrice : calculation.regularPrice)}
-                </motion.div>
                 
                 <div className="text-xs text-muted-foreground mt-2">
                   Кадров: {calculation.frames} • {formatDuration(duration)}

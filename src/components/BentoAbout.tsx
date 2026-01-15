@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { MapPin, ArrowRight } from 'lucide-react';
-import { artistInfo, techStack, pipelineSteps } from '@/lib/constants';
+import { artistInfo, videoTechStack, imageTechStack, pipelineSteps } from '@/lib/constants';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -22,6 +22,23 @@ const cardVariants = {
     transition: { duration: 0.4 }
   }
 };
+
+function TechItem({ name, logo }: { name: string; logo: string }) {
+  return (
+    <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-xl border border-white/10">
+      <img 
+        src={logo} 
+        alt={name} 
+        className="w-5 h-5 object-contain rounded"
+        onError={(e) => {
+          // Fallback to emoji if logo fails to load
+          e.currentTarget.style.display = 'none';
+        }}
+      />
+      <span className="font-mono text-sm">{name}</span>
+    </div>
+  );
+}
 
 export function BentoAbout() {
   return (
@@ -90,40 +107,58 @@ export function BentoAbout() {
             <div className="text-sm text-muted-foreground">лет в AI-арте</div>
           </motion.div>
 
-          {/* Card 4: Tech Stack Marquee - Medium */}
+          {/* Card 4: Video Tech Stack Marquee - Medium */}
           <motion.div
             variants={cardVariants}
             className="md:col-span-4 lg:col-span-3 glass-card p-5 overflow-hidden"
             whileHover={{ scale: 1.01 }}
           >
-            <div className="text-xs font-mono text-violet-400 mb-3">// Стек технологий</div>
+            <div className="text-xs font-mono text-violet-400 mb-3">// Стек для видео</div>
             <div className="relative overflow-hidden">
               <motion.div 
                 className="flex gap-4 whitespace-nowrap"
-                animate={{ x: [0, -50 * techStack.length] }}
+                animate={{ x: [0, -50 * videoTechStack.length] }}
                 transition={{ 
                   duration: 20, 
                   repeat: Infinity, 
                   ease: 'linear'
                 }}
               >
-                {[...techStack, ...techStack, ...techStack].map((tech, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-xl border border-white/10"
-                  >
-                    <span className="text-lg">{tech.icon}</span>
-                    <span className="font-mono text-sm">{tech.name}</span>
-                  </div>
+                {[...videoTechStack, ...videoTechStack, ...videoTechStack].map((tech, index) => (
+                  <TechItem key={index} name={tech.name} logo={tech.logo} />
                 ))}
               </motion.div>
             </div>
           </motion.div>
 
-          {/* Card 5: Pipeline - Wide */}
+          {/* Card 5: Image Tech Stack Marquee - Medium */}
           <motion.div
             variants={cardVariants}
-            className="md:col-span-4 lg:col-span-3 row-span-1 glass-card p-5"
+            className="md:col-span-4 lg:col-span-3 glass-card p-5 overflow-hidden"
+            whileHover={{ scale: 1.01 }}
+          >
+            <div className="text-xs font-mono text-violet-400 mb-3">// Стек для изображений</div>
+            <div className="relative overflow-hidden">
+              <motion.div 
+                className="flex gap-4 whitespace-nowrap"
+                animate={{ x: [-50 * imageTechStack.length, 0] }}
+                transition={{ 
+                  duration: 25, 
+                  repeat: Infinity, 
+                  ease: 'linear'
+                }}
+              >
+                {[...imageTechStack, ...imageTechStack, ...imageTechStack].map((tech, index) => (
+                  <TechItem key={index} name={tech.name} logo={tech.logo} />
+                ))}
+              </motion.div>
+            </div>
+          </motion.div>
+
+          {/* Card 6: Pipeline - Wide */}
+          <motion.div
+            variants={cardVariants}
+            className="md:col-span-4 lg:col-span-4 row-span-1 glass-card p-5"
             whileHover={{ scale: 1.01 }}
           >
             <div className="text-xs font-mono text-violet-400 mb-3">// Мой пайплайн</div>
@@ -151,7 +186,7 @@ export function BentoAbout() {
             </div>
           </motion.div>
 
-          {/* Card 6: Available Badge */}
+          {/* Card 7: Available Badge */}
           <motion.div
             variants={cardVariants}
             className="lg:col-span-2 glass-card p-5 flex flex-col justify-center items-center text-center bg-gradient-to-br from-emerald-500/10 to-green-500/5"
@@ -164,7 +199,7 @@ export function BentoAbout() {
             <div className="text-xs text-muted-foreground">Для новых проектов</div>
           </motion.div>
 
-          {/* Card 7: Email */}
+          {/* Card 8: Email */}
           <motion.a
             href={`mailto:${artistInfo.email}`}
             variants={cardVariants}

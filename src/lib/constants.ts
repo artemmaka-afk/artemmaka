@@ -9,6 +9,12 @@ export interface ContentBlock {
   caption?: string;
 }
 
+export interface AITool {
+  name: string;
+  logo: string;
+  category: 'video' | 'image';
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -18,8 +24,28 @@ export interface Project {
   tags: string[];
   year: string;
   duration: string;
+  aiTools?: string[]; // Названия нейронок, использованных в проекте
   contentBlocks: ContentBlock[];
 }
+
+// ============= AI Инструменты =============
+
+export const aiTools: AITool[] = [
+  // Для видео
+  { name: 'Kling', logo: 'https://kling.kuaishou.com/favicon.ico', category: 'video' },
+  { name: 'Veo', logo: 'https://www.gstatic.com/lamda/images/veo_favicon_v1.ico', category: 'video' },
+  { name: 'SeeDance', logo: 'https://seedance.ai/favicon.ico', category: 'video' },
+  { name: 'Wan', logo: 'https://wan.video/favicon.ico', category: 'video' },
+  { name: 'Sora', logo: 'https://openai.com/favicon.ico', category: 'video' },
+  { name: 'Minimax Hailuo', logo: 'https://hailuoai.com/favicon.ico', category: 'video' },
+  // Для изображений
+  { name: 'Midjourney', logo: 'https://www.midjourney.com/favicon.ico', category: 'image' },
+  { name: 'Flux', logo: 'https://flux.ai/favicon.ico', category: 'image' },
+  { name: 'Nano Banana', logo: 'https://www.gstatic.com/lamda/images/gemini_favicon_f069958c85030456e93de685481c559f160ea06b.png', category: 'image' },
+  { name: 'SeeDream', logo: 'https://seedream.ai/favicon.ico', category: 'image' },
+  { name: 'GPT Image', logo: 'https://openai.com/favicon.ico', category: 'image' },
+  { name: 'Z-Image', logo: 'https://z-image.ai/favicon.ico', category: 'image' },
+];
 
 // ============= Данные художника =============
 
@@ -39,6 +65,25 @@ export const stats = [
   { value: 'TOP 10', label: 'Creators' }
 ];
 
+export const videoTechStack = [
+  { name: 'Kling', logo: 'https://kling.kuaishou.com/favicon.ico' },
+  { name: 'Veo', logo: 'https://www.gstatic.com/lamda/images/veo_favicon_v1.ico' },
+  { name: 'SeeDance', logo: 'https://seedance.ai/favicon.ico' },
+  { name: 'Wan', logo: 'https://wan.video/favicon.ico' },
+  { name: 'Sora', logo: 'https://openai.com/favicon.ico' },
+  { name: 'Minimax Hailuo', logo: 'https://hailuoai.com/favicon.ico' },
+];
+
+export const imageTechStack = [
+  { name: 'Midjourney', logo: 'https://www.midjourney.com/favicon.ico' },
+  { name: 'Flux', logo: 'https://flux.ai/favicon.ico' },
+  { name: 'Nano Banana', logo: 'https://www.gstatic.com/lamda/images/gemini_favicon_f069958c85030456e93de685481c559f160ea06b.png' },
+  { name: 'SeeDream', logo: 'https://seedream.ai/favicon.ico' },
+  { name: 'GPT Image', logo: 'https://openai.com/favicon.ico' },
+  { name: 'Z-Image', logo: 'https://z-image.ai/favicon.ico' },
+];
+
+// Старый стек для обратной совместимости
 export const techStack = [
   { name: 'Midjourney', icon: '🎨' },
   { name: 'Runway Gen-3', icon: '🎬' },
@@ -76,6 +121,7 @@ export const projects: Project[] = [
     tags: ['#AI', '#Video', '#Commercial'],
     year: '2024',
     duration: '2:45',
+    aiTools: ['Kling', 'Midjourney', 'Sora'],
     contentBlocks: [
       {
         type: 'text',
@@ -112,6 +158,7 @@ export const projects: Project[] = [
     tags: ['#AI', '#Fashion', '#Art'],
     year: '2024',
     duration: '4:20',
+    aiTools: ['Veo', 'Flux', 'SeeDance'],
     contentBlocks: [
       {
         type: 'text',
@@ -148,6 +195,7 @@ export const projects: Project[] = [
     tags: ['#AI', '#Abstract', '#Motion'],
     year: '2023',
     duration: '3:15',
+    aiTools: ['Minimax Hailuo', 'Nano Banana'],
     contentBlocks: [
       {
         type: 'text',
@@ -184,6 +232,7 @@ export const projects: Project[] = [
     tags: ['#AI', '#Portrait', '#Neon'],
     year: '2024',
     duration: '1:30',
+    aiTools: ['GPT Image', 'Wan'],
     contentBlocks: [
       {
         type: 'text',
@@ -205,6 +254,7 @@ export const projects: Project[] = [
     tags: ['#Commercial', '#3D', '#Product'],
     year: '2024',
     duration: '0:45',
+    aiTools: ['Flux', 'Kling'],
     contentBlocks: [
       {
         type: 'text',
@@ -226,6 +276,7 @@ export const projects: Project[] = [
     tags: ['#AI', '#Nature', '#Surreal'],
     year: '2023',
     duration: '2:00',
+    aiTools: ['SeeDream', 'Veo'],
     contentBlocks: [
       {
         type: 'text',
