@@ -116,12 +116,9 @@ export function BentoAbout() {
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold">
             Обо <span className="gradient-text">мне</span>
           </h2>
-          <p className="text-muted-foreground max-w-xl mx-auto">
-            {artistInfo.tagline}
-          </p>
         </motion.div>
 
         {/* Bento Grid */}
@@ -138,9 +135,9 @@ export function BentoAbout() {
             className="md:col-span-2 lg:col-span-3 row-span-2 glass-card p-6 flex flex-col justify-between group"
             whileHover={{ scale: 1.01, y: -2 }}
           >
-            <div>
+            <div className="overflow-hidden">
               <SectionLabel icon={User} text="О себе" />
-              <p className="text-lg md:text-xl leading-relaxed text-muted-foreground">
+              <p className="text-sm sm:text-base md:text-lg leading-relaxed text-muted-foreground break-words">
                 {artistInfo.bio}
               </p>
             </div>
