@@ -25,6 +25,7 @@ export interface Project {
   content_blocks: ContentBlock[];
   sort_order: number;
   is_published: boolean;
+  created_at: string;
 }
 
 export interface ContentBlock {
@@ -40,6 +41,24 @@ export interface SiteContent {
   id: string;
   value: string;
   description: string | null;
+}
+
+export interface HeroStat {
+  id: string;
+  value: string;
+  label: string;
+  sort_order: number;
+  is_visible: boolean;
+}
+
+export interface SocialLink {
+  id: string;
+  name: string;
+  url: string;
+  icon: string;
+  location: 'header' | 'footer' | 'both';
+  sort_order: number;
+  is_visible: boolean;
 }
 
 // Fetch AI Tools
@@ -105,6 +124,42 @@ export function useSiteContent() {
 export function useSiteContentValue(id: string, fallback: string = '') {
   const { data } = useSiteContent();
   return data?.find(c => c.id === id)?.value || fallback;
+}
+
+// Fetch Hero Stats
+export function useHeroStats() {
+  return useQuery({
+    queryKey: ['hero-stats'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('hero_stats')
+        .select('*')
+        .order('sort_order');
+      
+      if (error) throw error;
+      return data as HeroStat[];
+    },
+    staleTime: 0,
+    gcTime: 5 * 60 * 1000,
+  });
+}
+
+// Fetch Social Links
+export function useSocialLinks() {
+  return useQuery({
+    queryKey: ['social-links'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('social_links')
+        .select('*')
+        .order('sort_order');
+      
+      if (error) throw error;
+      return data as SocialLink[];
+    },
+    staleTime: 0,
+    gcTime: 5 * 60 * 1000,
+  });
 }
 
 // Mutations for AI Tools
@@ -209,4 +264,78 @@ export function useSiteContentMutations() {
   });
 
   return { update };
+}
+
+// Mutations for Hero Stats
+export function useHeroStatsMutations() {
+  const queryClient = useQueryClient();
+  
+  const upsert = useMutation({
+    mutationFn: async (stat: Partial<HeroStat>) => {
+      const { error } = await supabase
+        .from('hero_stats')
+        .upsert(stat as any, { onConflict: 'id' });
+      if (error) throw error;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['hero-stats'] });
+      await queryClient.refetchQueries({ queryKey: ['hero-stats'] });
+    },
+    onError: (error: Error) => {
+      toast.error('Ошибка: ' + error.message);
+    },
+  });
+
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('hero_stats').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['hero-stats'] });
+      await queryClient.refetchQueries({ queryKey: ['hero-stats'] });
+    },
+    onError: (error: Error) => {
+      toast.error('Ошибка: ' + error.message);
+    },
+  });
+
+  return { upsert, remove };
+}
+
+// Mutations for Social Links
+export function useSocialLinksMutations() {
+  const queryClient = useQueryClient();
+  
+  const upsert = useMutation({
+    mutationFn: async (link: Partial<SocialLink>) => {
+      const { error } = await supabase
+        .from('social_links')
+        .upsert(link as any, { onConflict: 'id' });
+      if (error) throw error;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['social-links'] });
+      await queryClient.refetchQueries({ queryKey: ['social-links'] });
+    },
+    onError: (error: Error) => {
+      toast.error('Ошибка: ' + error.message);
+    },
+  });
+
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('social_links').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['social-links'] });
+      await queryClient.refetchQueries({ queryKey: ['social-links'] });
+    },
+    onError: (error: Error) => {
+      toast.error('Ошибка: ' + error.message);
+    },
+  });
+
+  return { upsert, remove };
 }

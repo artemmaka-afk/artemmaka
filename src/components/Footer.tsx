@@ -1,10 +1,18 @@
 import { motion } from 'framer-motion';
-import { Send, Heart, Mail, ArrowUpRight } from 'lucide-react';
-import { socialLinks } from '@/lib/constants';
-import { useSiteContent } from '@/hooks/useSiteData';
+import { Send, Heart, Mail, ArrowUpRight, Instagram, Youtube, Globe, Link } from 'lucide-react';
+import { useSiteContent, useSocialLinks } from '@/hooks/useSiteData';
+
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  Send,
+  Instagram,
+  Youtube,
+  Globe,
+  Link,
+};
 
 export function Footer() {
   const { data: siteContent } = useSiteContent();
+  const { data: socialLinks } = useSocialLinks();
 
   // Get content from DB with fallbacks
   const getContent = (id: string, fallback: string) => {
@@ -14,6 +22,9 @@ export function Footer() {
   const name = getContent('artist_name', 'Артём Макаров');
   const email = getContent('artist_email', 'artem@makarov.ai');
   const telegram = getContent('artist_telegram', '@artemmak_ai');
+
+  // Filter footer social links
+  const footerLinks = socialLinks?.filter(l => l.is_visible && (l.location === 'footer' || l.location === 'both')) || [];
 
   return (
     <footer className="py-16 px-6 border-t border-white/10">
@@ -65,21 +76,26 @@ export function Footer() {
             Сделано с <Heart className="w-4 h-4 text-red-500 mx-1" fill="currentColor" /> с помощью AI
           </div>
 
-          <div className="flex items-center gap-4">
-            {socialLinks.map((link) => (
-              <motion.a
-                key={link.name}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 text-sm"
-                whileHover={{ x: 2 }}
-              >
-                {link.name}
-                <ArrowUpRight className="w-3 h-3" />
-              </motion.a>
-            ))}
-          </div>
+          {footerLinks.length > 0 && (
+            <div className="flex items-center gap-4">
+              {footerLinks.map((link) => {
+                const Icon = iconMap[link.icon] || Link;
+                return (
+                  <motion.a
+                    key={link.id}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1 text-sm"
+                    whileHover={{ x: 2 }}
+                  >
+                    {link.name}
+                    <ArrowUpRight className="w-3 h-3" />
+                  </motion.a>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Admin Link */}

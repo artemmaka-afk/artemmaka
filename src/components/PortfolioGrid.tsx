@@ -1,9 +1,18 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Play, Clock, Loader2 } from 'lucide-react';
+import { Play, Calendar, Loader2 } from 'lucide-react';
 import { Project as ConstantsProject, projects as fallbackProjects } from '@/lib/constants';
 import { useProjects, type Project as DBProject } from '@/hooks/useSiteData';
 import { ProjectSheet } from './ProjectSheet';
+
+// Format date as dd.mm.yyyy
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  const day = date.getDate().toString().padStart(2, '0');
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}.${month}.${year}`;
+}
 
 // Adapter to transform DB project to constants format for ProjectSheet
 function toConstantsProject(p: DBProject): ConstantsProject {
@@ -23,6 +32,7 @@ function toConstantsProject(p: DBProject): ConstantsProject {
 
 interface ProjectCardProps {
   project: ConstantsProject;
+  createdAt?: string;
   index: number;
   onSelect: (project: ConstantsProject) => void;
 }
@@ -47,7 +57,7 @@ const cardVariants = {
   }
 };
 
-function ProjectCard({ project, index, onSelect }: ProjectCardProps) {
+function ProjectCard({ project, createdAt, index, onSelect }: ProjectCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -63,7 +73,6 @@ function ProjectCard({ project, index, onSelect }: ProjectCardProps) {
       videoRef.current.currentTime = 0;
     }
   };
-
 
   return (
     <motion.article
@@ -121,11 +130,12 @@ function ProjectCard({ project, index, onSelect }: ProjectCardProps) {
 
           {/* Bottom - Info */}
           <div>
+            {/* Show date instead of duration/year */}
             <div className="flex items-center gap-1.5 mb-1.5">
-              <Clock className="w-3 h-3 text-muted-foreground" />
-              <span className="text-[10px] sm:text-xs text-muted-foreground font-mono">{project.duration}</span>
-              <span className="text-[10px] text-muted-foreground">•</span>
-              <span className="text-[10px] sm:text-xs text-muted-foreground">{project.year}</span>
+              <Calendar className="w-3 h-3 text-muted-foreground" />
+              <span className="text-[10px] sm:text-xs text-muted-foreground font-mono">
+                {createdAt ? formatDate(createdAt) : project.year}
+              </span>
             </div>
             <h3 className="text-sm sm:text-base font-bold mb-0.5 line-clamp-2">{project.title}</h3>
             <p className="text-xs text-muted-foreground line-clamp-1 hidden sm:block">{project.subtitle}</p>
@@ -157,8 +167,10 @@ export function PortfolioGrid() {
 
   // Use DB projects if available and published, fallback to constants
   const projects = dbProjects && dbProjects.length > 0
-    ? dbProjects.filter(p => p.is_published).map(toConstantsProject)
-    : fallbackProjects;
+    ? dbProjects.filter(p => p.is_published)
+    : [];
+
+  const fallback = projects.length === 0 ? fallbackProjects : [];
 
   if (isLoading) {
     return (
@@ -197,7 +209,19 @@ export function PortfolioGrid() {
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
         >
-          {projects.map((project, index) => (
+          {/* DB Projects */}
+          {dbProjects?.filter(p => p.is_published).map((p, index) => (
+            <ProjectCard
+              key={p.id}
+              project={toConstantsProject(p)}
+              createdAt={p.created_at}
+              index={index}
+              onSelect={setSelectedProject}
+            />
+          ))}
+          
+          {/* Fallback projects */}
+          {fallback.map((project, index) => (
             <ProjectCard
               key={project.id}
               project={project}
@@ -207,7 +231,7 @@ export function PortfolioGrid() {
           ))}
         </motion.div>
 
-        {projects.length === 0 && (
+        {projects.length === 0 && fallback.length === 0 && (
           <div className="text-center py-20 text-muted-foreground">
             <p>Нет опубликованных проектов</p>
           </div>
