@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Clock } from 'lucide-react';
-import { projects, Project, aiTools } from '@/lib/constants';
+import { projects, Project } from '@/lib/constants';
 import { ProjectSheet } from './ProjectSheet';
 
 interface ProjectCardProps {
@@ -30,25 +30,6 @@ const cardVariants = {
   }
 };
 
-function AIToolBadge({ toolName }: { toolName: string }) {
-  const tool = aiTools.find(t => t.name === toolName);
-  if (!tool) return null;
-  
-  return (
-    <div className="flex items-center gap-1 px-1.5 py-0.5 bg-black/40 backdrop-blur-sm rounded-md border border-white/10">
-      <img 
-        src={tool.logo} 
-        alt={tool.name} 
-        className="w-3 h-3 object-contain rounded-sm"
-        onError={(e) => {
-          e.currentTarget.style.display = 'none';
-        }}
-      />
-      <span className="text-[9px] font-mono text-white/80">{tool.name}</span>
-    </div>
-  );
-}
-
 function ProjectCard({ project, index, onSelect }: ProjectCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -65,6 +46,7 @@ function ProjectCard({ project, index, onSelect }: ProjectCardProps) {
       videoRef.current.currentTime = 0;
     }
   };
+
 
   return (
     <motion.article
@@ -120,15 +102,6 @@ function ProjectCard({ project, index, onSelect }: ProjectCardProps) {
 
           {/* Bottom - Info */}
           <div>
-            {/* AI Tools used */}
-            {project.aiTools && project.aiTools.length > 0 && (
-              <div className="flex flex-wrap gap-1 mb-2">
-                {project.aiTools.slice(0, 3).map((tool) => (
-                  <AIToolBadge key={tool} toolName={tool} />
-                ))}
-              </div>
-            )}
-            
             <div className="flex items-center gap-1.5 mb-1.5">
               <Clock className="w-3 h-3 text-muted-foreground" />
               <span className="text-[10px] sm:text-xs text-muted-foreground font-mono">{project.duration}</span>
