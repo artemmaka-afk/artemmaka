@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
-import { MapPin, ArrowRight } from 'lucide-react';
-import { artistInfo, videoTechStack, imageTechStack, pipelineSteps } from '@/lib/constants';
+import { MapPin, ArrowRight, User, Film, Image, Workflow, Mail } from 'lucide-react';
+import { artistInfo, videoTechStack, imageTechStack, pipelineSteps, skills } from '@/lib/constants';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -25,17 +25,59 @@ const cardVariants = {
 
 function TechItem({ name, logo }: { name: string; logo: string }) {
   return (
-    <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-xl border border-white/10">
+    <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-xl border border-white/10 flex-shrink-0">
       <img 
         src={logo} 
         alt={name} 
         className="w-5 h-5 object-contain rounded"
         onError={(e) => {
-          // Fallback to emoji if logo fails to load
           e.currentTarget.style.display = 'none';
         }}
       />
-      <span className="font-mono text-sm">{name}</span>
+      <span className="font-mono text-sm whitespace-nowrap">{name}</span>
+    </div>
+  );
+}
+
+// Бесконечный маркер с CSS анимацией
+function InfiniteMarquee({ items, direction = 'left', duration = 20 }: { 
+  items: { name: string; logo: string }[]; 
+  direction?: 'left' | 'right';
+  duration?: number;
+}) {
+  const doubledItems = [...items, ...items];
+  
+  return (
+    <div className="relative overflow-hidden">
+      <div 
+        className="flex gap-4"
+        style={{
+          animation: `marquee-${direction} ${duration}s linear infinite`,
+        }}
+      >
+        {doubledItems.map((tech, index) => (
+          <TechItem key={`${tech.name}-${index}`} name={tech.name} logo={tech.logo} />
+        ))}
+      </div>
+      <style>{`
+        @keyframes marquee-left {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        @keyframes marquee-right {
+          0% { transform: translateX(-50%); }
+          100% { transform: translateX(0); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function SectionLabel({ icon: Icon, text }: { icon: React.ElementType; text: string }) {
+  return (
+    <div className="flex items-center gap-2 text-xs font-mono text-violet-400 mb-3">
+      <Icon className="w-3.5 h-3.5" />
+      <span>{text}</span>
     </div>
   );
 }
@@ -56,7 +98,7 @@ export function BentoAbout() {
             Обо <span className="gradient-text">мне</span>
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Создаю будущее визуального контента
+            {artistInfo.tagline}
           </p>
         </motion.div>
 
@@ -75,7 +117,7 @@ export function BentoAbout() {
             whileHover={{ scale: 1.01, y: -2 }}
           >
             <div>
-              <div className="text-xs font-mono text-violet-400 mb-3">// О себе</div>
+              <SectionLabel icon={User} text="О себе" />
               <p className="text-lg md:text-xl leading-relaxed text-muted-foreground">
                 {artistInfo.bio}
               </p>
@@ -113,22 +155,8 @@ export function BentoAbout() {
             className="md:col-span-4 lg:col-span-3 glass-card p-5 overflow-hidden"
             whileHover={{ scale: 1.01 }}
           >
-            <div className="text-xs font-mono text-violet-400 mb-3">// Стек для видео</div>
-            <div className="relative overflow-hidden">
-              <motion.div 
-                className="flex gap-4 whitespace-nowrap"
-                animate={{ x: [0, -50 * videoTechStack.length] }}
-                transition={{ 
-                  duration: 20, 
-                  repeat: Infinity, 
-                  ease: 'linear'
-                }}
-              >
-                {[...videoTechStack, ...videoTechStack, ...videoTechStack].map((tech, index) => (
-                  <TechItem key={index} name={tech.name} logo={tech.logo} />
-                ))}
-              </motion.div>
-            </div>
+            <SectionLabel icon={Film} text="Стек для видео" />
+            <InfiniteMarquee items={videoTechStack} direction="left" duration={25} />
           </motion.div>
 
           {/* Card 5: Image Tech Stack Marquee - Medium */}
@@ -137,22 +165,8 @@ export function BentoAbout() {
             className="md:col-span-4 lg:col-span-3 glass-card p-5 overflow-hidden"
             whileHover={{ scale: 1.01 }}
           >
-            <div className="text-xs font-mono text-violet-400 mb-3">// Стек для изображений</div>
-            <div className="relative overflow-hidden">
-              <motion.div 
-                className="flex gap-4 whitespace-nowrap"
-                animate={{ x: [-50 * imageTechStack.length, 0] }}
-                transition={{ 
-                  duration: 25, 
-                  repeat: Infinity, 
-                  ease: 'linear'
-                }}
-              >
-                {[...imageTechStack, ...imageTechStack, ...imageTechStack].map((tech, index) => (
-                  <TechItem key={index} name={tech.name} logo={tech.logo} />
-                ))}
-              </motion.div>
-            </div>
+            <SectionLabel icon={Image} text="Стек для изображений" />
+            <InfiniteMarquee items={imageTechStack} direction="right" duration={30} />
           </motion.div>
 
           {/* Card 6: Pipeline - Wide */}
@@ -161,7 +175,7 @@ export function BentoAbout() {
             className="md:col-span-4 lg:col-span-4 row-span-1 glass-card p-5"
             whileHover={{ scale: 1.01 }}
           >
-            <div className="text-xs font-mono text-violet-400 mb-3">// Мой пайплайн</div>
+            <SectionLabel icon={Workflow} text="Мой пайплайн" />
             <div className="flex items-center justify-between gap-2">
               {pipelineSteps.map((step, index) => (
                 <div key={step.step} className="flex items-center">
@@ -207,7 +221,7 @@ export function BentoAbout() {
             whileHover={{ scale: 1.01, y: -2 }}
           >
             <div>
-              <div className="text-xs font-mono text-violet-400 mb-1">// Связаться</div>
+              <SectionLabel icon={Mail} text="Связаться" />
               <div className="font-mono text-lg group-hover:text-violet-400 transition-colors">
                 {artistInfo.email}
               </div>

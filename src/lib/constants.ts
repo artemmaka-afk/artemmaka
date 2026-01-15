@@ -24,40 +24,65 @@ export interface Project {
   tags: string[];
   year: string;
   duration: string;
-  aiTools?: string[]; // Названия нейронок, использованных в проекте
+  aiTools?: string[]; // Названия нейронок через запятую
   contentBlocks: ContentBlock[];
 }
 
 // ============= AI Инструменты =============
+// Реальные логотипы нейросетей
 
 export const aiTools: AITool[] = [
   // Для видео
-  { name: 'Kling', logo: 'https://kling.kuaishou.com/favicon.ico', category: 'video' },
-  { name: 'Veo', logo: 'https://www.gstatic.com/lamda/images/veo_favicon_v1.ico', category: 'video' },
-  { name: 'SeeDance', logo: 'https://seedance.ai/favicon.ico', category: 'video' },
-  { name: 'Wan', logo: 'https://wan.video/favicon.ico', category: 'video' },
-  { name: 'Sora', logo: 'https://openai.com/favicon.ico', category: 'video' },
-  { name: 'Minimax Hailuo', logo: 'https://hailuoai.com/favicon.ico', category: 'video' },
+  { name: 'Kling', logo: 'https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/kling/favicon.png', category: 'video' },
+  { name: 'Veo', logo: 'https://lh3.googleusercontent.com/6MmUXu8i60OJqFxS6Xde5sPwg6QwKpTlVxg7N4AvG-GR8JjKpDO0K5j58iIV9zHcdHdD=w300', category: 'video' },
+  { name: 'SeeDance', logo: 'https://framerusercontent.com/images/VVqBT6oBr4DwRBKj2jZ0OYQm3Y.png', category: 'video' },
+  { name: 'Wan', logo: 'https://img.alicdn.com/imgextra/i1/O1CN01SdJ4Tt1FCMUjxQDXX_!!6000000000450-2-tps-400-400.png', category: 'video' },
+  { name: 'Sora', logo: 'https://cdn.openai.com/sora/favicon.ico', category: 'video' },
+  { name: 'Minimax Hailuo', logo: 'https://cdn-www.hailuoai.com/static/images/favicon.ico', category: 'video' },
   // Для изображений
-  { name: 'Midjourney', logo: 'https://www.midjourney.com/favicon.ico', category: 'image' },
-  { name: 'Flux', logo: 'https://flux.ai/favicon.ico', category: 'image' },
+  { name: 'Midjourney', logo: 'https://cdn.midjourney.com/0bbcbb3d-4cbb-4a4e-bdb7-bf0d65f1b7d7/0_0.webp', category: 'image' },
+  { name: 'Flux', logo: 'https://blackforestlabs.ai/wp-content/uploads/2024/07/bfl_logo.png', category: 'image' },
   { name: 'Nano Banana', logo: 'https://www.gstatic.com/lamda/images/gemini_favicon_f069958c85030456e93de685481c559f160ea06b.png', category: 'image' },
-  { name: 'SeeDream', logo: 'https://seedream.ai/favicon.ico', category: 'image' },
+  { name: 'SeeDream', logo: 'https://framerusercontent.com/images/VVqBT6oBr4DwRBKj2jZ0OYQm3Y.png', category: 'image' },
   { name: 'GPT Image', logo: 'https://openai.com/favicon.ico', category: 'image' },
-  { name: 'Z-Image', logo: 'https://z-image.ai/favicon.ico', category: 'image' },
+  { name: 'Z-Image', logo: 'https://zmo.ai/favicon.ico', category: 'image' },
 ];
+
+// Функция получения инструмента по имени
+export const getAIToolByName = (name: string): AITool | undefined => {
+  return aiTools.find(tool => tool.name.toLowerCase() === name.toLowerCase());
+};
 
 // ============= Данные художника =============
 
 export const artistInfo = {
   name: 'Артём Макаров',
-  title: 'AI Video Artist & Creative Director',
-  tagline: 'Создаю визуальные миры с помощью нейросетей',
-  bio: 'Я специализируюсь на создании сложных нарративных видео с использованием передовых AI-технологий. Каждый проект — это уникальное сочетание искусственного интеллекта и человеческого видения.',
+  title: 'AI Artist / Генеративный художник',
+  tagline: 'Создаю фотореалистичные видео и изображения с помощью нейросетей',
+  bio: 'Занимаюсь генерацией фотореалистичных видео и изображений для промо, сюжетных и рекламных проектов. Работаю с современными генеративными моделями, при необходимости обучаю LoRA под конкретные задачи и выстраиваю пайплайн от идеи до финального ролика.',
   email: 'artem@makarov.ai',
   telegram: '@artemmak_ai',
   location: 'Москва, Россия'
 };
+
+export const skills = [
+  {
+    title: 'Генерация видео и изображений',
+    description: 'Создание фотореалистичного контента для промо, сюжетных, музыкальных и рекламных роликов.'
+  },
+  {
+    title: 'Модели и пайплайны',
+    description: 'Обучение LoRA для закрепления стиля, персонажей и локаций. Построение цепочек: референсы → генерация → доработка → сборка.'
+  },
+  {
+    title: 'Визуал и сторителлинг',
+    description: 'Постановка сцены: композиция, работа с камерой, групповые сцены, морфинг и спецэффекты.'
+  },
+  {
+    title: 'Инструменты',
+    description: 'Photoshop — ретушь и композиция. DaVinci Resolve — монтаж и цветокоррекция.'
+  }
+];
 
 export const stats = [
   { value: '50+', label: 'Проектов' },
@@ -66,21 +91,21 @@ export const stats = [
 ];
 
 export const videoTechStack = [
-  { name: 'Kling', logo: 'https://kling.kuaishou.com/favicon.ico' },
-  { name: 'Veo', logo: 'https://www.gstatic.com/lamda/images/veo_favicon_v1.ico' },
-  { name: 'SeeDance', logo: 'https://seedance.ai/favicon.ico' },
-  { name: 'Wan', logo: 'https://wan.video/favicon.ico' },
-  { name: 'Sora', logo: 'https://openai.com/favicon.ico' },
-  { name: 'Minimax Hailuo', logo: 'https://hailuoai.com/favicon.ico' },
+  { name: 'Kling', logo: 'https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/kling/favicon.png' },
+  { name: 'Veo', logo: 'https://lh3.googleusercontent.com/6MmUXu8i60OJqFxS6Xde5sPwg6QwKpTlVxg7N4AvG-GR8JjKpDO0K5j58iIV9zHcdHdD=w300' },
+  { name: 'SeeDance', logo: 'https://framerusercontent.com/images/VVqBT6oBr4DwRBKj2jZ0OYQm3Y.png' },
+  { name: 'Wan', logo: 'https://img.alicdn.com/imgextra/i1/O1CN01SdJ4Tt1FCMUjxQDXX_!!6000000000450-2-tps-400-400.png' },
+  { name: 'Sora', logo: 'https://cdn.openai.com/sora/favicon.ico' },
+  { name: 'Minimax Hailuo', logo: 'https://cdn-www.hailuoai.com/static/images/favicon.ico' },
 ];
 
 export const imageTechStack = [
-  { name: 'Midjourney', logo: 'https://www.midjourney.com/favicon.ico' },
-  { name: 'Flux', logo: 'https://flux.ai/favicon.ico' },
+  { name: 'Midjourney', logo: 'https://cdn.midjourney.com/0bbcbb3d-4cbb-4a4e-bdb7-bf0d65f1b7d7/0_0.webp' },
+  { name: 'Flux', logo: 'https://blackforestlabs.ai/wp-content/uploads/2024/07/bfl_logo.png' },
   { name: 'Nano Banana', logo: 'https://www.gstatic.com/lamda/images/gemini_favicon_f069958c85030456e93de685481c559f160ea06b.png' },
-  { name: 'SeeDream', logo: 'https://seedream.ai/favicon.ico' },
+  { name: 'SeeDream', logo: 'https://framerusercontent.com/images/VVqBT6oBr4DwRBKj2jZ0OYQm3Y.png' },
   { name: 'GPT Image', logo: 'https://openai.com/favicon.ico' },
-  { name: 'Z-Image', logo: 'https://z-image.ai/favicon.ico' },
+  { name: 'Z-Image', logo: 'https://zmo.ai/favicon.ico' },
 ];
 
 // Старый стек для обратной совместимости

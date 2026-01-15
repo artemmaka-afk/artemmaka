@@ -1,12 +1,32 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ExternalLink, Clock, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Project, ContentBlock } from '@/lib/constants';
+import { Project, ContentBlock, getAIToolByName } from '@/lib/constants';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 
 interface ProjectSheetProps {
   project: Project | null;
   onClose: () => void;
+}
+
+function AIToolBadge({ name }: { name: string }) {
+  const tool = getAIToolByName(name);
+  
+  return (
+    <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">
+      {tool && (
+        <img 
+          src={tool.logo} 
+          alt={name} 
+          className="w-4 h-4 object-contain rounded"
+          onError={(e) => {
+            e.currentTarget.style.display = 'none';
+          }}
+        />
+      )}
+      <span className="text-xs font-mono">{name}</span>
+    </div>
+  );
 }
 
 function renderMarkdown(text: string): React.ReactNode {
@@ -180,7 +200,7 @@ export function ProjectSheet({ project, onClose }: ProjectSheetProps) {
     <Sheet open={!!project} onOpenChange={(open) => !open && onClose()}>
       <SheetContent 
         side="right" 
-        className="w-full sm:max-w-2xl lg:max-w-3xl p-0 bg-background border-l border-white/10 overflow-y-auto"
+        className="w-full sm:max-w-2xl lg:max-w-3xl p-0 bg-background border-l border-white/10 overflow-y-auto [&>button]:hidden"
       >
         <AnimatePresence>
           {project && (
@@ -205,7 +225,7 @@ export function ProjectSheet({ project, onClose }: ProjectSheetProps) {
                 
                 <motion.button
                   onClick={onClose}
-                  className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center border border-white/20"
+                  className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center border border-white/20 z-10"
                   aria-label="Закрыть"
                   whileHover={{ scale: 1.1, backgroundColor: 'rgba(0,0,0,0.7)' }}
                   whileTap={{ scale: 0.95 }}
@@ -248,6 +268,18 @@ export function ProjectSheet({ project, onClose }: ProjectSheetProps) {
                     <ContentBlockRenderer key={index} block={block} index={index} />
                   ))}
                 </div>
+
+                {/* AI Tools Used */}
+                {project.aiTools && project.aiTools.length > 0 && (
+                  <div className="pt-6 border-t border-white/10">
+                    <div className="text-xs font-mono text-muted-foreground mb-3">Использованные нейросети</div>
+                    <div className="flex flex-wrap gap-2">
+                      {project.aiTools.map((toolName) => (
+                        <AIToolBadge key={toolName} name={toolName} />
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <footer className="pt-8 border-t border-white/10">
                   <motion.a
