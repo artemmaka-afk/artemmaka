@@ -5,23 +5,23 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useSiteContent, useSiteContentMutations, type SiteContent } from '@/hooks/useSiteData';
 
-const contentLabels: Record<string, { label: string; multiline?: boolean; description?: string }> = {
-  artist_name: { label: 'Имя', description: 'Отображается в шапке сайта' },
-  artist_title: { label: 'Должность', description: 'Под именем в шапке' },
-  artist_tagline: { label: 'Слоган', description: 'Подзаголовок в шапке', multiline: true },
-  artist_bio: { label: 'Биография', description: 'Описание в блоке "Обо мне"', multiline: true },
-  artist_email: { label: 'Email', description: 'Используется для связи' },
-  artist_telegram: { label: 'Telegram', description: 'Используется для кнопок "Обсудить проект" и ссылок' },
-  artist_location: { label: 'Локация', description: 'Отображается в блоке "Обо мне"' },
+const contentLabels: Record<string, { label: string; multiline?: boolean; description?: string; typography?: string }> = {
+  artist_name: { label: 'Имя', description: 'Отображается в шапке сайта', typography: 'H1' },
+  artist_title: { label: 'Должность', description: 'Под именем в шапке', typography: 'Body' },
+  artist_tagline: { label: 'Слоган', description: 'Подзаголовок в шапке', multiline: true, typography: 'H3' },
+  artist_bio: { label: 'Биография', description: 'Описание в блоке "Обо мне"', multiline: true, typography: 'Body' },
+  artist_email: { label: 'Email', description: 'Используется для связи', typography: 'Small' },
+  artist_telegram: { label: 'Telegram', description: 'Используется для кнопок "Обсудить проект" и ссылок', typography: 'Small' },
+  artist_location: { label: 'Локация', description: 'Отображается в блоке "Обо мне"', typography: 'Small' },
   // Page sections
-  portfolio_title: { label: 'Заголовок портфолио', description: 'Заголовок раздела работ' },
-  portfolio_subtitle: { label: 'Подзаголовок портфолио', description: 'Описание раздела работ' },
-  calculator_title: { label: 'Заголовок калькулятора', description: 'Заголовок раздела калькулятора' },
-  calculator_subtitle: { label: 'Подзаголовок калькулятора', description: 'Описание раздела калькулятора' },
-  contact_title: { label: 'Заголовок формы связи', description: 'Заголовок раздела "Оставить заявку"' },
-  contact_subtitle: { label: 'Подзаголовок формы связи', description: 'Описание раздела заявки' },
-  footer_cta_text: { label: 'Текст CTA в футере', description: 'Подзаголовок под "Готовы создать что-то особенное?"', multiline: true },
-  footer_copyright: { label: 'Копирайт', description: 'Текст в футере' },
+  portfolio_title: { label: 'Заголовок портфолио', description: 'Заголовок раздела работ', typography: 'H2' },
+  portfolio_subtitle: { label: 'Подзаголовок портфолио', description: 'Описание раздела работ', typography: 'Body' },
+  calculator_title: { label: 'Заголовок калькулятора', description: 'Заголовок раздела калькулятора', typography: 'H2' },
+  calculator_subtitle: { label: 'Подзаголовок калькулятора', description: 'Описание раздела калькулятора', typography: 'Body' },
+  contact_title: { label: 'Заголовок формы связи', description: 'Заголовок раздела "Оставить заявку"', typography: 'H2' },
+  contact_subtitle: { label: 'Подзаголовок формы связи', description: 'Описание раздела заявки', typography: 'Body' },
+  footer_cta_text: { label: 'Текст CTA в футере', description: 'Подзаголовок под "Готовы создать что-то особенное?"', multiline: true, typography: 'H3' },
+  footer_copyright: { label: 'Копирайт', description: 'Текст в футере', typography: 'Small' },
 };
 
 export function SiteContentManager() {
@@ -109,10 +109,15 @@ export function SiteContentManager() {
           return (
             <div key={id} className="space-y-2">
               <div className="flex items-center justify-between">
-              <label className="text-sm font-medium flex items-center justify-between">
+              <label className="text-sm font-medium flex items-center gap-2">
                 <span>{config.label}</span>
+                {config.typography && (
+                  <span className="px-1.5 py-0.5 text-[10px] font-mono bg-violet-500/20 text-violet-400 rounded">
+                    {config.typography}
+                  </span>
+                )}
                 {config.description && (
-                  <span className="text-xs text-muted-foreground font-normal">{config.description}</span>
+                  <span className="text-xs text-muted-foreground font-normal ml-2">{config.description}</span>
                 )}
               </label>
               {isChanged && (
