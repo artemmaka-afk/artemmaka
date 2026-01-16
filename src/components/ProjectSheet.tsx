@@ -170,7 +170,6 @@ function renderMarkdown(text: string): React.ReactNode {
 
 function ContentBlockRenderer({ block, index }: { block: ContentBlock; index: number }) {
   const [comparePosition, setComparePosition] = useState(50);
-  const [isPlaying, setIsPlaying] = useState(false);
 
   switch (block.type) {
     case 'text':
@@ -220,22 +219,7 @@ function ContentBlockRenderer({ block, index }: { block: ContentBlock; index: nu
           transition={{ delay: index * 0.1 }}
         >
           <div className="relative overflow-hidden rounded-2xl glass-card">
-            <video
-              src={block.src}
-              className="w-full h-auto"
-              controls
-              playsInline
-              preload="metadata"
-              onPlay={() => setIsPlaying(true)}
-              onPause={() => setIsPlaying(false)}
-            />
-            {!isPlaying && (
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-20 h-20 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
-                  <div className="w-0 h-0 border-t-8 border-t-transparent border-l-12 border-l-white border-b-8 border-b-transparent ml-1" />
-                </div>
-              </div>
-            )}
+            <VideoPlayer src={block.src || ''} />
           </div>
           {block.caption && (
             <figcaption className="text-sm text-muted-foreground font-mono text-center">
