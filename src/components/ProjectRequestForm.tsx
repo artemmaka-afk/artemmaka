@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useSiteContent } from '@/hooks/useSiteData';
 
 export function ProjectRequestForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -19,7 +20,10 @@ export function ProjectRequestForm() {
     email: '',
     project_description: '',
   });
-
+  
+  const { data: siteContent } = useSiteContent();
+  const getContent = (id: string, fallback: string) => 
+    siteContent?.find(c => c.id === id)?.value || fallback;
   const handleFileSelect = (selectedFiles: FileList | null) => {
     if (!selectedFiles) return;
     const newFiles = Array.from(selectedFiles);
@@ -194,10 +198,11 @@ export function ProjectRequestForm() {
             <span className="text-sm font-medium">Связаться со мной</span>
           </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4">
-            Оставить <span className="gradient-text">заявку</span>
+            {getContent('form_title', 'Оставить заявку').split(' ').slice(0, -1).join(' ')}{' '}
+            <span className="gradient-text">{getContent('form_title', 'Оставить заявку').split(' ').slice(-1)[0]}</span>
           </h2>
           <p className="text-muted-foreground max-w-md mx-auto text-sm sm:text-base">
-            Расскажите о вашем проекте, и я свяжусь с вами для обсуждения деталей
+            {getContent('form_subtitle', 'Расскажите о вашем проекте, и я свяжусь с вами для обсуждения деталей')}
           </p>
         </motion.div>
 

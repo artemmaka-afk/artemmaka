@@ -295,10 +295,11 @@ export function ServiceCalculator() {
             <span className="text-sm font-medium">Оценка проекта</span>
           </div>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Калькулятор <span className="gradient-text">стоимости</span>
+            {(siteContent?.find(c => c.id === 'calculator_title')?.value || 'Калькулятор стоимости').split(' ').slice(0, -1).join(' ')}{' '}
+            <span className="gradient-text">{(siteContent?.find(c => c.id === 'calculator_title')?.value || 'Калькулятор стоимости').split(' ').slice(-1)[0]}</span>
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Получите мгновенную оценку стоимости вашего AI-видео проекта
+            {siteContent?.find(c => c.id === 'calculator_subtitle')?.value || 'Получите мгновенную оценку стоимости вашего AI-видео проекта'}
           </p>
         </motion.div>
 

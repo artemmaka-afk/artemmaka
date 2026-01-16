@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Calendar, Loader2 } from 'lucide-react';
 import { Project as ConstantsProject, projects as fallbackProjects } from '@/lib/constants';
-import { useProjects, type Project as DBProject } from '@/hooks/useSiteData';
+import { useProjects, useSiteContent, type Project as DBProject } from '@/hooks/useSiteData';
 import { ProjectSheet } from './ProjectSheet';
 
 // Format date as dd.mm.yyyy
@@ -163,7 +163,11 @@ function ProjectCard({ project, createdAt, index, onSelect }: ProjectCardProps) 
 
 export function PortfolioGrid() {
   const { data: dbProjects, isLoading } = useProjects();
+  const { data: siteContent } = useSiteContent();
   const [selectedProject, setSelectedProject] = useState<ConstantsProject | null>(null);
+
+  const getContent = (id: string, fallback: string) => 
+    siteContent?.find(c => c.id === id)?.value || fallback;
 
   // Use DB projects if available and published, fallback to constants
   const projects = dbProjects && dbProjects.length > 0
@@ -194,10 +198,11 @@ export function PortfolioGrid() {
           transition={{ duration: 0.5 }}
         >
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3">
-            Избранные <span className="gradient-text">проекты</span>
+            {getContent('portfolio_title', 'Избранные проекты').split(' ').slice(0, -1).join(' ')}{' '}
+            <span className="gradient-text">{getContent('portfolio_title', 'Избранные проекты').split(' ').slice(-1)[0]}</span>
           </h2>
           <p className="text-muted-foreground text-sm sm:text-base max-w-xl mx-auto">
-            Коллекция AI-генерированных видео, анимаций и визуальных экспериментов
+            {getContent('portfolio_subtitle', 'Коллекция AI-генерированных видео, анимаций и визуальных экспериментов')}
           </p>
         </motion.div>
 
