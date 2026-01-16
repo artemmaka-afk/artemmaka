@@ -35,6 +35,7 @@ interface ProjectCardProps {
   createdAt?: string;
   index: number;
   onSelect: (project: ConstantsProject) => void;
+  isLCP?: boolean; // Mark as potential LCP element
 }
 
 const containerVariants = {
@@ -57,7 +58,7 @@ const cardVariants = {
   }
 };
 
-function ProjectCard({ project, createdAt, index, onSelect }: ProjectCardProps) {
+function ProjectCard({ project, createdAt, index, onSelect, isLCP = false }: ProjectCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -93,7 +94,8 @@ function ProjectCard({ project, createdAt, index, onSelect }: ProjectCardProps) 
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
             isHovered ? 'opacity-0' : 'opacity-100'
           }`}
-          loading="lazy"
+          loading={isLCP ? "eager" : "lazy"}
+          {...(isLCP && { fetchPriority: "high" } as React.ImgHTMLAttributes<HTMLImageElement>)}
         />
 
         {/* Video Preview */}
@@ -222,6 +224,7 @@ export function PortfolioGrid() {
               createdAt={p.created_at}
               index={index}
               onSelect={setSelectedProject}
+              isLCP={index === 0} // First image is likely LCP
             />
           ))}
           
@@ -232,6 +235,7 @@ export function PortfolioGrid() {
               project={project}
               index={index}
               onSelect={setSelectedProject}
+              isLCP={index === 0}
             />
           ))}
         </motion.div>
