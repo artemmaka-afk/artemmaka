@@ -152,6 +152,49 @@
   }
 }
 
+/* Typography utility classes with responsive sizes from DB */
+.typography-h1 {
+  font-size: var(--typography-h1-mobile, 32px);
+}
+
+.typography-h2 {
+  font-size: var(--typography-h2-mobile, 28px);
+}
+
+.typography-h3 {
+  font-size: var(--typography-h3-mobile, 20px);
+}
+
+.typography-body {
+  font-size: var(--typography-body-mobile, 14px);
+}
+
+.typography-small {
+  font-size: var(--typography-small-mobile, 12px);
+}
+
+@media (min-width: 768px) {
+  .typography-h1 {
+    font-size: var(--typography-h1-desktop, 48px);
+  }
+
+  .typography-h2 {
+    font-size: var(--typography-h2-desktop, 36px);
+  }
+
+  .typography-h3 {
+    font-size: var(--typography-h3-desktop, 24px);
+  }
+
+  .typography-body {
+    font-size: var(--typography-body-desktop, 16px);
+  }
+
+  .typography-small {
+    font-size: var(--typography-small-desktop, 14px);
+  }
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

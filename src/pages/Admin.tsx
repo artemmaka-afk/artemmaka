@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Save, DollarSign, Film, Loader2, RefreshCcw, LogIn, LogOut, Inbox, Eye, CheckCircle, Clock, Palette, Cpu, Paperclip, FileText, ExternalLink, Trash2, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Save, DollarSign, Film, Loader2, RefreshCcw, LogIn, LogOut, Inbox, Eye, CheckCircle, Clock, Palette, Cpu, Paperclip, FileText, ExternalLink, Trash2, RotateCcw, Type } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import { SiteContentManager } from '@/components/admin/SiteContentManager';
 import { HeroStatsManager } from '@/components/admin/HeroStatsManager';
 import { SocialLinksManager } from '@/components/admin/SocialLinksManager';
 import { AvailabilityManager } from '@/components/admin/AvailabilityManager';
+import { TypographyManager } from '@/components/admin/TypographyManager';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 
 interface CalculatorConfig {
@@ -368,6 +369,10 @@ export default function Admin() {
               <TabsTrigger value="calculator" className="gap-2">
                 <DollarSign className="w-4 h-4" />
                 <span className="hidden sm:inline">Калькулятор</span>
+              </TabsTrigger>
+              <TabsTrigger value="typography" className="gap-2">
+                <Type className="w-4 h-4" />
+                <span className="hidden sm:inline">Шрифты</span>
               </TabsTrigger>
             </TabsList>
 
@@ -784,6 +789,13 @@ export default function Admin() {
                     </div>
                   </div>
                 )}
+              </div>
+            </TabsContent>
+
+            {/* Typography Tab */}
+            <TabsContent value="typography" className="space-y-6">
+              <div className="glass-card p-4 sm:p-6">
+                <TypographyManager />
               </div>
             </TabsContent>
           </Tabs>
