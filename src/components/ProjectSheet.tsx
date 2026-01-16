@@ -72,13 +72,19 @@ function VideoPlayer({
     const embedUrl = getKinescopeEmbedUrl(src);
     return (
       <div className="relative w-full bg-black rounded-2xl overflow-hidden">
-        <div className="relative w-full" style={{ paddingTop: '177.78%' /* 9:16 aspect ratio */ }}>
+        <div style={{ position: 'relative', paddingTop: '177.78%', width: '100%' }}>
           <iframe
             src={embedUrl}
-            className="absolute inset-0 w-full h-full"
+            style={{ 
+              position: 'absolute', 
+              width: '100%', 
+              height: '100%', 
+              top: 0, 
+              left: 0,
+              border: 'none'
+            }}
             allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;"
             allowFullScreen
-            frameBorder="0"
           />
         </div>
       </div>
