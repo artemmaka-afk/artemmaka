@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Plus, Pencil, Trash2, Loader2, Upload, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, Upload, X, Eye, EyeOff, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -277,6 +277,35 @@ function ProjectForm({
         <Switch checked={isPublished} onCheckedChange={setIsPublished} />
       </div>
 
+      {/* Preview Button */}
+      {slug && (
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            const previewData = {
+              title,
+              slug,
+              subtitle: subtitle || null,
+              thumbnail: thumbnail || null,
+              video_preview: videoPreview || null,
+              year: year || null,
+              duration: duration || null,
+              tags: tags.split(',').map((t) => t.trim()).filter(Boolean),
+              ai_tools: selectedTools,
+              is_published: isPublished,
+              content_blocks: contentBlocks,
+            };
+            localStorage.setItem('project_preview', JSON.stringify(previewData));
+            window.open(`/preview/${slug}`, '_blank');
+          }}
+          className="w-full gap-2"
+        >
+          <ExternalLink className="w-4 h-4" />
+          Предпросмотр проекта
+        </Button>
+      )}
+
       {/* Content Blocks Editor */}
       <div className="border-t border-white/10 pt-4">
         <ContentBlocksEditor blocks={contentBlocks} onChange={setContentBlocks} />
@@ -308,9 +337,16 @@ export function ProjectsManager() {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('Удалить проект?')) {
+    if (confirm('Удалить проект навсегда?')) {
       await remove.mutateAsync(id);
     }
+  };
+
+  const handleToggleVisibility = async (project: Project) => {
+    await upsert.mutateAsync({
+      id: project.id,
+      is_published: !project.is_published,
+    } as any);
   };
 
   if (isLoading) {
@@ -409,14 +445,25 @@ export function ProjectsManager() {
                     setEditingProject(project);
                     setIsDialogOpen(true);
                   }}
+                  title="Редактировать"
                 >
                   <Pencil className="w-4 h-4" />
                 </Button>
                 <Button
                   size="sm"
                   variant="ghost"
+                  onClick={() => handleToggleVisibility(project)}
+                  title={project.is_published ? 'Скрыть' : 'Показать'}
+                  className={project.is_published ? 'text-yellow-400 hover:text-yellow-300' : 'text-green-400 hover:text-green-300'}
+                >
+                  {project.is_published ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
                   onClick={() => handleDelete(project.id)}
                   className="text-red-400 hover:text-red-300"
+                  title="Удалить"
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
