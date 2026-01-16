@@ -17,20 +17,24 @@ function AIToolBadge({ name }: { name: string }) {
   );
 }
 
-// Проверяем является ли URL embed-ссылкой на Kinescope
+// Проверяем является ли URL ссылкой на Kinescope
 function isKinescopeUrl(url: string): boolean {
-  return url.includes('kinescope.io');
+  return /kinescope\.(io|ru)\//i.test(url) || /player\.kinescope\.io\//i.test(url);
 }
 
-// Извлекаем ID видео из Kinescope URL
+// Извлекаем ID видео из Kinescope URL и строим embed-ссылку
 function getKinescopeEmbedUrl(url: string): string {
   // Поддерживаем форматы:
   // https://kinescope.io/jRTcPUDJ1Hoy4MJG1iDThL
   // https://kinescope.io/embed/jRTcPUDJ1Hoy4MJG1iDThL
-  const match = url.match(/kinescope\.io\/(?:embed\/)?([a-zA-Z0-9]+)/);
-  if (match) {
-    return `https://kinescope.io/embed/${match[1]}`;
+  // https://kinescope.ru/jRTcPUDJ1Hoy4MJG1iDThL
+  // https://player.kinescope.io/jRTcPUDJ1Hoy4MJG1iDThL
+  const match = url.match(/(?:kinescope\.(?:io|ru)|player\.kinescope\.io)\/(?:embed\/)?([a-zA-Z0-9]+)/i);
+  if (match?.[1]) {
+    // Важно: домен embed обычно kinescope.io, даже если шеринговая ссылка kinescope.ru
+    return `https://kinescope.io/embed/${match[1]}?autoplay=0`;
   }
+
   return url;
 }
 
@@ -75,15 +79,18 @@ function VideoPlayer({
         <div style={{ position: 'relative', paddingTop: '177.78%', width: '100%' }}>
           <iframe
             src={embedUrl}
-            style={{ 
-              position: 'absolute', 
-              width: '100%', 
-              height: '100%', 
-              top: 0, 
+            title="Kinescope video"
+            loading="lazy"
+            style={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              top: 0,
               left: 0,
-              border: 'none'
+              border: 'none',
             }}
-            allow="autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write; screen-wake-lock;"
+            allow="autoplay; fullscreen; picture-in-picture; encrypted-media; clipboard-write"
+            referrerPolicy="strict-origin-when-cross-origin"
             allowFullScreen
           />
         </div>
