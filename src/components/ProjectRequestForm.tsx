@@ -289,14 +289,14 @@ export function ProjectRequestForm() {
                 multiple
                 onChange={(e) => handleFileSelect(e.target.files)}
                 className="hidden"
-                accept="image/*,video/*,.pdf,.doc,.docx,.txt"
+                accept=".jpg,.jpeg,.png,.gif,.webp,.bmp,.pdf,.doc,.docx,.xls,.xlsx,.txt,.rtf,.csv,.mp4,.mov,.avi,.webm,.mp3,.wav"
               />
               <Upload className={`w-8 h-8 mx-auto mb-2 ${isDragging ? 'text-violet-400' : 'text-muted-foreground'}`} />
               <p className="text-sm text-muted-foreground">
                 {isDragging ? 'Отпустите для загрузки' : 'Перетащите файлы сюда или нажмите для выбора'}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Изображения, видео, PDF, документы
+                Изображения, видео, PDF, Word, Excel, аудио
               </p>
             </div>
 

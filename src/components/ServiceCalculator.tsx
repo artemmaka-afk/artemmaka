@@ -231,8 +231,28 @@ export function ServiceCalculator() {
 
       toast.success('Заявка сохранена! Открываю Telegram...');
       
-      // Open Telegram
-      window.open(telegramLink, '_blank');
+      // Build pre-filled Telegram message with calculator parameters
+      const audioOptionsText = [];
+      if (hasScenario) audioOptionsText.push('Сценарий');
+      if (hasMusic) audioOptionsText.push('AI Музыка');
+      if (hasLipsync) audioOptionsText.push('Липсинк');
+      
+      const message = `Добрый день! Хочу обсудить проект.
+
+📋 Параметры из калькулятора:
+• Длительность: ${formatDuration(duration)}
+• Темп: ${paceLabels[pace]}
+• Опции: ${audioOptionsText.length > 0 ? audioOptionsText.join(', ') : 'нет'}
+• NDA: ${ndaLabels[nda]}
+• Правки: ${revisions} кругов
+• Срок: ${deadline} дней
+• Бюджет: ${formatPrice(calculation.hasDiscount ? calculation.discountedPrice : calculation.totalBeforeDiscount)}${calculation.hasDiscount ? ` (скидка ${calculation.discountPercent}%)` : ''}`;
+
+      const encodedMessage = encodeURIComponent(message);
+      const telegramDeepLink = `${telegramLink}?text=${encodedMessage}`;
+      
+      // Open Telegram with pre-filled message
+      window.open(telegramDeepLink, '_blank');
     } catch (error) {
       console.error('Error:', error);
       // Still open Telegram even if DB save fails
