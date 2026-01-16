@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Save, DollarSign, Film, Loader2, RefreshCcw, LogIn, LogOut, Inbox, Eye, CheckCircle, Clock, Palette, Cpu } from 'lucide-react';
+import { ArrowLeft, Save, DollarSign, Film, Loader2, RefreshCcw, LogIn, LogOut, Inbox, Eye, CheckCircle, Clock, Palette, Cpu, Paperclip, FileText, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -25,6 +25,8 @@ interface CalculatorConfig {
   deadline_10_multiplier: number;
   volume_discount_percent: number;
   scenario_price_per_min: number;
+  nda_partial_multiplier: number;
+  nda_full_multiplier: number;
 }
 
 interface ProjectRequest {
@@ -42,6 +44,7 @@ interface ProjectRequest {
   revisions: string | null;
   status: string;
   created_at: string;
+  attachments: string[] | null;
 }
 
 type StatusFilter = 'all' | 'new' | 'in_progress' | 'done';
@@ -106,6 +109,8 @@ export default function Admin() {
         deadline_10_multiplier: Number(data.deadline_10_multiplier),
         volume_discount_percent: data.volume_discount_percent,
         scenario_price_per_min: data.scenario_price_per_min,
+        nda_partial_multiplier: Number(data.nda_partial_multiplier ?? 1.3),
+        nda_full_multiplier: Number(data.nda_full_multiplier ?? 1.5),
       });
     }
   };
@@ -140,6 +145,9 @@ export default function Admin() {
         deadline_20_multiplier: config.deadline_20_multiplier,
         deadline_10_multiplier: config.deadline_10_multiplier,
         volume_discount_percent: config.volume_discount_percent,
+        scenario_price_per_min: config.scenario_price_per_min,
+        nda_partial_multiplier: config.nda_partial_multiplier,
+        nda_full_multiplier: config.nda_full_multiplier,
       })
       .eq('id', config.id);
 
@@ -489,9 +497,70 @@ export default function Admin() {
                           {request.project_description}
                         </p>
 
-                        {request.budget_estimate && (
-                          <div className="text-sm font-mono text-green-400">
-                            Бюджет: {new Intl.NumberFormat('ru-RU').format(request.budget_estimate)} ₽
+                        {/* Project Details */}
+                        <div className="flex flex-wrap gap-2">
+                          {request.budget_estimate && (
+                            <span className="px-2 py-1 text-xs font-mono bg-green-500/20 text-green-400 rounded-lg">
+                              💰 {new Intl.NumberFormat('ru-RU').format(request.budget_estimate)} ₽
+                            </span>
+                          )}
+                          {request.duration_seconds && (
+                            <span className="px-2 py-1 text-xs font-mono bg-blue-500/20 text-blue-400 rounded-lg">
+                              ⏱ {Math.floor(request.duration_seconds / 60)}:{(request.duration_seconds % 60).toString().padStart(2, '0')}
+                            </span>
+                          )}
+                          {request.pace && (
+                            <span className="px-2 py-1 text-xs bg-purple-500/20 text-purple-400 rounded-lg">
+                              🎬 {request.pace}
+                            </span>
+                          )}
+                          {request.deadline && (
+                            <span className="px-2 py-1 text-xs bg-orange-500/20 text-orange-400 rounded-lg">
+                              📅 {request.deadline} дней
+                            </span>
+                          )}
+                          {request.revisions && (
+                            <span className="px-2 py-1 text-xs bg-cyan-500/20 text-cyan-400 rounded-lg">
+                              🔄 {request.revisions} правок
+                            </span>
+                          )}
+                          {request.audio_options && request.audio_options.length > 0 && (
+                            <span className="px-2 py-1 text-xs bg-pink-500/20 text-pink-400 rounded-lg">
+                              🎵 {request.audio_options.join(', ')}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Attachments */}
+                        {request.attachments && request.attachments.length > 0 && (
+                          <div className="space-y-2 pt-2 border-t border-white/10">
+                            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                              <Paperclip className="w-4 h-4" />
+                              Вложения ({request.attachments.length})
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {request.attachments.map((url, idx) => {
+                                const fileName = url.split('/').pop() || `Файл ${idx + 1}`;
+                                const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
+                                return (
+                                  <a
+                                    key={idx}
+                                    href={url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 px-3 py-2 bg-white/5 rounded-lg border border-white/10 hover:border-violet-500/50 transition-colors"
+                                  >
+                                    {isImage ? (
+                                      <img src={url} alt={fileName} className="w-8 h-8 object-cover rounded" />
+                                    ) : (
+                                      <FileText className="w-4 h-4 text-violet-400" />
+                                    )}
+                                    <span className="text-xs truncate max-w-[120px]">{fileName}</span>
+                                    <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                                  </a>
+                                );
+                              })}
+                            </div>
                           </div>
                         )}
                       </div>
@@ -579,6 +648,15 @@ export default function Admin() {
                             className="bg-white/5 border-white/10"
                           />
                         </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Сценарий / мин (₽)</label>
+                          <Input
+                            type="number"
+                            value={config.scenario_price_per_min}
+                            onChange={(e) => updateConfig('scenario_price_per_min', Number(e.target.value))}
+                            className="bg-white/5 border-white/10"
+                          />
+                        </div>
                       </div>
                     </div>
 
@@ -641,6 +719,36 @@ export default function Admin() {
                             onChange={(e) => updateConfig('deadline_10_multiplier', Number(e.target.value))}
                             className="bg-white/5 border-white/10"
                           />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h3 className="text-sm font-medium text-muted-foreground border-b border-white/10 pb-2">
+                        Множители NDA
+                      </h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Частичный NDA (×)</label>
+                          <Input
+                            type="number"
+                            step="0.1"
+                            value={config.nda_partial_multiplier}
+                            onChange={(e) => updateConfig('nda_partial_multiplier', Number(e.target.value))}
+                            className="bg-white/5 border-white/10"
+                          />
+                          <p className="text-xs text-muted-foreground">+{Math.round((config.nda_partial_multiplier - 1) * 100)}% к цене</p>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Полный NDA (×)</label>
+                          <Input
+                            type="number"
+                            step="0.1"
+                            value={config.nda_full_multiplier}
+                            onChange={(e) => updateConfig('nda_full_multiplier', Number(e.target.value))}
+                            className="bg-white/5 border-white/10"
+                          />
+                          <p className="text-xs text-muted-foreground">+{Math.round((config.nda_full_multiplier - 1) * 100)}% к цене</p>
                         </div>
                       </div>
                     </div>

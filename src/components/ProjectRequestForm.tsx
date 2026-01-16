@@ -113,6 +113,22 @@ export function ProjectRequestForm() {
 
       if (error) throw error;
 
+      // Send Telegram notification
+      try {
+        await supabase.functions.invoke('send-telegram-notification', {
+          body: {
+            type: 'contact_form',
+            name: formData.name.trim(),
+            telegram: formData.telegram.trim() || undefined,
+            email: formData.email.trim() || undefined,
+            description: formData.project_description.trim(),
+            attachments: attachmentUrls,
+          },
+        });
+      } catch (e) {
+        console.log('Telegram notification not sent:', e);
+      }
+
       setIsSubmitted(true);
       toast.success('Заявка отправлена! Я свяжусь с вами в ближайшее время.');
     } catch (error) {
