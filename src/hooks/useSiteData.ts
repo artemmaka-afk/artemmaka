@@ -51,6 +51,13 @@ export interface HeroStat {
   is_visible: boolean;
 }
 
+export interface TypographySettings {
+  id: string;
+  desktop_size: string;
+  mobile_size: string;
+  description: string | null;
+}
+
 export interface SocialLink {
   id: string;
   name: string;
@@ -156,6 +163,23 @@ export function useSocialLinks() {
       
       if (error) throw error;
       return data as SocialLink[];
+    },
+    staleTime: 0,
+    gcTime: 5 * 60 * 1000,
+  });
+}
+
+// Fetch Typography Settings
+export function useTypographySettings() {
+  return useQuery({
+    queryKey: ['typography-settings'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('typography_settings')
+        .select('*');
+      
+      if (error) throw error;
+      return data as TypographySettings[];
     },
     staleTime: 0,
     gcTime: 5 * 60 * 1000,
@@ -350,4 +374,32 @@ export function useSocialLinksMutations() {
   });
 
   return { upsert, remove };
+}
+
+// Mutations for Typography Settings
+export function useTypographyMutations() {
+  const queryClient = useQueryClient();
+  
+  const update = useMutation({
+    mutationFn: async (setting: Partial<TypographySettings> & { id: string }) => {
+      const { error } = await supabase
+        .from('typography_settings')
+        .update({
+          desktop_size: setting.desktop_size,
+          mobile_size: setting.mobile_size,
+        })
+        .eq('id', setting.id);
+      if (error) throw error;
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['typography-settings'] });
+      await queryClient.refetchQueries({ queryKey: ['typography-settings'] });
+      toast.success('Настройки типографики сохранены');
+    },
+    onError: (error: Error) => {
+      toast.error('Ошибка: ' + error.message);
+    },
+  });
+
+  return { update };
 }

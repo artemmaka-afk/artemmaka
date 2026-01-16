@@ -293,6 +293,33 @@ export type Database = {
         }
         Relationships: []
       }
+      typography_settings: {
+        Row: {
+          created_at: string
+          description: string | null
+          desktop_size: string
+          id: string
+          mobile_size: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          desktop_size?: string
+          id: string
+          mobile_size?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          desktop_size?: string
+          id?: string
+          mobile_size?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
