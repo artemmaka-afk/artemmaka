@@ -29,6 +29,13 @@
 
     <link rel="canonical" href="https://artemmaka.lovable.app" />
     <meta name="theme-color" content="#09090b" />
+    
+    <!-- Critical CSS for initial render - prevents FOUC and reduces render-blocking -->
+    <style>
+      :root { --background: 240 10% 3.9%; --foreground: 0 0% 98%; }
+      body { background-color: hsl(240 10% 3.9%); color: hsl(0 0% 98%); margin: 0; font-family: system-ui, sans-serif; }
+      #root { min-height: 100vh; }
+    </style>
   </head>
 
   <body>
