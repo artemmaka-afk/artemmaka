@@ -206,11 +206,23 @@ export function useProjectMutations() {
   const queryClient = useQueryClient();
   
   const upsert = useMutation({
-    mutationFn: async (project: Partial<Project> & { title: string; slug: string }) => {
-      const { error } = await supabase
-        .from('projects')
-        .upsert(project as any, { onConflict: 'id' });
-      if (error) throw error;
+    mutationFn: async (project: Partial<Project>) => {
+      // Для обновления существующего проекта (по id) не требуем title/slug
+      // Для создания нового — они должны быть в project
+      if (project.id) {
+        // Update existing project
+        const { error } = await supabase
+          .from('projects')
+          .update(project as any)
+          .eq('id', project.id);
+        if (error) throw error;
+      } else {
+        // Insert new project
+        const { error } = await supabase
+          .from('projects')
+          .insert(project as any);
+        if (error) throw error;
+      }
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['projects'] });
