@@ -62,12 +62,13 @@ function TechItem({ name, logo }: { name: string; logo: string }) {
 }
 
 
-// Бесконечный маркер с CSS анимацией
+// Бесконечный маркер с CSS анимацией - бесшовный цикл
 function InfiniteMarquee({ items, direction = 'left', duration = 20 }: { 
   items: { name: string; logo: string }[]; 
   direction?: 'left' | 'right';
   duration?: number;
 }) {
+  // Дублируем элементы для бесшовной прокрутки
   const doubledItems = [...items, ...items];
   
   if (items.length === 0) {
@@ -78,12 +79,14 @@ function InfiniteMarquee({ items, direction = 'left', duration = 20 }: {
     );
   }
   
+  const animationName = direction === 'left' ? 'marquee-seamless-left' : 'marquee-seamless-right';
+  
   return (
     <div className="relative overflow-hidden">
       <div 
-        className="flex gap-4"
+        className="flex gap-4 w-max"
         style={{
-          animation: `marquee-${direction} ${duration}s linear infinite`,
+          animation: `${animationName} ${duration}s linear infinite`,
         }}
       >
         {doubledItems.map((tech, index) => (
@@ -91,11 +94,11 @@ function InfiniteMarquee({ items, direction = 'left', duration = 20 }: {
         ))}
       </div>
       <style>{`
-        @keyframes marquee-left {
+        @keyframes marquee-seamless-left {
           0% { transform: translateX(0); }
           100% { transform: translateX(-50%); }
         }
-        @keyframes marquee-right {
+        @keyframes marquee-seamless-right {
           0% { transform: translateX(-50%); }
           100% { transform: translateX(0); }
         }
