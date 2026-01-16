@@ -5,14 +5,7 @@ import { Project as ConstantsProject, projects as fallbackProjects } from '@/lib
 import { useProjects, useSiteContent, type Project as DBProject } from '@/hooks/useSiteData';
 import { ProjectSheet } from './ProjectSheet';
 
-// Format date as dd.mm.yyyy
-function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  const day = date.getDate().toString().padStart(2, '0');
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const year = date.getFullYear();
-  return `${day}.${month}.${year}`;
-}
+// Для даты на карточке используем поле year из настроек проекта
 
 // Adapter to transform DB project to constants format for ProjectSheet
 function toConstantsProject(p: DBProject): ConstantsProject {
@@ -32,7 +25,6 @@ function toConstantsProject(p: DBProject): ConstantsProject {
 
 interface ProjectCardProps {
   project: ConstantsProject;
-  createdAt?: string;
   index: number;
   onSelect: (project: ConstantsProject) => void;
   isLCP?: boolean; // Mark as potential LCP element
@@ -58,7 +50,7 @@ const cardVariants = {
   }
 };
 
-function ProjectCard({ project, createdAt, index, onSelect, isLCP = false }: ProjectCardProps) {
+function ProjectCard({ project, index, onSelect, isLCP = false }: ProjectCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -132,11 +124,11 @@ function ProjectCard({ project, createdAt, index, onSelect, isLCP = false }: Pro
 
           {/* Bottom - Info */}
           <div>
-            {/* Show date instead of duration/year */}
+            {/* Show year from project settings */}
             <div className="flex items-center gap-1.5 mb-1.5">
               <Calendar className="w-3 h-3 text-muted-foreground" />
               <span className="text-[10px] sm:text-xs text-muted-foreground font-mono">
-                {createdAt ? formatDate(createdAt) : project.year}
+                {project.year}
               </span>
             </div>
             <h3 className="text-sm sm:text-base font-bold mb-0.5 line-clamp-2">{project.title}</h3>
@@ -221,7 +213,6 @@ export function PortfolioGrid() {
             <ProjectCard
               key={p.id}
               project={toConstantsProject(p)}
-              createdAt={p.created_at}
               index={index}
               onSelect={setSelectedProject}
               isLCP={index === 0} // First image is likely LCP

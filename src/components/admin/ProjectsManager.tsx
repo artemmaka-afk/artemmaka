@@ -236,12 +236,18 @@ function ProjectForm({
         label="Превью (изображение)"
       />
 
-      <FileUploadInput
-        value={videoPreview}
-        onChange={setVideoPreview}
-        accept="video/*,.gif"
-        label="Видео-превью"
-      />
+      <div className="space-y-2">
+        <label className="text-sm font-medium">Видео-превью</label>
+        <p className="text-xs text-muted-foreground mb-2">
+          Загрузите видео или вставьте ссылку на Kinescope (формат: https://kinescope.io/VIDEO_ID)
+        </p>
+        <FileUploadInput
+          value={videoPreview}
+          onChange={setVideoPreview}
+          accept="video/*,.gif"
+          label=""
+        />
+      </div>
 
       <div className="space-y-2">
         <label className="text-sm font-medium">AI Инструменты</label>
