@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calculator, Clock, Sparkles, Volume2, RefreshCcw, CalendarClock, Send, Percent, FileText, Shield, EyeOff } from 'lucide-react';
+import { Calculator, Clock, Sparkles, Volume2, RefreshCcw, CalendarClock, Send, Percent, FileText, Shield } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { supabase } from '@/integrations/supabase/client';
 import { useSiteContent } from '@/hooks/useSiteData';
@@ -45,7 +45,6 @@ export function ServiceCalculator() {
   const [nda, setNda] = useState<'none' | 'partial' | 'full'>('none');
   const [deadline, setDeadline] = useState<'30' | '20' | '10'>('30');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [hidePricing, setHidePricing] = useState(false);
   
   const { data: siteContent } = useSiteContent();
   const telegramUsername = siteContent?.find(c => c.id === 'artist_telegram')?.value || '@artemmak_ai';
@@ -554,23 +553,6 @@ export function ServiceCalculator() {
             </div>
           </motion.div>
 
-          {/* Hide Pricing Toggle */}
-          <motion.div variants={itemVariants} className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10">
-            <div className="flex items-center gap-3">
-              <EyeOff className="w-4 h-4 text-muted-foreground" />
-              <div>
-                <div className="text-sm font-medium">Скрыть детализацию</div>
-                <div className="text-xs text-muted-foreground">Показывать только итоговую сумму</div>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setHidePricing(!hidePricing)}
-              className={`w-12 h-6 rounded-full transition-colors ${hidePricing ? 'bg-violet-500' : 'bg-white/20'}`}
-            >
-              <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${hidePricing ? 'translate-x-6' : 'translate-x-0.5'}`} />
-            </button>
-          </motion.div>
 
           {/* Calculation Summary */}
           <motion.div 
