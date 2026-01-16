@@ -69,7 +69,7 @@ export function Footer() {
         {/* Bottom Section */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="text-muted-foreground text-sm">
-            © {new Date().getFullYear()} {name}. Все права защищены.
+            {getContent('copyright', `© ${new Date().getFullYear()} ${name}. Все права защищены.`)}
           </div>
           
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
