@@ -182,12 +182,12 @@ function ContentBlockRenderer({ block, index }: { block: ContentBlock; index: nu
     case 'text':
       return (
         <motion.div 
-          className="prose prose-invert max-w-none"
+          className="max-w-none"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.1 }}
         >
-          <p className="text-lg leading-relaxed text-muted-foreground">
+          <p className="text-lg leading-relaxed text-muted-foreground whitespace-pre-wrap break-words">
             {renderMarkdown(block.content || '')}
           </p>
         </motion.div>

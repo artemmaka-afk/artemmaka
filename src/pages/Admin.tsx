@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Save, DollarSign, Film, Loader2, RefreshCcw, LogIn, LogOut, Inbox, Eye, CheckCircle, Clock, Palette, Cpu, Paperclip, FileText, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Save, DollarSign, Film, Loader2, RefreshCcw, LogIn, LogOut, Inbox, Eye, CheckCircle, Clock, Palette, Cpu, Paperclip, FileText, ExternalLink, Trash2, RotateCcw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -47,7 +47,7 @@ interface ProjectRequest {
   attachments: string[] | null;
 }
 
-type StatusFilter = 'all' | 'new' | 'in_progress' | 'done';
+type StatusFilter = 'all' | 'new' | 'in_progress' | 'done' | 'deleted';
 
 export default function Admin() {
   const { user, isAdmin, isLoading, login, register, logout } = useAdminAuth();
@@ -180,7 +180,7 @@ export default function Admin() {
   };
 
   const filteredRequests = requests.filter(req => {
-    if (statusFilter === 'all') return true;
+    if (statusFilter === 'all') return req.status !== 'deleted';
     return req.status === statusFilter;
   });
 
@@ -192,6 +192,8 @@ export default function Admin() {
         return <span className="px-2 py-1 text-xs font-medium bg-yellow-500/20 text-yellow-400 rounded-lg">В работе</span>;
       case 'done':
         return <span className="px-2 py-1 text-xs font-medium bg-green-500/20 text-green-400 rounded-lg">Завершена</span>;
+      case 'deleted':
+        return <span className="px-2 py-1 text-xs font-medium bg-red-500/20 text-red-400 rounded-lg">Удалена</span>;
       default:
         return <span className="px-2 py-1 text-xs font-medium bg-gray-500/20 text-gray-400 rounded-lg">{status}</span>;
     }
@@ -202,8 +204,6 @@ export default function Admin() {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
     });
   };
 
@@ -415,6 +415,15 @@ export default function Admin() {
                       <CheckCircle className="w-3 h-3" />
                       Завершённые
                     </Button>
+                    <Button
+                      variant={statusFilter === 'deleted' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setStatusFilter('deleted')}
+                      className="gap-1"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      Удалённые
+                    </Button>
                   </div>
                 </div>
 
@@ -470,6 +479,27 @@ export default function Admin() {
                                 className="h-8 px-2"
                               >
                                 <CheckCircle className="w-3 h-3" />
+                              </Button>
+                            )}
+                            {request.status === 'deleted' ? (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => updateRequestStatus(request.id, 'new')}
+                                className="h-8 px-2 text-green-400 hover:text-green-300"
+                                title="Восстановить"
+                              >
+                                <RotateCcw className="w-3 h-3" />
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => updateRequestStatus(request.id, 'deleted')}
+                                className="h-8 px-2 text-red-400 hover:text-red-300"
+                                title="Удалить"
+                              >
+                                <Trash2 className="w-3 h-3" />
                               </Button>
                             )}
                           </div>
