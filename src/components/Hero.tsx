@@ -52,6 +52,7 @@ export function Hero() {
   const title = getContent('artist_title', 'AI Artist / Генеративный художник');
   const tagline = getContent('artist_tagline', 'Создаю фотореалистичные видео и изображения с помощью нейросетей');
   const availabilityStatus = getContent('availability_status', 'available') as keyof typeof statusConfig;
+  const availabilityVisible = getContent('availability_visible', 'true') === 'true';
   const statusInfo = statusConfig[availabilityStatus] || statusConfig.available;
 
   // Filter visible stats
@@ -105,13 +106,15 @@ export function Hero() {
         animate="visible"
       >
         {/* Eyebrow - Availability Status */}
-        <motion.div 
-          variants={itemVariants}
-          className="inline-flex items-center gap-2 px-4 py-2 glass rounded-full mb-8"
-        >
-          <span className={`w-2 h-2 ${statusInfo.color} rounded-full animate-pulse`} />
-          <span className="text-sm font-medium text-muted-foreground">{statusInfo.text}</span>
-        </motion.div>
+        {availabilityVisible && (
+          <motion.div 
+            variants={itemVariants}
+            className="inline-flex items-center gap-2 px-4 py-2 glass rounded-full mb-8"
+          >
+            <span className={`w-2 h-2 ${statusInfo.color} rounded-full animate-pulse`} />
+            <span className="text-sm font-medium text-muted-foreground">{statusInfo.text}</span>
+          </motion.div>
+        )}
 
         {/* Main Title */}
         <motion.h1 

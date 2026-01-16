@@ -20,6 +20,7 @@ const contentLabels: Record<string, { label: string; multiline?: boolean; descri
   calculator_subtitle: { label: 'Подзаголовок калькулятора', description: 'Описание раздела калькулятора' },
   contact_title: { label: 'Заголовок формы связи', description: 'Заголовок раздела "Оставить заявку"' },
   contact_subtitle: { label: 'Подзаголовок формы связи', description: 'Описание раздела заявки' },
+  footer_cta_text: { label: 'Текст CTA в футере', description: 'Подзаголовок под "Готовы создать что-то особенное?"', multiline: true },
   footer_copyright: { label: 'Копирайт', description: 'Текст в футере' },
 };
 

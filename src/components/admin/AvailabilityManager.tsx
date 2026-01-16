@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Loader2, Check } from 'lucide-react';
+import { Loader2, Check, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { useSiteContent, useSiteContentMutations } from '@/hooks/useSiteData';
 import { toast } from 'sonner';
 
@@ -14,11 +15,15 @@ export function AvailabilityManager() {
   const { data: content, isLoading } = useSiteContent();
   const { update } = useSiteContentMutations();
   const [status, setStatus] = useState('available');
+  const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
     if (content) {
-      const found = content.find((c) => c.id === 'availability_status');
-      if (found) setStatus(found.value);
+      const foundStatus = content.find((c) => c.id === 'availability_status');
+      if (foundStatus) setStatus(foundStatus.value);
+      
+      const foundVisible = content.find((c) => c.id === 'availability_visible');
+      if (foundVisible) setIsVisible(foundVisible.value === 'true');
     }
   }, [content]);
 
@@ -27,6 +32,16 @@ export function AvailabilityManager() {
     try {
       await update.mutateAsync({ id: 'availability_status', value: newStatus });
       toast.success('Статус обновлён');
+    } catch (error: any) {
+      toast.error('Ошибка: ' + error.message);
+    }
+  };
+
+  const handleVisibilityChange = async (visible: boolean) => {
+    setIsVisible(visible);
+    try {
+      await update.mutateAsync({ id: 'availability_visible', value: visible ? 'true' : 'false' });
+      toast.success(visible ? 'Статус показан' : 'Статус скрыт');
     } catch (error: any) {
       toast.error('Ошибка: ' + error.message);
     }
@@ -42,12 +57,24 @@ export function AvailabilityManager() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-semibold">Статус доступности</h3>
-        <p className="text-sm text-muted-foreground">Индикатор в шапке сайта</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-semibold">Статус доступности</h3>
+          <p className="text-sm text-muted-foreground">Индикатор в шапке сайта</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-muted-foreground flex items-center gap-2">
+            {isVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+            {isVisible ? 'Показан' : 'Скрыт'}
+          </span>
+          <Switch
+            checked={isVisible}
+            onCheckedChange={handleVisibilityChange}
+          />
+        </div>
       </div>
 
-      <div className="grid gap-3">
+      <div className={`grid gap-3 transition-opacity ${!isVisible ? 'opacity-50' : ''}`}>
         {statusOptions.map((opt) => (
           <Button
             key={opt.value}
@@ -58,7 +85,7 @@ export function AvailabilityManager() {
                 : 'bg-white/5 border border-white/10 hover:bg-white/10'
             }`}
             onClick={() => handleChange(opt.value)}
-            disabled={update.isPending}
+            disabled={update.isPending || !isVisible}
           >
             <div className="flex items-center gap-4 w-full">
               <span className={`w-3 h-3 rounded-full ${opt.color} ${status === opt.value ? 'animate-pulse' : ''}`} />

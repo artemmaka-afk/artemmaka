@@ -40,7 +40,7 @@ export function Footer() {
             Готовы создать <span className="gradient-text">что-то особенное</span>?
           </h3>
           <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-            Свяжитесь со мной, чтобы обсудить ваш проект. Отвечаю в течение 24 часов.
+            {getContent('footer_cta_text', 'Свяжитесь со мной, чтобы обсудить ваш проект.')}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <motion.a
