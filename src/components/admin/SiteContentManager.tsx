@@ -5,14 +5,22 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useSiteContent, useSiteContentMutations, type SiteContent } from '@/hooks/useSiteData';
 
-const contentLabels: Record<string, { label: string; multiline?: boolean }> = {
-  artist_name: { label: 'Имя' },
-  artist_title: { label: 'Должность' },
-  artist_tagline: { label: 'Слоган' },
-  artist_bio: { label: 'Биография', multiline: true },
-  artist_email: { label: 'Email' },
-  artist_telegram: { label: 'Telegram' },
-  artist_location: { label: 'Локация' },
+const contentLabels: Record<string, { label: string; multiline?: boolean; description?: string }> = {
+  artist_name: { label: 'Имя', description: 'Отображается в шапке сайта' },
+  artist_title: { label: 'Должность', description: 'Под именем в шапке' },
+  artist_tagline: { label: 'Слоган', description: 'Подзаголовок в шапке', multiline: true },
+  artist_bio: { label: 'Биография', description: 'Описание в блоке "Обо мне"', multiline: true },
+  artist_email: { label: 'Email', description: 'Используется для связи' },
+  artist_telegram: { label: 'Telegram', description: 'Используется для кнопок "Обсудить проект" и ссылок' },
+  artist_location: { label: 'Локация', description: 'Отображается в блоке "Обо мне"' },
+  // Page sections
+  portfolio_title: { label: 'Заголовок портфолио', description: 'Заголовок раздела работ' },
+  portfolio_subtitle: { label: 'Подзаголовок портфолио', description: 'Описание раздела работ' },
+  calculator_title: { label: 'Заголовок калькулятора', description: 'Заголовок раздела калькулятора' },
+  calculator_subtitle: { label: 'Подзаголовок калькулятора', description: 'Описание раздела калькулятора' },
+  contact_title: { label: 'Заголовок формы связи', description: 'Заголовок раздела "Оставить заявку"' },
+  contact_subtitle: { label: 'Подзаголовок формы связи', description: 'Описание раздела заявки' },
+  footer_copyright: { label: 'Копирайт', description: 'Текст в футере' },
 };
 
 export function SiteContentManager() {
@@ -100,33 +108,38 @@ export function SiteContentManager() {
           return (
             <div key={id} className="space-y-2">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">{config.label}</label>
-                {isChanged && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-6 px-2 text-xs text-violet-400"
-                    onClick={() => handleSave(id)}
-                    disabled={update.isPending}
-                  >
-                    <Save className="w-3 h-3 mr-1" />
-                    Сохранить
-                  </Button>
+              <label className="text-sm font-medium flex items-center justify-between">
+                <span>{config.label}</span>
+                {config.description && (
+                  <span className="text-xs text-muted-foreground font-normal">{config.description}</span>
                 )}
-              </div>
-              {config.multiline ? (
-                <Textarea
-                  value={localValues[id] || ''}
-                  onChange={(e) => handleChange(id, e.target.value)}
-                  className={`bg-white/5 border-white/10 min-h-[100px] ${isChanged ? 'border-violet-500/50' : ''}`}
-                />
-              ) : (
-                <Input
-                  value={localValues[id] || ''}
-                  onChange={(e) => handleChange(id, e.target.value)}
-                  className={`bg-white/5 border-white/10 ${isChanged ? 'border-violet-500/50' : ''}`}
-                />
+              </label>
+              {isChanged && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-6 px-2 text-xs text-violet-400"
+                  onClick={() => handleSave(id)}
+                  disabled={update.isPending}
+                >
+                  <Save className="w-3 h-3 mr-1" />
+                  Сохранить
+                </Button>
               )}
+            </div>
+            {config.multiline ? (
+              <Textarea
+                value={localValues[id] || ''}
+                onChange={(e) => handleChange(id, e.target.value)}
+                className={`bg-white/5 border-white/10 min-h-[100px] ${isChanged ? 'border-violet-500/50' : ''}`}
+              />
+            ) : (
+              <Input
+                value={localValues[id] || ''}
+                onChange={(e) => handleChange(id, e.target.value)}
+                className={`bg-white/5 border-white/10 ${isChanged ? 'border-violet-500/50' : ''}`}
+              />
+            )}
             </div>
           );
         })}

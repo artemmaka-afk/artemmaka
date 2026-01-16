@@ -3,6 +3,8 @@ import { motion } from 'framer-motion';
 import { Calculator, Clock, Sparkles, Volume2, RefreshCcw, CalendarClock, Send, Percent, FileText, Shield } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { supabase } from '@/integrations/supabase/client';
+import { useSiteContent } from '@/hooks/useSiteData';
+import { toast } from 'sonner';
 
 interface CalculatorConfig {
   base_frame_price: number;
@@ -42,6 +44,11 @@ export function ServiceCalculator() {
   const [revisions, setRevisions] = useState<'2' | '4' | '8'>('2');
   const [nda, setNda] = useState<'none' | 'partial' | 'full'>('none');
   const [deadline, setDeadline] = useState<'30' | '20' | '10'>('30');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const { data: siteContent } = useSiteContent();
+  const telegramUsername = siteContent?.find(c => c.id === 'artist_telegram')?.value || '@artemmak_ai';
+  const telegramLink = `https://t.me/${telegramUsername.replace('@', '')}`;
 
   // Загружаем конфиг из базы
   useEffect(() => {
@@ -167,6 +174,73 @@ export function ServiceCalculator() {
       hasDiscount: discountPercent > 0,
     };
   }, [duration, pace, hasScenario, hasMusic, hasLipsync, revisions, nda, deadline, config]);
+
+  const paceLabels = {
+    standard: 'Стандарт',
+    dynamic: 'Динамичный', 
+    ultra: 'Ультра',
+  };
+
+  const ndaLabels = {
+    none: 'Не нужен',
+    partial: 'Частичный',
+    full: 'Полный',
+  };
+
+  const handleDiscussProject = async () => {
+    setIsSubmitting(true);
+    
+    try {
+      // Save request to DB
+      const audioOptions: string[] = [];
+      if (hasScenario) audioOptions.push('scenario');
+      if (hasMusic) audioOptions.push('music');
+      if (hasLipsync) audioOptions.push('lipsync');
+
+      const { error: dbError } = await supabase.from('project_requests').insert({
+        name: 'Из калькулятора',
+        project_description: `Запрос из калькулятора:\n• Длительность: ${formatDuration(duration)}\n• Темп: ${paceLabels[pace]}\n• NDA: ${ndaLabels[nda]}\n• Правки: ${revisions} кругов\n• Срок: ${deadline} дней`,
+        budget_estimate: calculation.hasDiscount ? calculation.discountedPrice : calculation.totalBeforeDiscount,
+        duration_seconds: duration,
+        pace: pace,
+        audio_options: audioOptions.length > 0 ? audioOptions : null,
+        revisions: revisions,
+        deadline: deadline,
+      });
+
+      if (dbError) {
+        console.error('Error saving request:', dbError);
+      }
+
+      // Send Telegram notification
+      try {
+        await supabase.functions.invoke('send-telegram-notification', {
+          body: {
+            type: 'calculator_request',
+            budget: calculation.hasDiscount ? calculation.discountedPrice : calculation.totalBeforeDiscount,
+            duration: duration,
+            pace: paceLabels[pace],
+            nda: ndaLabels[nda],
+            deadline: deadline,
+            revisions: revisions,
+          },
+        });
+      } catch (e) {
+        console.log('Telegram notification not sent:', e);
+      }
+
+      toast.success('Заявка сохранена! Открываю Telegram...');
+      
+      // Open Telegram
+      window.open(telegramLink, '_blank');
+    } catch (error) {
+      console.error('Error:', error);
+      // Still open Telegram even if DB save fails
+      window.open(telegramLink, '_blank');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('ru-RU').format(price) + ' ₽';
@@ -498,17 +572,20 @@ export function ServiceCalculator() {
                 </div>
               </div>
               
-              <motion.a
-                href="https://t.me/artemmak_ai"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gradient-violet rounded-xl font-semibold text-primary-foreground text-sm sm:text-base"
-                whileHover={{ scale: 1.02, boxShadow: '0 0 40px hsl(263 70% 58% / 0.4)' }}
-                whileTap={{ scale: 0.98 }}
+              <motion.button
+                onClick={handleDiscussProject}
+                disabled={isSubmitting}
+                className="flex items-center justify-center gap-2 w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gradient-violet rounded-xl font-semibold text-primary-foreground text-sm sm:text-base disabled:opacity-50"
+                whileHover={{ scale: isSubmitting ? 1 : 1.02, boxShadow: isSubmitting ? 'none' : '0 0 40px hsl(263 70% 58% / 0.4)' }}
+                whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
               >
-                <Send className="w-4 sm:w-5 h-4 sm:h-5" />
-                Обсудить проект
-              </motion.a>
+                {isSubmitting ? (
+                  <div className="w-4 sm:w-5 h-4 sm:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <Send className="w-4 sm:w-5 h-4 sm:h-5" />
+                )}
+                {isSubmitting ? 'Сохраняю...' : 'Обсудить проект'}
+              </motion.button>
             </div>
           </motion.div>
         </motion.div>
