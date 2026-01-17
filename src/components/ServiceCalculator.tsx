@@ -36,7 +36,7 @@ const defaultConfig: CalculatorConfig = {
   hide_pricing: false,
 };
 
-export function ServiceCalculator() {
+function ServiceCalculator() {
   const [config, setConfig] = useState<CalculatorConfig>(defaultConfig);
   const [duration, setDuration] = useState(30);
   const [pace, setPace] = useState<'standard' | 'dynamic' | 'ultra'>('dynamic');
@@ -634,3 +634,5 @@ export function ServiceCalculator() {
     </section>
   );
 }
+
+export default ServiceCalculator;

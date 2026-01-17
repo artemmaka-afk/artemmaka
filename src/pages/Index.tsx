@@ -1,9 +1,12 @@
+import { lazy, Suspense } from 'react';
 import { Hero } from '@/components/Hero';
 import { BentoAbout } from '@/components/BentoAbout';
 import { PortfolioGrid } from '@/components/PortfolioGrid';
-import { ServiceCalculator } from '@/components/ServiceCalculator';
-import { ProjectRequestForm } from '@/components/ProjectRequestForm';
 import { Footer } from '@/components/Footer';
+
+// Lazy load below-the-fold components to reduce initial bundle size
+const ServiceCalculator = lazy(() => import('@/components/ServiceCalculator'));
+const ProjectRequestForm = lazy(() => import('@/components/ProjectRequestForm'));
 
 const Index = () => {
   return (
@@ -12,8 +15,12 @@ const Index = () => {
         <Hero />
         <BentoAbout />
         <PortfolioGrid />
-        <ServiceCalculator />
-        <ProjectRequestForm />
+        <Suspense fallback={<div className="min-h-[400px]" />}>
+          <ServiceCalculator />
+        </Suspense>
+        <Suspense fallback={<div className="min-h-[300px]" />}>
+          <ProjectRequestForm />
+        </Suspense>
         <Footer />
       </div>
     </div>
