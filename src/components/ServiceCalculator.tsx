@@ -18,6 +18,7 @@ interface CalculatorConfig {
   scenario_price_per_min: number;
   nda_partial_multiplier: number;
   nda_full_multiplier: number;
+  hide_pricing: boolean;
 }
 
 const defaultConfig: CalculatorConfig = {
@@ -32,6 +33,7 @@ const defaultConfig: CalculatorConfig = {
   scenario_price_per_min: 20000,
   nda_partial_multiplier: 1.3,
   nda_full_multiplier: 1.5,
+  hide_pricing: false,
 };
 
 export function ServiceCalculator() {
@@ -49,6 +51,9 @@ export function ServiceCalculator() {
   const { data: siteContent } = useSiteContent();
   const telegramUsername = siteContent?.find(c => c.id === 'artist_telegram')?.value || '@artemmak_ai';
   const telegramLink = `https://t.me/${telegramUsername.replace('@', '')}`;
+
+  // Use hide_pricing from config loaded from database
+  const hidePricing = config.hide_pricing;
 
   // Загружаем конфиг из базы
   useEffect(() => {
@@ -72,6 +77,7 @@ export function ServiceCalculator() {
           scenario_price_per_min: (data as any).scenario_price_per_min ?? 20000,
           nda_partial_multiplier: data.nda_partial_multiplier ?? 1.3,
           nda_full_multiplier: data.nda_full_multiplier ?? 1.5,
+          hide_pricing: (data as any).hide_pricing ?? false,
         });
       }
     };
@@ -451,55 +457,21 @@ export function ServiceCalculator() {
             </div>
           </motion.div>
 
-          {/* NDA */}
-          <motion.div variants={itemVariants} className="space-y-3 sm:space-y-4">
-            <label className="flex items-center gap-2 font-medium text-sm sm:text-base">
-              <Shield className="w-4 h-4 text-violet-400" />
-              NDA (Соглашение о неразглашении)
-            </label>
-            <div className="grid grid-cols-3 gap-2 sm:gap-3">
-              {[
-                { value: 'none' as const, label: 'Не нужен', multiplier: 1 },
-                { value: 'partial' as const, label: 'Частичный', multiplier: config.nda_partial_multiplier },
-                { value: 'full' as const, label: 'Полный', multiplier: config.nda_full_multiplier },
-              ].map((option) => (
-                <motion.button
-                  key={option.value}
-                  onClick={() => setNda(option.value)}
-                  className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all text-center ${
-                    nda === option.value
-                      ? 'bg-violet-500/20 border-violet-500/50 text-foreground'
-                      : 'bg-white/5 border-white/10 text-muted-foreground hover:border-white/20'
-                  }`}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <div className="font-semibold text-xs sm:text-sm">{option.label}</div>
-                  {!hidePricing && (
-                    <div className="text-[10px] sm:text-xs font-mono mt-1">
-                      {option.multiplier === 1 ? 'Без наценки' : `+${Math.round((option.multiplier - 1) * 100)}%`}
-                    </div>
-                  )}
-                </motion.button>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Revisions */}
+          {/* Revisions Radio */}
           <motion.div variants={itemVariants} className="space-y-3 sm:space-y-4">
             <label className="flex items-center gap-2 font-medium text-sm sm:text-base">
               <RefreshCcw className="w-4 h-4 text-violet-400" />
-              Правки
+              Кругов правок
             </label>
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
               {[
-                { value: '2' as const, label: '2 круга', price: 0 },
-                { value: '4' as const, label: '4 круга', price: config.revisions_4_price },
-                { value: '8' as const, label: '8 кругов', price: config.revisions_8_price },
+                { value: '2', label: '2 правки', price: 0 },
+                { value: '4', label: '4 правки', price: config.revisions_4_price },
+                { value: '8', label: '8 правок', price: config.revisions_8_price },
               ].map((option) => (
                 <motion.button
                   key={option.value}
-                  onClick={() => setRevisions(option.value)}
+                  onClick={() => setRevisions(option.value as '2' | '4' | '8')}
                   className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all text-center ${
                     revisions === option.value
                       ? 'bg-violet-500/20 border-violet-500/50 text-foreground'
@@ -519,21 +491,55 @@ export function ServiceCalculator() {
             </div>
           </motion.div>
 
-          {/* Deadline */}
+          {/* NDA Radio */}
           <motion.div variants={itemVariants} className="space-y-3 sm:space-y-4">
             <label className="flex items-center gap-2 font-medium text-sm sm:text-base">
-              <CalendarClock className="w-4 h-4 text-violet-400" />
-              Срочность
+              <Shield className="w-4 h-4 text-violet-400" />
+              NDA (конфиденциальность)
             </label>
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
               {[
-                { value: '30' as const, label: '30 дней', multiplier: 1 },
-                { value: '20' as const, label: '20 дней', multiplier: config.deadline_20_multiplier },
-                { value: '10' as const, label: '10 дней', multiplier: config.deadline_10_multiplier },
+                { value: 'none', label: 'Не нужен', multiplier: 1 },
+                { value: 'partial', label: 'Частичный', multiplier: config.nda_partial_multiplier },
+                { value: 'full', label: 'Полный', multiplier: config.nda_full_multiplier },
               ].map((option) => (
                 <motion.button
                   key={option.value}
-                  onClick={() => setDeadline(option.value)}
+                  onClick={() => setNda(option.value as 'none' | 'partial' | 'full')}
+                  className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all text-center ${
+                    nda === option.value
+                      ? 'bg-violet-500/20 border-violet-500/50 text-foreground'
+                      : 'bg-white/5 border-white/10 text-muted-foreground hover:border-white/20'
+                  }`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="font-semibold text-xs sm:text-sm">{option.label}</div>
+                  {!hidePricing && (
+                    <div className="text-[10px] sm:text-xs font-mono mt-1">
+                      {option.multiplier === 1 ? 'Стандарт' : `×${option.multiplier}`}
+                    </div>
+                  )}
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Deadline Radio */}
+          <motion.div variants={itemVariants} className="space-y-3 sm:space-y-4">
+            <label className="flex items-center gap-2 font-medium text-sm sm:text-base">
+              <CalendarClock className="w-4 h-4 text-violet-400" />
+              Срок сдачи
+            </label>
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              {[
+                { value: '30', label: '30 дней', multiplier: 1 },
+                { value: '20', label: '20 дней', multiplier: config.deadline_20_multiplier },
+                { value: '10', label: '10 дней', multiplier: config.deadline_10_multiplier },
+              ].map((option) => (
+                <motion.button
+                  key={option.value}
+                  onClick={() => setDeadline(option.value as '30' | '20' | '10')}
                   className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all text-center ${
                     deadline === option.value
                       ? 'bg-violet-500/20 border-violet-500/50 text-foreground'
@@ -552,7 +558,6 @@ export function ServiceCalculator() {
               ))}
             </div>
           </motion.div>
-
 
           {/* Calculation Summary */}
           <motion.div 

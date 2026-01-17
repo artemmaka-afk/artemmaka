@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Plus, Pencil, Trash2, Loader2, Upload, X, Eye, EyeOff, ExternalLink } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, Upload, X, Eye, EyeOff, ExternalLink, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -8,6 +8,9 @@ import { useProjects, useProjectMutations, useAITools, type Project, type Conten
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { ContentBlocksEditor } from './ContentBlocksEditor';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 function slugify(text: string): string {
   return text
@@ -323,12 +326,113 @@ function ProjectForm({
   );
 }
 
+function SortableProjectItem({ 
+  project, 
+  onEdit, 
+  onToggleVisibility, 
+  onDelete 
+}: { 
+  project: Project; 
+  onEdit: () => void; 
+  onToggleVisibility: () => void; 
+  onDelete: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: project.id });
+  
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/10"
+    >
+      <button
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing p-1 text-muted-foreground hover:text-foreground"
+      >
+        <GripVertical className="w-5 h-5" />
+      </button>
+      {project.thumbnail && (
+        <img
+          src={project.thumbnail}
+          alt={project.title}
+          className="w-16 h-20 object-cover rounded-lg flex-shrink-0"
+        />
+      )}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <h4 className="font-semibold truncate">{project.title}</h4>
+          {!project.is_published && (
+            <span className="px-2 py-0.5 text-[10px] bg-yellow-500/20 text-yellow-400 rounded">Скрыт</span>
+          )}
+          {project.content_blocks?.length > 0 && (
+            <span className="px-2 py-0.5 text-[10px] bg-violet-500/20 text-violet-400 rounded">
+              {project.content_blocks.length} блоков
+            </span>
+          )}
+        </div>
+        <p className="text-sm text-muted-foreground truncate">{project.subtitle}</p>
+        <div className="flex gap-1.5 mt-2 flex-wrap">
+          {project.tags?.slice(0, 3).map((tag) => (
+            <span key={tag} className="px-2 py-0.5 text-[10px] font-mono bg-white/5 rounded">{tag}</span>
+          ))}
+        </div>
+      </div>
+      <div className="flex gap-1">
+        <Button size="sm" variant="ghost" onClick={onEdit} title="Редактировать">
+          <Pencil className="w-4 h-4" />
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={onToggleVisibility}
+          title={project.is_published ? 'Скрыть' : 'Показать'}
+          className={project.is_published ? 'text-yellow-400 hover:text-yellow-300' : 'text-green-400 hover:text-green-300'}
+        >
+          {project.is_published ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+        </Button>
+        <Button size="sm" variant="ghost" onClick={onDelete} className="text-red-400 hover:text-red-300" title="Удалить">
+          <Trash2 className="w-4 h-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export function ProjectsManager() {
   const { data: projects, isLoading } = useProjects();
   const { data: aiTools } = useAITools();
   const { upsert, remove } = useProjectMutations();
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id || !projects) return;
+
+    const oldIndex = projects.findIndex((p) => p.id === active.id);
+    const newIndex = projects.findIndex((p) => p.id === over.id);
+    const reordered = arrayMove(projects, oldIndex, newIndex);
+
+    // Update sort_order in DB
+    for (let i = 0; i < reordered.length; i++) {
+      if (reordered[i].sort_order !== i) {
+        await supabase.from('projects').update({ sort_order: i }).eq('id', reordered[i].id);
+      }
+    }
+    toast.success('Порядок сохранён');
+  };
 
   const handleSave = async (data: Partial<Project>) => {
     await upsert.mutateAsync(data as any);
@@ -343,10 +447,7 @@ export function ProjectsManager() {
   };
 
   const handleToggleVisibility = async (project: Project) => {
-    await upsert.mutateAsync({
-      id: project.id,
-      is_published: !project.is_published,
-    } as any);
+    await upsert.mutateAsync({ id: project.id, is_published: !project.is_published } as any);
   };
 
   if (isLoading) {
@@ -357,37 +458,25 @@ export function ProjectsManager() {
     );
   }
 
+  const sortedProjects = projects?.slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)) || [];
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold">Проекты</h3>
-          <p className="text-sm text-muted-foreground">Управляйте портфолио</p>
+          <p className="text-sm text-muted-foreground">Перетаскивайте для сортировки</p>
         </div>
-        <Dialog
-          open={isDialogOpen}
-          onOpenChange={(open) => {
-            setIsDialogOpen(open);
-            if (!open) setEditingProject(null);
-          }}
-        >
+        <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) setEditingProject(null); }}>
           <DialogTrigger asChild>
-            <Button size="sm" className="gap-2 bg-gradient-violet">
-              <Plus className="w-4 h-4" />
-              Добавить
-            </Button>
+            <Button size="sm" className="gap-2 bg-gradient-violet"><Plus className="w-4 h-4" />Добавить</Button>
           </DialogTrigger>
           <DialogContent className="glass-card border-white/10 max-w-3xl max-h-[90vh]">
-            <DialogHeader>
-              <DialogTitle>{editingProject ? 'Редактировать проект' : 'Новый проект'}</DialogTitle>
-            </DialogHeader>
+            <DialogHeader><DialogTitle>{editingProject ? 'Редактировать проект' : 'Новый проект'}</DialogTitle></DialogHeader>
             <ProjectForm
               project={editingProject || undefined}
               onSave={handleSave}
-              onCancel={() => {
-                setIsDialogOpen(false);
-                setEditingProject(null);
-              }}
+              onCancel={() => { setIsDialogOpen(false); setEditingProject(null); }}
               isLoading={upsert.isPending}
               aiTools={aiTools || []}
             />
@@ -396,80 +485,25 @@ export function ProjectsManager() {
       </div>
 
       <div className="space-y-3">
-        {projects?.length === 0 ? (
+        {sortedProjects.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <p>Нет проектов</p>
             <p className="text-sm">Добавьте первый проект</p>
           </div>
         ) : (
-          projects?.map((project) => (
-            <div
-              key={project.id}
-              className="flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/10"
-            >
-              {project.thumbnail && (
-                <img
-                  src={project.thumbnail}
-                  alt={project.title}
-                  className="w-16 h-20 object-cover rounded-lg flex-shrink-0"
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={sortedProjects.map(p => p.id)} strategy={verticalListSortingStrategy}>
+              {sortedProjects.map((project) => (
+                <SortableProjectItem
+                  key={project.id}
+                  project={project}
+                  onEdit={() => { setEditingProject(project); setIsDialogOpen(true); }}
+                  onToggleVisibility={() => handleToggleVisibility(project)}
+                  onDelete={() => handleDelete(project.id)}
                 />
-              )}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <h4 className="font-semibold truncate">{project.title}</h4>
-                  {!project.is_published && (
-                    <span className="px-2 py-0.5 text-[10px] bg-yellow-500/20 text-yellow-400 rounded">
-                      Скрыт
-                    </span>
-                  )}
-                  {project.content_blocks?.length > 0 && (
-                    <span className="px-2 py-0.5 text-[10px] bg-violet-500/20 text-violet-400 rounded">
-                      {project.content_blocks.length} блоков
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm text-muted-foreground truncate">{project.subtitle}</p>
-                <div className="flex gap-1.5 mt-2 flex-wrap">
-                  {project.tags?.slice(0, 3).map((tag) => (
-                    <span key={tag} className="px-2 py-0.5 text-[10px] font-mono bg-white/5 rounded">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <div className="flex gap-1">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    setEditingProject(project);
-                    setIsDialogOpen(true);
-                  }}
-                  title="Редактировать"
-                >
-                  <Pencil className="w-4 h-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => handleToggleVisibility(project)}
-                  title={project.is_published ? 'Скрыть' : 'Показать'}
-                  className={project.is_published ? 'text-yellow-400 hover:text-yellow-300' : 'text-green-400 hover:text-green-300'}
-                >
-                  {project.is_published ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => handleDelete(project.id)}
-                  className="text-red-400 hover:text-red-300"
-                  title="Удалить"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          ))
+              ))}
+            </SortableContext>
+          </DndContext>
         )}
       </div>
     </div>
