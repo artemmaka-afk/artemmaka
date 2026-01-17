@@ -8,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useSiteContent } from '@/hooks/useSiteData';
 
-export function ProjectRequestForm() {
+function ProjectRequestForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
@@ -364,3 +364,5 @@ export function ProjectRequestForm() {
     </section>
   );
 }
+
+export default ProjectRequestForm;
