@@ -177,7 +177,7 @@ export function BentoAbout() {
           >
             <div className="overflow-hidden">
               <SectionLabel icon={User} text="О себе" />
-              <p className="text-sm sm:text-base md:text-lg leading-relaxed text-muted-foreground break-words">
+              <p className="typography-body leading-relaxed text-muted-foreground break-words">
                 {bio}
               </p>
             </div>
