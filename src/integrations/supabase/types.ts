@@ -50,6 +50,7 @@ export type Database = {
           created_at: string
           deadline_10_multiplier: number
           deadline_20_multiplier: number
+          hide_pricing: boolean
           id: string
           lipsync_price_per_30s: number
           music_price: number
@@ -66,6 +67,7 @@ export type Database = {
           created_at?: string
           deadline_10_multiplier?: number
           deadline_20_multiplier?: number
+          hide_pricing?: boolean
           id?: string
           lipsync_price_per_30s?: number
           music_price?: number
@@ -82,6 +84,7 @@ export type Database = {
           created_at?: string
           deadline_10_multiplier?: number
           deadline_20_multiplier?: number
+          hide_pricing?: boolean
           id?: string
           lipsync_price_per_30s?: number
           music_price?: number

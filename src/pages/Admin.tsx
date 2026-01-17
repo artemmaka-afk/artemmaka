@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Save, DollarSign, Film, Loader2, RefreshCcw, LogIn, LogOut, Inbox, Eye, CheckCircle, Clock, Palette, Cpu, Paperclip, FileText, ExternalLink, Trash2, RotateCcw, Type } from 'lucide-react';
+import { ArrowLeft, Save, DollarSign, Film, Loader2, RefreshCcw, LogIn, LogOut, Inbox, Eye, EyeOff, CheckCircle, Clock, Palette, Cpu, Paperclip, FileText, ExternalLink, Trash2, RotateCcw, Type } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -28,6 +28,7 @@ interface CalculatorConfig {
   scenario_price_per_min: number;
   nda_partial_multiplier: number;
   nda_full_multiplier: number;
+  hide_pricing: boolean;
 }
 
 interface ProjectRequest {
@@ -112,6 +113,7 @@ export default function Admin() {
         scenario_price_per_min: data.scenario_price_per_min,
         nda_partial_multiplier: Number(data.nda_partial_multiplier ?? 1.3),
         nda_full_multiplier: Number(data.nda_full_multiplier ?? 1.5),
+        hide_pricing: (data as any).hide_pricing ?? false,
       });
     }
   };
@@ -149,7 +151,8 @@ export default function Admin() {
         scenario_price_per_min: config.scenario_price_per_min,
         nda_partial_multiplier: config.nda_partial_multiplier,
         nda_full_multiplier: config.nda_full_multiplier,
-      })
+        hide_pricing: config.hide_pricing,
+      } as any)
       .eq('id', config.id);
 
     if (error) {
@@ -161,7 +164,7 @@ export default function Admin() {
     setIsSaving(false);
   };
 
-  const updateConfig = (field: keyof CalculatorConfig, value: number) => {
+  const updateConfig = (field: keyof CalculatorConfig, value: number | boolean) => {
     if (!config) return;
     setConfig({ ...config, [field]: value });
   };
@@ -785,6 +788,29 @@ export default function Admin() {
                           />
                           <p className="text-xs text-muted-foreground">+{Math.round((config.nda_full_multiplier - 1) * 100)}% к цене</p>
                         </div>
+                      </div>
+                    </div>
+
+                    {/* Hide Pricing Toggle */}
+                    <div className="space-y-4">
+                      <h3 className="text-sm font-medium text-muted-foreground border-b border-white/10 pb-2">
+                        Отображение
+                      </h3>
+                      <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10">
+                        <div className="flex items-center gap-3">
+                          <EyeOff className="w-5 h-5 text-violet-400" />
+                          <div>
+                            <div className="font-medium">Скрыть детализацию цен</div>
+                            <div className="text-sm text-muted-foreground">Посетители увидят только итоговую сумму</div>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => updateConfig('hide_pricing', !config.hide_pricing)}
+                          className={`w-12 h-6 rounded-full transition-colors ${config.hide_pricing ? 'bg-violet-500' : 'bg-white/20'}`}
+                        >
+                          <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${config.hide_pricing ? 'translate-x-6' : 'translate-x-0.5'}`} />
+                        </button>
                       </div>
                     </div>
                   </div>
