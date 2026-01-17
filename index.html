@@ -2,16 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- Preconnect hints MUST come first, before any other resources -->
-    <link rel="preconnect" href="https://ztbpxqzramwgfrwnstpi.supabase.co" />
-    <link rel="preconnect" href="https://cdn.gpteng.co" />
-    <link rel="preconnect" href="https://openai.com" />
+    <!-- Preconnect hints with crossorigin for CORS resources -->
+    <link rel="preconnect" href="https://ztbpxqzramwgfrwnstpi.supabase.co" crossorigin />
+    <link rel="preconnect" href="https://cdn.gpteng.co" crossorigin />
+    <link rel="preconnect" href="https://openai.com" crossorigin />
     <link rel="dns-prefetch" href="https://ztbpxqzramwgfrwnstpi.supabase.co" />
     <link rel="dns-prefetch" href="https://cdn.gpteng.co" />
     <link rel="dns-prefetch" href="https://openai.com" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Preload critical font after preconnects -->
-    <link rel="preload" href="https://cdn.gpteng.co/mcp-widgets/v1/fonts/CameraPlainVariable.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <!-- Preload critical font with high priority -->
+    <link rel="preload" href="https://cdn.gpteng.co/mcp-widgets/v1/fonts/CameraPlainVariable.woff2" as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="high" />
     <title>Артём Макаров | AI Artist</title>
     <meta name="description" content="Создаю фотореалистичные видео и изображения с помощью нейросетей. Генеративное искусство, AI-видео, LoRA обучение." />
     <meta name="author" content="Артём Макаров" />
