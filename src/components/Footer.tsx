@@ -36,10 +36,10 @@ export function Footer() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <h3 className="text-2xl md:text-3xl font-bold mb-4">
+          <h3 className="typography-h2 font-bold mb-4">
             Готовы создать <span className="gradient-text">что-то особенное</span>?
           </h3>
-          <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
+          <p className="typography-body text-muted-foreground mb-8 max-w-xl mx-auto">
             {getContent('footer_cta_text', 'Свяжитесь со мной, чтобы обсудить ваш проект.')}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -68,11 +68,11 @@ export function Footer() {
 
         {/* Bottom Section */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="text-muted-foreground text-sm">
+          <div className="typography-small text-muted-foreground">
             {getContent('copyright', `© ${new Date().getFullYear()} ${name}. Все права защищены.`)}
           </div>
           
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1 typography-small text-muted-foreground">
             Сделано с <Heart className="w-4 h-4 text-red-500 mx-1" fill="currentColor" /> с помощью AI
           </div>
 

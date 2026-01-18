@@ -191,11 +191,11 @@ export function PortfolioGrid() {
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3">
+          <h2 className="typography-h2 font-bold mb-3">
             {getContent('portfolio_title', 'Избранные проекты').split(' ').slice(0, -1).join(' ')}{' '}
             <span className="gradient-text">{getContent('portfolio_title', 'Избранные проекты').split(' ').slice(-1)[0]}</span>
           </h2>
-          <p className="text-muted-foreground text-sm sm:text-base max-w-xl mx-auto">
+          <p className="text-muted-foreground typography-body max-w-xl mx-auto">
             {getContent('portfolio_subtitle', 'Коллекция AI-генерированных видео, анимаций и визуальных экспериментов')}
           </p>
         </motion.div>
