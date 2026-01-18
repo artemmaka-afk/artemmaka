@@ -119,14 +119,14 @@ export function Hero() {
         {/* Main Title */}
         <motion.h1 
           variants={itemVariants}
-          className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-4"
+          className="typography-h1 font-bold tracking-tight mb-4"
         >
           <span className="block text-foreground">{name}</span>
         </motion.h1>
 
         <motion.p 
           variants={itemVariants}
-          className="text-xl md:text-2xl gradient-text font-semibold mb-4"
+          className="typography-h3 gradient-text font-semibold mb-4"
         >
           {title}
         </motion.p>
@@ -134,7 +134,7 @@ export function Hero() {
         {/* Tagline */}
         <motion.p 
           variants={itemVariants}
-          className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8"
+          className="typography-body text-muted-foreground max-w-2xl mx-auto mb-8"
         >
           {tagline}
         </motion.p>
@@ -152,8 +152,8 @@ export function Hero() {
                 whileHover={{ scale: 1.05, y: -2 }}
                 transition={{ type: 'spring', stiffness: 400 }}
               >
-                <div className="text-2xl md:text-3xl font-bold gradient-text">{stat.value}</div>
-                <div className="text-sm text-muted-foreground">{stat.label}</div>
+                <div className="typography-h3 font-bold gradient-text">{stat.value}</div>
+                <div className="typography-small text-muted-foreground">{stat.label}</div>
               </motion.div>
             ))}
           </motion.div>

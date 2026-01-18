@@ -156,14 +156,14 @@ export function BentoAbout() {
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
         >
-          <h2 className="text-3xl md:text-4xl font-bold">
+          <h2 className="typography-h2 font-bold">
             Обо <span className="gradient-text">мне</span>
           </h2>
         </motion.div>
 
         {/* Bento Grid */}
         <motion.div 
-          className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4 auto-rows-[140px]"
+          className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-4 auto-rows-auto md:auto-rows-[minmax(140px,auto)]"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
@@ -172,7 +172,7 @@ export function BentoAbout() {
           {/* Card 1: Bio - Large */}
           <motion.div
             variants={cardVariants}
-            className="md:col-span-2 lg:col-span-3 row-span-2 glass-card p-6 flex flex-col justify-between group"
+            className="md:col-span-2 lg:col-span-3 md:row-span-2 glass-card p-6 flex flex-col justify-between group min-h-[200px] h-auto"
             whileHover={{ scale: 1.01, y: -2 }}
           >
             <div className="overflow-hidden">
@@ -190,28 +190,28 @@ export function BentoAbout() {
           {/* Card 2: Location - Small */}
           <motion.div
             variants={cardVariants}
-            className="md:col-span-2 lg:col-span-1 glass-card p-5 flex flex-col justify-center items-center text-center"
+            className="md:col-span-2 lg:col-span-1 glass-card p-5 flex flex-col justify-center items-center text-center min-h-[100px] h-auto"
             whileHover={{ scale: 1.02, y: -2 }}
           >
             <MapPin className="w-6 h-6 text-violet-400 mb-2" />
-            <div className="text-sm font-semibold">{location.split(',')[0]}</div>
-            <div className="text-xs text-muted-foreground">{location.split(',')[1]?.trim() || 'Россия'}</div>
+            <div className="typography-small font-semibold">{location.split(',')[0]}</div>
+            <div className="typography-small text-muted-foreground">{location.split(',')[1]?.trim() || 'Россия'}</div>
           </motion.div>
 
           {/* Card 3: Experience - Small */}
           <motion.div
             variants={cardVariants}
-            className="lg:col-span-2 glass-card p-5 flex flex-col justify-center items-center text-center bg-gradient-to-br from-violet-500/10 to-purple-500/5"
+            className="lg:col-span-2 glass-card p-5 flex flex-col justify-center items-center text-center bg-gradient-to-br from-violet-500/10 to-purple-500/5 min-h-[100px] h-auto"
             whileHover={{ scale: 1.02, y: -2 }}
           >
-            <div className="text-3xl font-bold gradient-text">3+</div>
-            <div className="text-sm text-muted-foreground">лет в AI-арте</div>
+            <div className="typography-h2 font-bold gradient-text">3+</div>
+            <div className="typography-small text-muted-foreground">лет в AI-арте</div>
           </motion.div>
 
           {/* Card 4: Video Tech Stack Marquee - Medium */}
           <motion.div
             variants={cardVariants}
-            className="md:col-span-4 lg:col-span-3 glass-card p-5 overflow-hidden"
+            className="md:col-span-4 lg:col-span-3 glass-card p-5 overflow-hidden min-h-[100px] h-auto"
             whileHover={{ scale: 1.01 }}
           >
             <SectionLabel icon={Film} text="Стек для видео" />
@@ -221,7 +221,7 @@ export function BentoAbout() {
           {/* Card 5: Image Tech Stack Marquee - Medium */}
           <motion.div
             variants={cardVariants}
-            className="md:col-span-4 lg:col-span-3 glass-card p-5 overflow-hidden"
+            className="md:col-span-4 lg:col-span-3 glass-card p-5 overflow-hidden min-h-[100px] h-auto"
             whileHover={{ scale: 1.01 }}
           >
             <SectionLabel icon={Image} text="Стек для изображений" />
@@ -231,7 +231,7 @@ export function BentoAbout() {
           {/* Card 6: Pipeline - Wide */}
           <motion.div
             variants={cardVariants}
-            className="md:col-span-4 lg:col-span-4 row-span-1 glass-card p-5"
+            className="md:col-span-4 lg:col-span-4 glass-card p-5 min-h-[120px] h-auto"
             whileHover={{ scale: 1.01 }}
           >
             <SectionLabel icon={Workflow} text="Мой пайплайн" />
@@ -245,11 +245,11 @@ export function BentoAbout() {
                     viewport={{ once: true }}
                     transition={{ delay: index * 0.1 }}
                   >
-                    <div className="w-10 h-10 rounded-xl bg-gradient-violet flex items-center justify-center text-sm font-bold mb-2">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-violet flex items-center justify-center typography-small font-bold mb-2">
                       {step.step}
                     </div>
-                    <div className="text-xs font-semibold">{step.title}</div>
-                    <div className="text-[10px] text-muted-foreground hidden sm:block">{step.description}</div>
+                    <div className="typography-small font-semibold">{step.title}</div>
+                    <div className="typography-small text-muted-foreground hidden sm:block">{step.description}</div>
                   </motion.div>
                   {index < pipelineSteps.length - 1 && (
                     <ArrowRight className="w-4 h-4 text-muted-foreground mx-1 flex-shrink-0" />
@@ -262,26 +262,26 @@ export function BentoAbout() {
           {/* Card 7: Available Badge */}
           <motion.div
             variants={cardVariants}
-            className="lg:col-span-2 glass-card p-5 flex flex-col justify-center items-center text-center bg-gradient-to-br from-emerald-500/10 to-green-500/5"
+            className="lg:col-span-2 glass-card p-5 flex flex-col justify-center items-center text-center bg-gradient-to-br from-emerald-500/10 to-green-500/5 min-h-[100px] h-auto"
             whileHover={{ scale: 1.02, y: -2 }}
           >
             <div className="flex items-center gap-2 mb-2">
               <span className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse" />
-              <span className="font-semibold text-emerald-400">Доступен</span>
+              <span className="typography-body font-semibold text-emerald-400">Доступен</span>
             </div>
-            <div className="text-xs text-muted-foreground">Для новых проектов</div>
+            <div className="typography-small text-muted-foreground">Для новых проектов</div>
           </motion.div>
 
           {/* Card 8: Email */}
           <motion.a
             href={`mailto:${email}`}
             variants={cardVariants}
-            className="lg:col-span-4 glass-card p-5 flex items-center justify-between group cursor-pointer"
+            className="lg:col-span-4 glass-card p-5 flex items-center justify-between group cursor-pointer min-h-[100px] h-auto"
             whileHover={{ scale: 1.01, y: -2 }}
           >
             <div>
               <SectionLabel icon={Mail} text="Связаться" />
-              <div className="font-mono text-lg group-hover:text-violet-400 transition-colors">
+              <div className="font-mono typography-h3 group-hover:text-violet-400 transition-colors">
                 {email}
               </div>
             </div>
