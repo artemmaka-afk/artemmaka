@@ -22,6 +22,13 @@ const contentLabels: Record<string, { label: string; multiline?: boolean; descri
   contact_subtitle: { label: 'Подзаголовок формы связи', description: 'Описание раздела заявки', typography: 'Body' },
   footer_cta_text: { label: 'Текст CTA в футере', description: 'Подзаголовок под "Готовы создать что-то особенное?"', multiline: true, typography: 'H3' },
   footer_copyright: { label: 'Копирайт', description: 'Текст в футере', typography: 'Small' },
+  // Legal & Cookies
+  cookie_consent_text: { label: 'Текст про куки', description: 'Всплывающее уведомление о куках', multiline: true },
+  privacy_policy_title: { label: 'Заголовок политики конф.', description: 'Заголовок модального окна' },
+  privacy_policy_text: { label: 'Текст политики конф.', description: 'Содержимое политики конфиденциальности', multiline: true },
+  consent_title: { label: 'Заголовок согласия', description: 'Заголовок модального окна согласия' },
+  consent_text: { label: 'Текст согласия на обработку', description: 'Содержимое согласия на обработку данных', multiline: true },
+  og_image: { label: 'OG-изображение', description: 'URL изображения для превью в соцсетях' },
 };
 
 export function SiteContentManager() {

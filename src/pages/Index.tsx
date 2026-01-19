@@ -3,6 +3,7 @@ import { Hero } from '@/components/Hero';
 import { BentoAbout } from '@/components/BentoAbout';
 import { PortfolioGrid } from '@/components/PortfolioGrid';
 import { Footer } from '@/components/Footer';
+import { CookieConsent } from '@/components/CookieConsent';
 
 // Lazy load below-the-fold components to reduce initial bundle size
 const ServiceCalculator = lazy(() => import('@/components/ServiceCalculator'));
@@ -22,6 +23,7 @@ const Index = () => {
           <ProjectRequestForm />
         </Suspense>
         <Footer />
+        <CookieConsent />
       </div>
     </div>
   );
