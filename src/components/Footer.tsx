@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Send, Heart, Mail, ArrowUpRight, Instagram, Youtube, Globe, Link } from 'lucide-react';
 import { useSiteContent, useSocialLinks } from '@/hooks/useSiteData';
+import { LegalLinks } from './LegalLinks';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Send,
@@ -98,8 +99,13 @@ export function Footer() {
           )}
         </div>
 
+        {/* Legal Links */}
+        <div className="mt-8">
+          <LegalLinks />
+        </div>
+
         {/* Admin Link */}
-        <div className="mt-8 text-center">
+        <div className="mt-4 text-center">
           <a
             href="/admin"
             className="text-xs text-muted-foreground/30 hover:text-muted-foreground/60 transition-colors"
