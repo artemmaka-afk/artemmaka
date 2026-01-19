@@ -1,0 +1,6 @@
+build:
+  - npm ci
+  - npm run build
+
+run:
+  command: npx serve dist -s -l 3000
