@@ -119,3 +119,4 @@ npm run build
 ## Лицензия
 
 MIT
+Test Amvera
