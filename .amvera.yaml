@@ -3,5 +3,4 @@ build:
   - npm run build
 
 run:
-  command: npx http-server dist -p 3000 --cors
-
+  command: node -e "require('http').createServer((req, res) => require('fs').readFileSync('./dist/index.html', 'utf-8').replace(/\/assets\/([^'\"]+)/g, '/assets/$1'), (req, res) => res.end()).listen(3000)"
