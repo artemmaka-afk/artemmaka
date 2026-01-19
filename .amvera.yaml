@@ -3,4 +3,4 @@ build:
   - npm run build
 
 run:
-  command: node -e "require('http').createServer((req, res) => require('fs').readFileSync('./dist/index.html', 'utf-8').replace(/\/assets\/([^'\"]+)/g, '/assets/$1'), (req, res) => res.end()).listen(3000)"
+  command: npm install -g serve && serve -s dist -l 3000
