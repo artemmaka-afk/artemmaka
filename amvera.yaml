@@ -6,7 +6,7 @@ meta:
     version: "20"
 build:
   skip: false
-  additionalCommands: install && npm run build
+  additionalCommands: npm install && npm run build
   artifacts:
     "": ""
 run:
