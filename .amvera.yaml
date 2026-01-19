@@ -3,4 +3,5 @@ build:
   - npm run build
 
 run:
-  command: npx serve dist -s -l 3000
+  command: npx http-server dist -p 3000 --cors
+
