@@ -4,6 +4,8 @@ import { BentoAbout } from '@/components/BentoAbout';
 import { PortfolioGrid } from '@/components/PortfolioGrid';
 import { Footer } from '@/components/Footer';
 import { CookieConsent } from '@/components/CookieConsent';
+import { ScrollToTop } from '@/components/ScrollToTop';
+import { Analytics } from '@/components/Analytics';
 
 // Lazy load below-the-fold components to reduce initial bundle size
 const ServiceCalculator = lazy(() => import('@/components/ServiceCalculator'));
@@ -12,6 +14,7 @@ const ProjectRequestForm = lazy(() => import('@/components/ProjectRequestForm'))
 const Index = () => {
   return (
     <div className="min-h-screen bg-background mesh-background noise-overlay">
+      <Analytics />
       <div className="relative z-10">
         <Hero />
         <BentoAbout />
@@ -24,6 +27,7 @@ const Index = () => {
         </Suspense>
         <Footer />
         <CookieConsent />
+        <ScrollToTop />
       </div>
     </div>
   );
