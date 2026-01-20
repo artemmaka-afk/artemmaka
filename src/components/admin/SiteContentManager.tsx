@@ -29,6 +29,9 @@ const contentLabels: Record<string, { label: string; multiline?: boolean; descri
   consent_title: { label: 'Заголовок согласия', description: 'Заголовок модального окна согласия' },
   consent_text: { label: 'Текст согласия на обработку', description: 'Содержимое согласия на обработку данных', multiline: true },
   og_image: { label: 'OG-изображение', description: 'URL изображения для превью в соцсетях' },
+  // Analytics
+  yandex_metrika_id: { label: 'ID Яндекс.Метрики', description: 'Номер счётчика (например: 12345678)' },
+  google_analytics_id: { label: 'ID Google Analytics', description: 'Tracking ID (например: G-XXXXXXXXXX)' },
 };
 
 export function SiteContentManager() {
