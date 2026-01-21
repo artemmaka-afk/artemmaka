@@ -6,14 +6,14 @@ meta:
     version: "20"
 build:
   skip: false
-  additionalCommands: npm install && npm run build
+  additionalCommands: npm run build
   artifacts:
-    dist: /app
+    "*": /
 run:
   persistenceMount: /data
-  scriptName: ""
+  scriptName: index.js
   scriptArguments: null
   nodeArguments: null
-  command: ./node_modules/.bin/serve -s /app/dist -l 80
+  command: npm run preview
   containerPort: 80
 serviceType: compute
