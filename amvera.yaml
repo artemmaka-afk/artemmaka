@@ -5,21 +5,12 @@ meta:
     version: 20
 
 build:
-  # Здесь мы устанавливаем зависимости и собираем проект.
-  # Amvera сама выполняет npm install перед этим, поэтому достаточно npm run build.
+  # Явно запускаем установку всех зависимостей перед билдом
   additionalCommands: npm install && npm run build
-  
-  # Копируем папку dist (результат сборки) в корень приложения
   artifacts:
     dist: /app
 
 run:
-  # Запускаем сервер для раздачи статики из папки /app
-  # Используем npx serve, так как это не скрипт внутри package.json, а внешняя утилита
   command: npx serve -s /app -l 80
-  
-  # Порт обязательно 80, так требует Amvera для внешнего доступа
   containerPort: 80
-  
-  # Указываем папку для постоянных данных (стандартная настройка)
   persistenceMount: /data
