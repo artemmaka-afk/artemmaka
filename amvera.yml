@@ -2,18 +2,11 @@ version: null
 meta:
   environment: node
   toolchain:
-    name: npm
-    version: "20"
+    name: browser
+    version: "18"
 build:
-  skip: false
-  additionalCommands: npm run build
+  additionalCommands: null
   artifacts:
-    "*": /
-run:
-  persistenceMount: /data
-  scriptName: index.js
-  scriptArguments: null
-  nodeArguments: null
-  command: npm run preview
-  containerPort: 80
+    dist/*: /
+run: {}
 serviceType: compute
