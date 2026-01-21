@@ -14,6 +14,6 @@ run:
   scriptName: ""
   scriptArguments: null
   nodeArguments: null
-  command: npx serve -s /app -l 80
+  command: npx serve -s /app/dist -l 80
   containerPort: 80
 serviceType: compute
