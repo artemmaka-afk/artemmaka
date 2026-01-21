@@ -7,7 +7,7 @@ meta:
 build:
   # Здесь мы устанавливаем зависимости и собираем проект.
   # Amvera сама выполняет npm install перед этим, поэтому достаточно npm run build.
-  additionalCommands: npm run build
+  additionalCommands: npm install && npm run build
   
   # Копируем папку dist (результат сборки) в корень приложения
   artifacts:
