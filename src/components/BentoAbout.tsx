@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { MapPin, ArrowRight, User, Film, Image, Workflow, Mail, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MapPin, ArrowRight, User, Film, Image, Workflow, Mail, Loader2, X } from 'lucide-react';
 import { pipelineSteps } from '@/lib/constants';
 import { useAITools, useSiteContent } from '@/hooks/useSiteData';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -119,6 +120,7 @@ function SectionLabel({ icon: Icon, text }: { icon: React.ElementType; text: str
 export function BentoAbout() {
   const { data: aiTools, isLoading: toolsLoading } = useAITools();
   const { data: siteContent, isLoading: contentLoading } = useSiteContent();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Get content from DB with fallbacks
   const getContent = (id: string, fallback: string) => {
@@ -128,6 +130,8 @@ export function BentoAbout() {
   const bio = getContent('artist_bio', 'Занимаюсь генерацией фотореалистичных видео и изображений для промо, сюжетных и рекламных проектов.');
   const email = getContent('artist_email', 'artem@makarov.ai');
   const location = getContent('artist_location', 'Москва, Россия');
+  const showMoreButton = getContent('about_show_more_button', 'false') === 'true';
+  const extendedContent = getContent('about_extended_content', '');
 
   // Split AI tools by category from DB
   const videoTools = aiTools?.filter(t => t.category === 'video').map(t => ({ name: t.name, logo: t.logo })) || [];
@@ -172,8 +176,9 @@ export function BentoAbout() {
           {/* Card 1: Bio - Large */}
           <motion.div
             variants={cardVariants}
-            className="md:col-span-2 lg:col-span-3 md:row-span-2 glass-card p-6 flex flex-col justify-between group min-h-[200px] h-auto"
+            className="md:col-span-2 lg:col-span-3 md:row-span-2 glass-card p-6 flex flex-col justify-between group min-h-[200px] h-auto cursor-pointer"
             whileHover={{ scale: 1.01, y: -2 }}
+            onClick={() => showMoreButton && extendedContent && setIsModalOpen(true)}
           >
             <div className="overflow-hidden">
               <SectionLabel icon={User} text="О себе" />
@@ -181,10 +186,12 @@ export function BentoAbout() {
                 {bio}
               </p>
             </div>
-            <div className="flex items-center gap-2 text-violet-400 mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
-              <span className="text-sm font-medium">Подробнее</span>
-              <ArrowRight className="w-4 h-4" />
-            </div>
+            {showMoreButton && extendedContent && (
+              <div className="flex items-center gap-2 text-violet-400 mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="text-sm font-medium">Подробнее</span>
+                <ArrowRight className="w-4 h-4" />
+              </div>
+            )}
           </motion.div>
 
           {/* Card 2: Location - Small */}
@@ -289,6 +296,23 @@ export function BentoAbout() {
           </motion.a>
         </motion.div>
       </div>
+
+      {/* Extended Content Modal */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="glass-card border-white/10 max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <User className="w-5 h-5 text-violet-400" />
+              Обо мне
+            </DialogTitle>
+          </DialogHeader>
+          <div className="prose prose-invert max-w-none">
+            <p className="typography-body leading-relaxed text-muted-foreground whitespace-pre-wrap break-words">
+              {extendedContent}
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

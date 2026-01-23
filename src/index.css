@@ -87,6 +87,7 @@
 @layer components {
   .glass {
     @apply bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] rounded-3xl;
+    contain: layout style paint;
   }
 
   .glass-hover {
@@ -95,6 +96,8 @@
 
   .glass-card {
     @apply glass shadow-[0_8px_32px_hsl(0_0%_0%/0.3)];
+    will-change: transform;
+    contain: layout style paint;
   }
 
   .gradient-text {
@@ -121,7 +124,7 @@
 
   .mesh-background {
     background-image: var(--gradient-mesh);
-    background-attachment: fixed;
+    background-attachment: scroll; /* Changed from fixed to scroll for better performance */
   }
 
   .noise-overlay::after {
@@ -132,6 +135,7 @@
     opacity: 0.015;
     pointer-events: none;
     z-index: 0;
+    will-change: auto;
   }
 
   .font-mono-tech {
@@ -148,6 +152,21 @@
 
   .animate-glow {
     animation: glow 2s ease-in-out infinite alternate;
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .mesh-background {
+    background-attachment: scroll;
   }
 }
 

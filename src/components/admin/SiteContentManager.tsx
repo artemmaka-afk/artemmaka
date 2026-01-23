@@ -1,11 +1,20 @@
-import { useState, useEffect } from 'react';
-import { Save, Loader2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Save, Loader2, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import { useSiteContent, useSiteContentMutations, type SiteContent } from '@/hooks/useSiteData';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
-const contentLabels: Record<string, { label: string; multiline?: boolean; description?: string; typography?: string }> = {
+const contentLabels: Record<string, { label: string; multiline?: boolean; description?: string; typography?: string; type?: 'text' | 'textarea' | 'switch' | 'file' }> = {
+  // Site Meta & Favicon
+  site_favicon: { label: 'Фавикон', description: 'URL иконки сайта (отображается на вкладке браузера)', type: 'file' },
+  site_title: { label: 'Заголовок сайта', description: 'Текст на вкладке браузера' },
+  site_description: { label: 'Meta-описание', description: 'Описание сайта для поисковиков', multiline: true },
+  og_image: { label: 'OG-изображение', description: 'URL изображения для превью в соцсетях', type: 'file' },
+  // Artist info
   artist_name: { label: 'Имя', description: 'Отображается в шапке сайта', typography: 'H1' },
   artist_title: { label: 'Должность', description: 'Под именем в шапке', typography: 'Body' },
   artist_tagline: { label: 'Слоган', description: 'Подзаголовок в шапке', multiline: true, typography: 'H3' },
@@ -13,6 +22,9 @@ const contentLabels: Record<string, { label: string; multiline?: boolean; descri
   artist_email: { label: 'Email', description: 'Используется для связи', typography: 'Small' },
   artist_telegram: { label: 'Telegram', description: 'Используется для кнопок "Обсудить проект" и ссылок', typography: 'Small' },
   artist_location: { label: 'Локация', description: 'Отображается в блоке "Обо мне"', typography: 'Small' },
+  // About extended
+  about_show_more_button: { label: 'Показать кнопку "Подробнее"', description: 'Отображать кнопку в разделе "Обо мне"', type: 'switch' },
+  about_extended_content: { label: 'Расширенный контент', description: 'Текст для модального окна "Подробнее"', multiline: true },
   // Page sections
   portfolio_title: { label: 'Заголовок портфолио', description: 'Заголовок раздела работ', typography: 'H2' },
   portfolio_subtitle: { label: 'Подзаголовок портфолио', description: 'Описание раздела работ', typography: 'Body' },
@@ -28,7 +40,6 @@ const contentLabels: Record<string, { label: string; multiline?: boolean; descri
   privacy_policy_text: { label: 'Текст политики конф.', description: 'Содержимое политики конфиденциальности', multiline: true },
   consent_title: { label: 'Заголовок согласия', description: 'Заголовок модального окна согласия' },
   consent_text: { label: 'Текст согласия на обработку', description: 'Содержимое согласия на обработку данных', multiline: true },
-  og_image: { label: 'OG-изображение', description: 'URL изображения для превью в соцсетях' },
   // Analytics
   yandex_metrika_id: { label: 'ID Яндекс.Метрики', description: 'Номер счётчика (например: 12345678)' },
   google_analytics_id: { label: 'ID Google Analytics', description: 'Tracking ID (например: G-XXXXXXXXXX)' },
@@ -143,7 +154,23 @@ export function SiteContentManager() {
                 </Button>
               )}
             </div>
-            {config.multiline ? (
+            {config.type === 'switch' ? (
+              <div className="flex items-center gap-3">
+                <Switch
+                  checked={localValues[id] === 'true'}
+                  onCheckedChange={(checked) => handleChange(id, checked ? 'true' : 'false')}
+                />
+                <span className="text-sm text-muted-foreground">
+                  {localValues[id] === 'true' ? 'Включено' : 'Выключено'}
+                </span>
+              </div>
+            ) : config.type === 'file' ? (
+              <FileUploadField
+                value={localValues[id] || ''}
+                onChange={(url) => handleChange(id, url)}
+                isChanged={isChanged}
+              />
+            ) : config.multiline ? (
               <Textarea
                 value={localValues[id] || ''}
                 onChange={(e) => handleChange(id, e.target.value)}
@@ -160,6 +187,81 @@ export function SiteContentManager() {
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function FileUploadField({
+  value,
+  onChange,
+  isChanged,
+}: {
+  value: string;
+  onChange: (url: string) => void;
+  isChanged: boolean;
+}) {
+  const [isUploading, setIsUploading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Файл слишком большой. Максимум: 5MB');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `site-${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage.from('project-media').upload(fileName, file);
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage.from('project-media').getPublicUrl(fileName);
+      onChange(publicUrl);
+      toast.success('Файл загружен');
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast.error('Ошибка загрузки: ' + error.message);
+    } finally {
+      setIsUploading(false);
+      if (inputRef.current) inputRef.current.value = '';
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex gap-2">
+        <Input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="URL или загрузите файл"
+          className={`bg-white/5 border-white/10 flex-1 ${isChanged ? 'border-violet-500/50' : ''}`}
+        />
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          onClick={() => inputRef.current?.click()}
+          disabled={isUploading}
+          className="flex-shrink-0"
+        >
+          {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+        </Button>
+        <input ref={inputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+      </div>
+      {value && (
+        <div className="flex items-center gap-2 p-2 bg-white/5 rounded-lg">
+          <img src={value} alt="Preview" className="w-12 h-12 object-cover rounded" />
+          <span className="text-xs text-muted-foreground flex-1 truncate">{value}</span>
+          <Button type="button" variant="ghost" size="sm" onClick={() => onChange('')} className="h-6 w-6 p-0">
+            <X className="w-3 h-3" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
