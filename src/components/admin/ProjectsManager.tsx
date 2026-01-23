@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Plus, Pencil, Trash2, Loader2, Upload, X, Eye, EyeOff, ExternalLink, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import { ContentBlocksEditor } from './ContentBlocksEditor';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useQueryClient } from '@tanstack/react-query';
 
 function slugify(text: string): string {
   return text
@@ -411,6 +412,15 @@ export function ProjectsManager() {
   const { upsert, remove } = useProjectMutations();
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [localProjects, setLocalProjects] = useState<Project[]>([]);
+  const queryClient = useQueryClient();
+
+  // Sync local projects with fetched data
+  useEffect(() => {
+    if (projects) {
+      setLocalProjects([...projects].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)));
+    }
+  }, [projects]);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -419,19 +429,33 @@ export function ProjectsManager() {
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
-    if (!over || active.id === over.id || !projects) return;
+    if (!over || active.id === over.id || !localProjects.length) return;
 
-    const oldIndex = projects.findIndex((p) => p.id === active.id);
-    const newIndex = projects.findIndex((p) => p.id === over.id);
-    const reordered = arrayMove(projects, oldIndex, newIndex);
+    const oldIndex = localProjects.findIndex((p) => p.id === active.id);
+    const newIndex = localProjects.findIndex((p) => p.id === over.id);
+    const reordered = arrayMove(localProjects, oldIndex, newIndex);
+
+    // Optimistic update - update local state immediately
+    const updatedProjects = reordered.map((p, i) => ({ ...p, sort_order: i }));
+    setLocalProjects(updatedProjects);
 
     // Update sort_order in DB
-    for (let i = 0; i < reordered.length; i++) {
-      if (reordered[i].sort_order !== i) {
-        await supabase.from('projects').update({ sort_order: i }).eq('id', reordered[i].id);
+    try {
+      for (let i = 0; i < reordered.length; i++) {
+        if (reordered[i].sort_order !== i) {
+          await supabase.from('projects').update({ sort_order: i }).eq('id', reordered[i].id);
+        }
       }
+      // Refetch to ensure sync
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      toast.success('Порядок сохранён');
+    } catch (error) {
+      // Revert on error
+      if (projects) {
+        setLocalProjects([...projects].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)));
+      }
+      toast.error('Ошибка сохранения порядка');
     }
-    toast.success('Порядок сохранён');
   };
 
   const handleSave = async (data: Partial<Project>) => {
@@ -458,7 +482,7 @@ export function ProjectsManager() {
     );
   }
 
-  const sortedProjects = projects?.slice().sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0)) || [];
+  // Remove unused sortedProjects - use localProjects instead
 
   return (
     <div className="space-y-6">
@@ -485,15 +509,15 @@ export function ProjectsManager() {
       </div>
 
       <div className="space-y-3">
-        {sortedProjects.length === 0 ? (
+        {localProjects.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
             <p>Нет проектов</p>
             <p className="text-sm">Добавьте первый проект</p>
           </div>
         ) : (
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={sortedProjects.map(p => p.id)} strategy={verticalListSortingStrategy}>
-              {sortedProjects.map((project) => (
+            <SortableContext items={localProjects.map(p => p.id)} strategy={verticalListSortingStrategy}>
+              {localProjects.map((project) => (
                 <SortableProjectItem
                   key={project.id}
                   project={project}
