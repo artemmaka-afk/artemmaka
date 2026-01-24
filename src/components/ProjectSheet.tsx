@@ -3,15 +3,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, ExternalLink, Clock, Calendar, ChevronLeft, ChevronRight, Play, Pause, Maximize } from 'lucide-react';
 import { Project, ContentBlock } from '@/lib/constants';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { useAITools } from '@/hooks/useSiteData';
 
 interface ProjectSheetProps {
   project: Project | null;
   onClose: () => void;
 }
 
-function AIToolBadge({ name }: { name: string }) {
+function AIToolBadge({ name, logo }: { name: string; logo?: string }) {
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">
+    <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 dark:bg-white/5 rounded-lg border border-white/10 dark:border-white/10">
+      {logo && (
+        <img src={logo} alt={name} className="w-4 h-4 object-contain rounded-sm" />
+      )}
       <span className="text-xs font-mono">{name}</span>
     </div>
   );
@@ -71,12 +75,12 @@ function VideoPlayer({
     }
   };
 
-  // Kinescope embed
+  // Kinescope embed - adaptive height for screen
   if (isKinescopeUrl(src)) {
     const embedUrl = getKinescopeEmbedUrl(src);
     return (
-      <div className="relative w-full bg-black rounded-2xl overflow-hidden">
-        <div style={{ position: 'relative', paddingTop: '177.78%', width: '100%' }}>
+      <div className="relative w-full bg-black rounded-2xl overflow-hidden" style={{ maxHeight: '70vh' }}>
+        <div style={{ position: 'relative', paddingTop: 'min(177.78%, 70vh)', width: '100%' }}>
           <iframe
             src={embedUrl}
             title="Kinescope video"
@@ -302,6 +306,14 @@ function ContentBlockRenderer({ block, index }: { block: ContentBlock; index: nu
 }
 
 export function ProjectSheet({ project, onClose }: ProjectSheetProps) {
+  const { data: aiToolsData } = useAITools();
+  
+  // Create a map of tool names to logos
+  const toolLogos = aiToolsData?.reduce((acc, tool) => {
+    acc[tool.name] = tool.logo;
+    return acc;
+  }, {} as Record<string, string>) || {};
+
   useEffect(() => {
     if (project) {
       document.body.style.overflow = 'hidden';
@@ -317,7 +329,7 @@ export function ProjectSheet({ project, onClose }: ProjectSheetProps) {
     <Sheet open={!!project} onOpenChange={(open) => !open && onClose()}>
       <SheetContent 
         side="right" 
-        className="w-full sm:max-w-2xl lg:max-w-3xl p-0 bg-background border-l border-white/10 overflow-y-auto [&>button]:hidden"
+        className="w-full sm:max-w-2xl lg:max-w-3xl p-0 bg-background border-l border-border overflow-y-auto [&>button]:hidden"
       >
         <AnimatePresence>
           {project && (
@@ -328,9 +340,15 @@ export function ProjectSheet({ project, onClose }: ProjectSheetProps) {
               exit={{ opacity: 0, x: 50 }}
               transition={{ duration: 0.3 }}
             >
-              {/* Hero Video/Image with proper aspect ratio */}
+              {/* Hero Image - static thumbnail, not video */}
               <div className="relative">
-                <VideoPlayer src={project.videoPreview} autoPlay={true} />
+                <div className="relative w-full bg-black rounded-b-2xl overflow-hidden" style={{ maxHeight: '60vh' }}>
+                  <img 
+                    src={project.thumbnail} 
+                    alt={project.title}
+                    className="w-full h-auto max-h-[60vh] object-cover"
+                  />
+                </div>
                 
                 <motion.button
                   onClick={onClose}
@@ -380,17 +398,17 @@ export function ProjectSheet({ project, onClose }: ProjectSheetProps) {
 
                 {/* AI Tools Used */}
                 {project.aiTools && project.aiTools.length > 0 && (
-                  <div className="pt-6 border-t border-white/10">
+                  <div className="pt-6 border-t border-border">
                     <div className="text-xs font-mono text-muted-foreground mb-3">Использованные нейросети</div>
                     <div className="flex flex-wrap gap-2">
                       {project.aiTools.map((toolName) => (
-                        <AIToolBadge key={toolName} name={toolName} />
+                        <AIToolBadge key={toolName} name={toolName} logo={toolLogos[toolName]} />
                       ))}
                     </div>
                   </div>
                 )}
 
-                <footer className="pt-8 border-t border-white/10">
+                <footer className="pt-8 border-t border-border">
                   <motion.a
                     href="#calculator"
                     onClick={onClose}

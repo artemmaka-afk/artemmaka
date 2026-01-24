@@ -7,6 +7,7 @@ import { CookieConsent } from '@/components/CookieConsent';
 import { ScrollToTop } from '@/components/ScrollToTop';
 import { Analytics } from '@/components/Analytics';
 import { DynamicMeta } from '@/components/DynamicMeta';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 // Lazy load below-the-fold components to reduce initial bundle size
 const ServiceCalculator = lazy(() => import('@/components/ServiceCalculator'));
@@ -30,6 +31,7 @@ const Index = () => {
         <Footer />
         <CookieConsent />
         <ScrollToTop />
+        <ThemeToggle />
       </div>
     </div>
   );
