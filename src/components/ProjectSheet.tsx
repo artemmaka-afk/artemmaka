@@ -329,7 +329,7 @@ export function ProjectSheet({ project, onClose }: ProjectSheetProps) {
     <Sheet open={!!project} onOpenChange={(open) => !open && onClose()}>
       <SheetContent 
         side="right" 
-        className="w-full sm:max-w-2xl lg:max-w-3xl p-0 bg-background border-l border-border overflow-y-auto [&>button]:hidden"
+        className="w-full sm:max-w-full p-0 bg-background border-l border-border overflow-y-auto [&>button]:hidden"
       >
         <AnimatePresence>
           {project && (
