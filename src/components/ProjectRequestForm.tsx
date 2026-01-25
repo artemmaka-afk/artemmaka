@@ -223,7 +223,7 @@ function ProjectRequestForm() {
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="Как к вам обращаться"
-              className="bg-white/5 border-white/10 focus:border-violet-500/50"
+              className="bg-background/50 border-[hsl(var(--form-border))] hover:border-[hsl(var(--form-border-hover))] focus:border-violet-500/50"
               required
             />
           </div>
@@ -238,7 +238,7 @@ function ProjectRequestForm() {
                 value={formData.telegram}
                 onChange={(e) => setFormData({ ...formData, telegram: e.target.value })}
                 placeholder="@username"
-                className="bg-white/5 border-white/10 focus:border-violet-500/50"
+                className="bg-background/50 border-[hsl(var(--form-border))] hover:border-[hsl(var(--form-border-hover))] focus:border-violet-500/50"
               />
             </div>
             <div className="space-y-2">
@@ -251,7 +251,7 @@ function ProjectRequestForm() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="email@example.com"
-                className="bg-white/5 border-white/10 focus:border-violet-500/50"
+                className="bg-background/50 border-[hsl(var(--form-border))] hover:border-[hsl(var(--form-border-hover))] focus:border-violet-500/50"
               />
             </div>
           </div>
@@ -265,7 +265,7 @@ function ProjectRequestForm() {
               value={formData.project_description}
               onChange={(e) => setFormData({ ...formData, project_description: e.target.value })}
               placeholder="Опишите вашу идею, желаемый стиль, сроки и бюджет..."
-              className="bg-white/5 border-white/10 focus:border-violet-500/50 min-h-[120px] resize-none"
+              className="bg-background/50 border-[hsl(var(--form-border))] hover:border-[hsl(var(--form-border-hover))] focus:border-violet-500/50 min-h-[120px] resize-none"
               required
             />
           </div>
@@ -285,7 +285,7 @@ function ProjectRequestForm() {
               className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${
                 isDragging 
                   ? 'border-violet-500 bg-violet-500/10' 
-                  : 'border-white/20 hover:border-white/40 bg-white/5'
+                  : 'border-[hsl(var(--form-border))] hover:border-[hsl(var(--form-border-hover))] bg-background/50'
               }`}
             >
               <input
@@ -311,7 +311,7 @@ function ProjectRequestForm() {
                 {files.map((file, index) => (
                   <div 
                     key={index}
-                    className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10"
+                    className="flex items-center justify-between p-3 bg-background/50 rounded-lg border border-[hsl(var(--form-border))]"
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <Paperclip className="w-4 h-4 text-violet-400 flex-shrink-0" />

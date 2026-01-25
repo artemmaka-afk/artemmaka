@@ -12,7 +12,7 @@ interface ProjectSheetProps {
 
 function AIToolBadge({ name, logo }: { name: string; logo?: string }) {
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 dark:bg-white/5 rounded-lg border border-white/10 dark:border-white/10">
+    <div className="flex items-center gap-2 px-3 py-1.5 bg-background/50 rounded-lg border border-[hsl(var(--form-border))]">
       {logo && (
         <img src={logo} alt={name} className="w-4 h-4 object-contain rounded-sm" />
       )}
