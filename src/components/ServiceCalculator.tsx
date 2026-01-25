@@ -353,14 +353,14 @@ function ServiceCalculator() {
               className={`w-full p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all text-left ${
                 hasScenario
                   ? 'bg-violet-500/20 border-violet-500/50 text-foreground'
-                  : 'bg-white/5 border-white/10 text-muted-foreground hover:border-white/20'
+                  : 'bg-background/50 border-[hsl(var(--form-border))] text-muted-foreground hover:border-[hsl(var(--form-border-hover))]'
               }`}
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
             >
               <div className="flex items-center gap-2">
                 <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
-                  hasScenario ? 'bg-violet-500 border-violet-500' : 'border-white/30'
+                  hasScenario ? 'bg-violet-500 border-violet-500' : 'border-[hsl(var(--form-border))]'
                 }`}>
                   {hasScenario && <span className="text-white text-xs">✓</span>}
                 </div>
@@ -388,7 +388,7 @@ function ServiceCalculator() {
                   className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all text-center ${
                     pace === value
                       ? 'bg-violet-500/20 border-violet-500/50 text-foreground'
-                      : 'bg-white/5 border-white/10 text-muted-foreground hover:border-white/20'
+                      : 'bg-background/50 border-[hsl(var(--form-border))] text-muted-foreground hover:border-[hsl(var(--form-border-hover))]'
                   }`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -414,14 +414,14 @@ function ServiceCalculator() {
                 className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all text-left ${
                   hasMusic
                     ? 'bg-violet-500/20 border-violet-500/50 text-foreground'
-                    : 'bg-white/5 border-white/10 text-muted-foreground hover:border-white/20'
+                    : 'bg-background/50 border-[hsl(var(--form-border))] text-muted-foreground hover:border-[hsl(var(--form-border-hover))]'
                 }`}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 <div className="flex items-center gap-2">
                   <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
-                    hasMusic ? 'bg-violet-500 border-violet-500' : 'border-white/30'
+                    hasMusic ? 'bg-violet-500 border-violet-500' : 'border-[hsl(var(--form-border))]'
                   }`}>
                     {hasMusic && <span className="text-white text-xs">✓</span>}
                   </div>
@@ -437,14 +437,14 @@ function ServiceCalculator() {
                 className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all text-left ${
                   hasLipsync
                     ? 'bg-violet-500/20 border-violet-500/50 text-foreground'
-                    : 'bg-white/5 border-white/10 text-muted-foreground hover:border-white/20'
+                    : 'bg-background/50 border-[hsl(var(--form-border))] text-muted-foreground hover:border-[hsl(var(--form-border-hover))]'
                 }`}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 <div className="flex items-center gap-2">
                   <div className={`w-4 h-4 rounded border-2 flex items-center justify-center ${
-                    hasLipsync ? 'bg-violet-500 border-violet-500' : 'border-white/30'
+                    hasLipsync ? 'bg-violet-500 border-violet-500' : 'border-[hsl(var(--form-border))]'
                   }`}>
                     {hasLipsync && <span className="text-white text-xs">✓</span>}
                   </div>
@@ -475,7 +475,7 @@ function ServiceCalculator() {
                   className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all text-center ${
                     revisions === option.value
                       ? 'bg-violet-500/20 border-violet-500/50 text-foreground'
-                      : 'bg-white/5 border-white/10 text-muted-foreground hover:border-white/20'
+                      : 'bg-background/50 border-[hsl(var(--form-border))] text-muted-foreground hover:border-[hsl(var(--form-border-hover))]'
                   }`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -509,7 +509,7 @@ function ServiceCalculator() {
                   className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all text-center ${
                     nda === option.value
                       ? 'bg-violet-500/20 border-violet-500/50 text-foreground'
-                      : 'bg-white/5 border-white/10 text-muted-foreground hover:border-white/20'
+                      : 'bg-background/50 border-[hsl(var(--form-border))] text-muted-foreground hover:border-[hsl(var(--form-border-hover))]'
                   }`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -543,7 +543,7 @@ function ServiceCalculator() {
                   className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all text-center ${
                     deadline === option.value
                       ? 'bg-violet-500/20 border-violet-500/50 text-foreground'
-                      : 'bg-white/5 border-white/10 text-muted-foreground hover:border-white/20'
+                      : 'bg-background/50 border-[hsl(var(--form-border))] text-muted-foreground hover:border-[hsl(var(--form-border-hover))]'
                   }`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
