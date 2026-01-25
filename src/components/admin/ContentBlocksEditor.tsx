@@ -123,7 +123,7 @@ function BlockEditor({
               value={block.content || ''}
               onChange={(e) => onChange({ ...block, content: e.target.value })}
               placeholder="Текст с поддержкой **жирного** и *курсива*"
-              className="bg-white/5 border-white/10 min-h-[100px]"
+              className="bg-background/50 border-[hsl(var(--form-border))] min-h-[100px]"
             />
           </div>
         );
@@ -138,7 +138,7 @@ function BlockEditor({
                   value={block.src || ''}
                   onChange={(e) => onChange({ ...block, src: e.target.value })}
                   placeholder="https://..."
-                  className="bg-white/5 border-white/10"
+                  className="bg-background/50 border-[hsl(var(--form-border))]"
                 />
               </div>
               <FileUploadButton
@@ -154,7 +154,7 @@ function BlockEditor({
               value={block.caption || ''}
               onChange={(e) => onChange({ ...block, caption: e.target.value })}
               placeholder="Подпись (опционально)"
-              className="bg-white/5 border-white/10"
+              className="bg-background/50 border-[hsl(var(--form-border))]"
             />
           </div>
         );
@@ -169,7 +169,7 @@ function BlockEditor({
                   value={block.src || ''}
                   onChange={(e) => onChange({ ...block, src: e.target.value })}
                   placeholder="https://..."
-                  className="bg-white/5 border-white/10"
+                  className="bg-background/50 border-[hsl(var(--form-border))]"
                 />
               </div>
               <FileUploadButton
@@ -185,7 +185,7 @@ function BlockEditor({
               value={block.caption || ''}
               onChange={(e) => onChange({ ...block, caption: e.target.value })}
               placeholder="Подпись (опционально)"
-              className="bg-white/5 border-white/10"
+              className="bg-background/50 border-[hsl(var(--form-border))]"
             />
           </div>
         );
@@ -200,7 +200,7 @@ function BlockEditor({
                   value={block.beforeSrc || ''}
                   onChange={(e) => onChange({ ...block, beforeSrc: e.target.value })}
                   placeholder="https://..."
-                  className="bg-white/5 border-white/10 flex-1"
+                  className="bg-background/50 border-[hsl(var(--form-border))] flex-1"
                 />
                 <FileUploadButton
                   accept="image/*"
@@ -216,7 +216,7 @@ function BlockEditor({
                   value={block.afterSrc || ''}
                   onChange={(e) => onChange({ ...block, afterSrc: e.target.value })}
                   placeholder="https://..."
-                  className="bg-white/5 border-white/10 flex-1"
+                  className="bg-background/50 border-[hsl(var(--form-border))] flex-1"
                 />
                 <FileUploadButton
                   accept="image/*"
@@ -239,7 +239,7 @@ function BlockEditor({
               value={block.caption || ''}
               onChange={(e) => onChange({ ...block, caption: e.target.value })}
               placeholder="Подпись (опционально)"
-              className="bg-white/5 border-white/10"
+              className="bg-background/50 border-[hsl(var(--form-border))]"
             />
           </div>
         );
@@ -250,7 +250,7 @@ function BlockEditor({
   };
 
   return (
-    <div className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-4">
+    <div className="p-4 bg-background/50 rounded-xl border border-[hsl(var(--form-border))] space-y-4">
       <div className="flex items-center gap-2">
         <GripVertical className="w-4 h-4 text-muted-foreground cursor-grab" />
         <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center">
@@ -262,7 +262,7 @@ function BlockEditor({
             onChange({ type, content: '', src: '', caption: '', beforeSrc: '', afterSrc: '' })
           }
         >
-          <SelectTrigger className="w-40 bg-white/5 border-white/10 h-8">
+          <SelectTrigger className="w-40 bg-background/50 border-[hsl(var(--form-border))] h-8">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

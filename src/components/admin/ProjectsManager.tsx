@@ -76,7 +76,7 @@ function FileUploadInput({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="URL или загрузите файл"
-          className="bg-white/5 border-white/10 flex-1"
+          className="bg-background/50 border-[hsl(var(--form-border))] flex-1"
         />
         <Button
           type="button"
@@ -91,7 +91,7 @@ function FileUploadInput({
         <input ref={inputRef} type="file" accept={accept} onChange={handleFileChange} className="hidden" />
       </div>
       {value && (
-        <div className="flex items-center gap-2 p-2 bg-white/5 rounded-lg">
+        <div className="flex items-center gap-2 p-2 bg-background/50 border border-[hsl(var(--form-border))] rounded-lg">
           {value.match(/\.(mp4|webm|mov|gif)$/i) ? (
             <video src={value} className="w-16 h-12 object-cover rounded" muted />
           ) : (
@@ -176,7 +176,7 @@ function ProjectForm({
             value={title}
             onChange={(e) => handleTitleChange(e.target.value)}
             placeholder="Киберпанк Москва"
-            className="bg-white/5 border-white/10"
+            className="bg-background/50 border-[hsl(var(--form-border))]"
             required
           />
         </div>
@@ -186,7 +186,7 @@ function ProjectForm({
             value={slug}
             onChange={(e) => setSlug(e.target.value)}
             placeholder="cyberpunk-moscow"
-            className="bg-white/5 border-white/10"
+            className="bg-background/50 border-[hsl(var(--form-border))]"
             required
           />
         </div>
@@ -198,7 +198,7 @@ function ProjectForm({
           value={subtitle}
           onChange={(e) => setSubtitle(e.target.value)}
           placeholder="Футуристический короткометражный фильм"
-          className="bg-white/5 border-white/10"
+          className="bg-background/50 border-[hsl(var(--form-border))]"
         />
       </div>
 
@@ -209,7 +209,7 @@ function ProjectForm({
             value={year}
             onChange={(e) => setYear(e.target.value)}
             placeholder="2024"
-            className="bg-white/5 border-white/10"
+            className="bg-background/50 border-[hsl(var(--form-border))]"
           />
         </div>
         <div className="space-y-2">
@@ -218,7 +218,7 @@ function ProjectForm({
             value={duration}
             onChange={(e) => setDuration(e.target.value)}
             placeholder="2:45"
-            className="bg-white/5 border-white/10"
+            className="bg-background/50 border-[hsl(var(--form-border))]"
           />
         </div>
       </div>
@@ -229,7 +229,7 @@ function ProjectForm({
           value={tags}
           onChange={(e) => setTags(e.target.value)}
           placeholder="#AI, #Video, #Commercial"
-          className="bg-white/5 border-white/10"
+          className="bg-background/50 border-[hsl(var(--form-border))]"
         />
       </div>
 
@@ -255,7 +255,7 @@ function ProjectForm({
 
       <div className="space-y-2">
         <label className="text-sm font-medium">AI Инструменты</label>
-        <div className="flex flex-wrap gap-2 p-3 bg-white/5 rounded-lg border border-white/10">
+        <div className="flex flex-wrap gap-2 p-3 bg-background/50 rounded-lg border border-[hsl(var(--form-border))]">
           {aiTools.map((tool) => (
             <button
               key={tool.id}
@@ -264,7 +264,7 @@ function ProjectForm({
               className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                 selectedTools.includes(tool.name)
                   ? 'bg-violet-500/30 text-violet-300 border border-violet-500/50'
-                  : 'bg-white/5 text-muted-foreground border border-white/10 hover:bg-white/10'
+                  : 'bg-background/50 text-muted-foreground border border-[hsl(var(--form-border))] hover:bg-muted'
               }`}
             >
               {tool.name}
@@ -273,7 +273,7 @@ function ProjectForm({
         </div>
       </div>
 
-      <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+      <div className="flex items-center justify-between p-3 bg-background/50 border border-[hsl(var(--form-border))] rounded-lg">
         <div>
           <div className="font-medium text-sm">Опубликован</div>
           <div className="text-xs text-muted-foreground">Виден на сайте</div>
@@ -311,7 +311,7 @@ function ProjectForm({
       )}
 
       {/* Content Blocks Editor */}
-      <div className="border-t border-white/10 pt-4">
+      <div className="border-t border-[hsl(var(--form-border))] pt-4">
         <ContentBlocksEditor blocks={contentBlocks} onChange={setContentBlocks} />
       </div>
 
@@ -350,7 +350,7 @@ function SortableProjectItem({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/10"
+      className="flex items-center gap-4 p-4 bg-background/50 rounded-xl border border-[hsl(var(--form-border))]"
     >
       <button
         {...attributes}
@@ -381,7 +381,7 @@ function SortableProjectItem({
         <p className="text-sm text-muted-foreground truncate">{project.subtitle}</p>
         <div className="flex gap-1.5 mt-2 flex-wrap">
           {project.tags?.slice(0, 3).map((tag) => (
-            <span key={tag} className="px-2 py-0.5 text-[10px] font-mono bg-white/5 rounded">{tag}</span>
+            <span key={tag} className="px-2 py-0.5 text-[10px] font-mono bg-muted rounded">{tag}</span>
           ))}
         </div>
       </div>

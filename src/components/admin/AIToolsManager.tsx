@@ -85,8 +85,8 @@ function ToolForm({
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Midjourney"
-          className="bg-white/5 border-white/10"
+            placeholder="Midjourney"
+            className="bg-background/50 border-[hsl(var(--form-border))]"
           required
         />
       </div>
@@ -98,7 +98,7 @@ function ToolForm({
             value={logo}
             onChange={(e) => setLogo(e.target.value)}
             placeholder="URL или загрузите файл"
-            className="bg-white/5 border-white/10 flex-1"
+            className="bg-background/50 border-[hsl(var(--form-border))] flex-1"
             required
           />
           <Button
@@ -124,7 +124,7 @@ function ToolForm({
           />
         </div>
         {logo && (
-          <div className="flex items-center gap-2 p-2 bg-white/5 rounded-lg">
+          <div className="flex items-center gap-2 p-2 bg-background/50 border border-[hsl(var(--form-border))] rounded-lg">
             <img src={logo} alt="Preview" className="w-8 h-8 object-contain rounded" />
             <span className="text-xs text-muted-foreground flex-1 truncate">{logo}</span>
             <Button
@@ -143,7 +143,7 @@ function ToolForm({
       <div className="space-y-2">
         <label className="text-sm font-medium">Категория</label>
         <Select value={category} onValueChange={(v) => setCategory(v as 'video' | 'image')}>
-          <SelectTrigger className="bg-white/5 border-white/10">
+          <SelectTrigger className="bg-background/50 border-[hsl(var(--form-border))]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -187,7 +187,7 @@ export function AIToolsManager() {
   };
 
   const renderToolRow = (tool: AITool) => (
-    <div key={tool.id} className="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/10">
+    <div key={tool.id} className="flex items-center gap-3 p-3 bg-background/50 rounded-lg border border-[hsl(var(--form-border))]">
       <img src={tool.logo} alt={tool.name} className="w-8 h-8 object-contain rounded" />
       <span className="flex-1 font-medium text-sm">{tool.name}</span>
       <div className="flex gap-1">
@@ -238,7 +238,7 @@ export function AIToolsManager() {
               Добавить
             </Button>
           </DialogTrigger>
-          <DialogContent className="glass-card border-white/10">
+          <DialogContent className="glass-card border-[hsl(var(--form-border))]">
             <DialogHeader>
               <DialogTitle>{editingTool ? 'Редактировать инструмент' : 'Новый инструмент'}</DialogTitle>
             </DialogHeader>

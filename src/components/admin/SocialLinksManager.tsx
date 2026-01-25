@@ -64,7 +64,7 @@ function LinkForm({
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Telegram"
-          className="bg-white/5 border-white/10"
+          className="bg-background/50 border-[hsl(var(--form-border))]"
           required
         />
       </div>
@@ -75,7 +75,7 @@ function LinkForm({
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="https://t.me/username"
-          className="bg-white/5 border-white/10"
+          className="bg-background/50 border-[hsl(var(--form-border))]"
           required
         />
       </div>
@@ -84,7 +84,7 @@ function LinkForm({
         <div className="space-y-2">
           <label className="text-sm font-medium">Иконка</label>
           <Select value={icon} onValueChange={setIcon}>
-            <SelectTrigger className="bg-white/5 border-white/10">
+            <SelectTrigger className="bg-background/50 border-[hsl(var(--form-border))]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -103,7 +103,7 @@ function LinkForm({
         <div className="space-y-2">
           <label className="text-sm font-medium">Расположение</label>
           <Select value={location} onValueChange={(v) => setLocation(v as 'header' | 'footer' | 'both')}>
-            <SelectTrigger className="bg-white/5 border-white/10">
+            <SelectTrigger className="bg-background/50 border-[hsl(var(--form-border))]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -117,7 +117,7 @@ function LinkForm({
         </div>
       </div>
 
-      <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+      <div className="flex items-center justify-between p-3 bg-background/50 border border-[hsl(var(--form-border))] rounded-lg">
         <div>
           <div className="font-medium text-sm">Видимость</div>
           <div className="text-xs text-muted-foreground">Показывать на сайте</div>
@@ -206,7 +206,7 @@ export function SocialLinksManager() {
               Добавить
             </Button>
           </DialogTrigger>
-          <DialogContent className="glass-card border-white/10">
+          <DialogContent className="glass-card border-[hsl(var(--form-border))]">
             <DialogHeader>
               <DialogTitle>{editingLink ? 'Редактировать' : 'Новая ссылка'}</DialogTitle>
             </DialogHeader>
@@ -234,7 +234,7 @@ export function SocialLinksManager() {
             return (
               <div
                 key={link.id}
-                className={`flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/10 ${
+                className={`flex items-center gap-4 p-4 bg-background/50 rounded-xl border border-[hsl(var(--form-border))] ${
                   !link.is_visible ? 'opacity-50' : ''
                 }`}
               >

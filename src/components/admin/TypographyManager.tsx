@@ -77,7 +77,7 @@ export function TypographyManager() {
         {sortedSettings.map((setting) => (
           <div
             key={setting.id}
-            className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-3"
+            className="p-4 bg-background/50 rounded-xl border border-[hsl(var(--form-border))] space-y-3"
           >
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg bg-violet-500/20 flex items-center justify-center">
@@ -96,7 +96,7 @@ export function TypographyManager() {
                   value={getValue(setting.id, 'desktop_size')}
                   onChange={(e) => handleChange(setting.id, 'desktop_size', e.target.value)}
                   placeholder="48px"
-                  className="bg-white/5 border-white/10 font-mono"
+                  className="bg-background/50 border-[hsl(var(--form-border))] font-mono"
                 />
               </div>
               <div className="space-y-2">
@@ -105,7 +105,7 @@ export function TypographyManager() {
                   value={getValue(setting.id, 'mobile_size')}
                   onChange={(e) => handleChange(setting.id, 'mobile_size', e.target.value)}
                   placeholder="32px"
-                  className="bg-white/5 border-white/10 font-mono"
+                  className="bg-background/50 border-[hsl(var(--form-border))] font-mono"
                 />
               </div>
             </div>
