@@ -82,7 +82,7 @@ export function AvailabilityManager() {
             className={`w-full justify-start p-4 h-auto ${
               status === opt.value
                 ? 'bg-violet-500/20 border border-violet-500/50'
-                : 'bg-white/5 border border-white/10 hover:bg-white/10'
+                : 'bg-background/50 border border-[hsl(var(--form-border))] hover:bg-muted'
             }`}
             onClick={() => handleChange(opt.value)}
             disabled={update.isPending || !isVisible}

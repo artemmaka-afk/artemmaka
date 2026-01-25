@@ -243,7 +243,7 @@ export default function Admin() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="admin@example.com"
-                className="bg-white/5 border-white/10"
+                className="bg-background/50 border-[hsl(var(--form-border))]"
                 required
               />
             </div>
@@ -254,7 +254,7 @@ export default function Admin() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="bg-white/5 border-white/10"
+                className="bg-background/50 border-[hsl(var(--form-border))]"
                 required
                 minLength={6}
               />
@@ -320,7 +320,7 @@ export default function Admin() {
   return (
     <div className="min-h-screen bg-background mesh-background noise-overlay">
       <div className="relative z-10">
-        <header className="border-b border-white/10 px-4 sm:px-6 py-4">
+        <header className="border-b border-[hsl(var(--form-border))] px-4 sm:px-6 py-4">
           <div className="max-w-6xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link
@@ -348,7 +348,7 @@ export default function Admin() {
 
         <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
           <Tabs defaultValue="requests" className="space-y-6">
-            <TabsList className="bg-white/5 border border-white/10 flex-wrap h-auto gap-1 p-1">
+            <TabsList className="bg-background/50 border border-[hsl(var(--form-border))] flex-wrap h-auto gap-1 p-1">
               <TabsTrigger value="requests" className="gap-2">
                 <Inbox className="w-4 h-4" />
                 <span className="hidden sm:inline">Заявки</span>
@@ -445,7 +445,7 @@ export default function Admin() {
                     {filteredRequests.map((request) => (
                       <div
                         key={request.id}
-                        className="p-4 bg-white/5 rounded-xl border border-white/10 space-y-3"
+                        className="p-4 bg-background/50 rounded-xl border border-[hsl(var(--form-border))] space-y-3"
                       >
                         <div className="flex items-start justify-between gap-4">
                           <div>
@@ -571,7 +571,7 @@ export default function Admin() {
 
                         {/* Attachments */}
                         {request.attachments && request.attachments.length > 0 && (
-                          <div className="space-y-2 pt-2 border-t border-white/10">
+                          <div className="space-y-2 pt-2 border-t border-[hsl(var(--form-border))]">
                             <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                               <Paperclip className="w-4 h-4" />
                               Вложения ({request.attachments.length})
@@ -586,7 +586,7 @@ export default function Admin() {
                                     href={url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center gap-2 px-3 py-2 bg-white/5 rounded-lg border border-white/10 hover:border-violet-500/50 transition-colors"
+                                    className="flex items-center gap-2 px-3 py-2 bg-background/50 rounded-lg border border-[hsl(var(--form-border))] hover:border-violet-500/50 transition-colors"
                                   >
                                     {isImage ? (
                                       <img src={url} alt={fileName} className="w-8 h-8 object-cover rounded" />
@@ -664,7 +664,7 @@ export default function Admin() {
                 {config && (
                   <div className="space-y-6">
                     <div className="space-y-4">
-                      <h3 className="text-sm font-medium text-muted-foreground border-b border-white/10 pb-2">
+                      <h3 className="text-sm font-medium text-muted-foreground border-b border-[hsl(var(--form-border))] pb-2">
                         Базовые цены
                       </h3>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -674,7 +674,7 @@ export default function Admin() {
                             type="number"
                             value={config.base_frame_price}
                             onChange={(e) => updateConfig('base_frame_price', Number(e.target.value))}
-                            className="bg-white/5 border-white/10"
+                            className="bg-background/50 border-[hsl(var(--form-border))]"
                           />
                         </div>
                         <div className="space-y-2">
@@ -683,7 +683,7 @@ export default function Admin() {
                             type="number"
                             value={config.music_price}
                             onChange={(e) => updateConfig('music_price', Number(e.target.value))}
-                            className="bg-white/5 border-white/10"
+                            className="bg-background/50 border-[hsl(var(--form-border))]"
                           />
                         </div>
                         <div className="space-y-2">
@@ -692,14 +692,14 @@ export default function Admin() {
                             type="number"
                             value={config.scenario_price_per_min}
                             onChange={(e) => updateConfig('scenario_price_per_min', Number(e.target.value))}
-                            className="bg-white/5 border-white/10"
+                            className="bg-background/50 border-[hsl(var(--form-border))]"
                           />
                         </div>
                       </div>
                     </div>
 
                     <div className="space-y-4">
-                      <h3 className="text-sm font-medium text-muted-foreground border-b border-white/10 pb-2">
+                      <h3 className="text-sm font-medium text-muted-foreground border-b border-[hsl(var(--form-border))] pb-2">
                         Дополнительные услуги
                       </h3>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -709,7 +709,7 @@ export default function Admin() {
                             type="number"
                             value={config.lipsync_price_per_30s}
                             onChange={(e) => updateConfig('lipsync_price_per_30s', Number(e.target.value))}
-                            className="bg-white/5 border-white/10"
+                            className="bg-background/50 border-[hsl(var(--form-border))]"
                           />
                         </div>
                         <div className="space-y-2">
@@ -718,7 +718,7 @@ export default function Admin() {
                             type="number"
                             value={config.revisions_4_price}
                             onChange={(e) => updateConfig('revisions_4_price', Number(e.target.value))}
-                            className="bg-white/5 border-white/10"
+                            className="bg-background/50 border-[hsl(var(--form-border))]"
                           />
                         </div>
                         <div className="space-y-2">
@@ -727,14 +727,14 @@ export default function Admin() {
                             type="number"
                             value={config.revisions_8_price}
                             onChange={(e) => updateConfig('revisions_8_price', Number(e.target.value))}
-                            className="bg-white/5 border-white/10"
+                            className="bg-background/50 border-[hsl(var(--form-border))]"
                           />
                         </div>
                       </div>
                     </div>
 
                     <div className="space-y-4">
-                      <h3 className="text-sm font-medium text-muted-foreground border-b border-white/10 pb-2">
+                      <h3 className="text-sm font-medium text-muted-foreground border-b border-[hsl(var(--form-border))] pb-2">
                         Множители срочности
                       </h3>
                       <div className="grid grid-cols-2 gap-4">
@@ -745,7 +745,7 @@ export default function Admin() {
                             step="0.1"
                             value={config.deadline_20_multiplier}
                             onChange={(e) => updateConfig('deadline_20_multiplier', Number(e.target.value))}
-                            className="bg-white/5 border-white/10"
+                            className="bg-background/50 border-[hsl(var(--form-border))]"
                           />
                         </div>
                         <div className="space-y-2">
@@ -755,14 +755,14 @@ export default function Admin() {
                             step="0.1"
                             value={config.deadline_10_multiplier}
                             onChange={(e) => updateConfig('deadline_10_multiplier', Number(e.target.value))}
-                            className="bg-white/5 border-white/10"
+                            className="bg-background/50 border-[hsl(var(--form-border))]"
                           />
                         </div>
                       </div>
                     </div>
 
                     <div className="space-y-4">
-                      <h3 className="text-sm font-medium text-muted-foreground border-b border-white/10 pb-2">
+                      <h3 className="text-sm font-medium text-muted-foreground border-b border-[hsl(var(--form-border))] pb-2">
                         Множители NDA
                       </h3>
                       <div className="grid grid-cols-2 gap-4">
@@ -773,7 +773,7 @@ export default function Admin() {
                             step="0.1"
                             value={config.nda_partial_multiplier}
                             onChange={(e) => updateConfig('nda_partial_multiplier', Number(e.target.value))}
-                            className="bg-white/5 border-white/10"
+                            className="bg-background/50 border-[hsl(var(--form-border))]"
                           />
                           <p className="text-xs text-muted-foreground">+{Math.round((config.nda_partial_multiplier - 1) * 100)}% к цене</p>
                         </div>
@@ -784,7 +784,7 @@ export default function Admin() {
                             step="0.1"
                             value={config.nda_full_multiplier}
                             onChange={(e) => updateConfig('nda_full_multiplier', Number(e.target.value))}
-                            className="bg-white/5 border-white/10"
+                            className="bg-background/50 border-[hsl(var(--form-border))]"
                           />
                           <p className="text-xs text-muted-foreground">+{Math.round((config.nda_full_multiplier - 1) * 100)}% к цене</p>
                         </div>
@@ -793,10 +793,10 @@ export default function Admin() {
 
                     {/* Hide Pricing Toggle */}
                     <div className="space-y-4">
-                      <h3 className="text-sm font-medium text-muted-foreground border-b border-white/10 pb-2">
+                      <h3 className="text-sm font-medium text-muted-foreground border-b border-[hsl(var(--form-border))] pb-2">
                         Отображение
                       </h3>
-                      <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10">
+                      <div className="flex items-center justify-between p-4 bg-background/50 rounded-xl border border-[hsl(var(--form-border))]">
                         <div className="flex items-center gap-3">
                           <EyeOff className="w-5 h-5 text-violet-400" />
                           <div>
@@ -807,7 +807,7 @@ export default function Admin() {
                         <button
                           type="button"
                           onClick={() => updateConfig('hide_pricing', !config.hide_pricing)}
-                          className={`w-12 h-6 rounded-full transition-colors ${config.hide_pricing ? 'bg-violet-500' : 'bg-white/20'}`}
+                          className={`w-12 h-6 rounded-full transition-colors ${config.hide_pricing ? 'bg-violet-500' : 'bg-muted'}`}
                         >
                           <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${config.hide_pricing ? 'translate-x-6' : 'translate-x-0.5'}`} />
                         </button>

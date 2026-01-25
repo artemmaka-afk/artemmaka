@@ -174,13 +174,13 @@ export function SiteContentManager() {
               <Textarea
                 value={localValues[id] || ''}
                 onChange={(e) => handleChange(id, e.target.value)}
-                className={`bg-white/5 border-white/10 min-h-[100px] ${isChanged ? 'border-violet-500/50' : ''}`}
+                className={`bg-background/50 border-[hsl(var(--form-border))] min-h-[100px] ${isChanged ? 'border-violet-500/50' : ''}`}
               />
             ) : (
               <Input
                 value={localValues[id] || ''}
                 onChange={(e) => handleChange(id, e.target.value)}
-                className={`bg-white/5 border-white/10 ${isChanged ? 'border-violet-500/50' : ''}`}
+                className={`bg-background/50 border-[hsl(var(--form-border))] ${isChanged ? 'border-violet-500/50' : ''}`}
               />
             )}
             </div>
@@ -239,7 +239,7 @@ function FileUploadField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="URL или загрузите файл"
-          className={`bg-white/5 border-white/10 flex-1 ${isChanged ? 'border-violet-500/50' : ''}`}
+          className={`bg-background/50 border-[hsl(var(--form-border))] flex-1 ${isChanged ? 'border-violet-500/50' : ''}`}
         />
         <Button
           type="button"
@@ -254,7 +254,7 @@ function FileUploadField({
         <input ref={inputRef} type="file" accept="image/*,.ico" onChange={handleFileChange} className="hidden" />
       </div>
       {value && (
-        <div className="flex items-center gap-2 p-2 bg-white/5 rounded-lg">
+        <div className="flex items-center gap-2 p-2 bg-background/50 border border-[hsl(var(--form-border))] rounded-lg">
           <img src={value} alt="Preview" className="w-12 h-12 object-cover rounded" />
           <span className="text-xs text-muted-foreground flex-1 truncate">{value}</span>
           <Button type="button" variant="ghost" size="sm" onClick={() => onChange('')} className="h-6 w-6 p-0">

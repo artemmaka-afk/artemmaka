@@ -45,7 +45,7 @@ function StatForm({
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder="50+"
-          className="bg-white/5 border-white/10"
+          className="bg-background/50 border-[hsl(var(--form-border))]"
           required
         />
       </div>
@@ -56,12 +56,12 @@ function StatForm({
           value={label}
           onChange={(e) => setLabel(e.target.value)}
           placeholder="Проектов"
-          className="bg-white/5 border-white/10"
+          className="bg-background/50 border-[hsl(var(--form-border))]"
           required
         />
       </div>
 
-      <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+      <div className="flex items-center justify-between p-3 bg-background/50 border border-[hsl(var(--form-border))] rounded-lg">
         <div>
           <div className="font-medium text-sm">Видимость</div>
           <div className="text-xs text-muted-foreground">Показывать на сайте</div>
@@ -145,7 +145,7 @@ export function HeroStatsManager() {
               Добавить
             </Button>
           </DialogTrigger>
-          <DialogContent className="glass-card border-white/10">
+          <DialogContent className="glass-card border-[hsl(var(--form-border))]">
             <DialogHeader>
               <DialogTitle>{editingStat ? 'Редактировать' : 'Новый блок'}</DialogTitle>
             </DialogHeader>
@@ -171,7 +171,7 @@ export function HeroStatsManager() {
           stats?.map((stat) => (
             <div
               key={stat.id}
-              className={`flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/10 ${
+              className={`flex items-center gap-4 p-4 bg-background/50 rounded-xl border border-[hsl(var(--form-border))] ${
                 !stat.is_visible ? 'opacity-50' : ''
               }`}
             >
