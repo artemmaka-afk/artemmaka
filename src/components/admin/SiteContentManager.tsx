@@ -251,7 +251,7 @@ function FileUploadField({
         >
           {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
         </Button>
-        <input ref={inputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+        <input ref={inputRef} type="file" accept="image/*,.ico" onChange={handleFileChange} className="hidden" />
       </div>
       {value && (
         <div className="flex items-center gap-2 p-2 bg-white/5 rounded-lg">
