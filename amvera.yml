@@ -1,8 +1,12 @@
+version: null
 meta:
   environment: node
   toolchain:
     name: browser
     version: "20"
 build:
+  additionalCommands: null
   artifacts:
     dist/*: /
+run: {}
+serviceType: compute
