@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ExternalLink, Clock, Calendar, ChevronLeft, ChevronRight, Play, Pause, Maximize } from 'lucide-react';
 import { Project, ContentBlock } from '@/lib/constants';
@@ -314,16 +314,26 @@ export function ProjectSheet({ project, onClose }: ProjectSheetProps) {
     return acc;
   }, {} as Record<string, string>) || {};
 
+  // Handle back button to close sheet instead of navigating back
   useEffect(() => {
-    if (project) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+    if (!project) return;
+    
+    // Push a new history state when opening the sheet
+    window.history.pushState({ projectSheet: true }, '');
+    document.body.style.overflow = 'hidden';
+    
+    const handlePopState = (event: PopStateEvent) => {
+      // When back button is pressed, close the sheet instead of navigating
+      onClose();
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    
     return () => {
+      window.removeEventListener('popstate', handlePopState);
       document.body.style.overflow = '';
     };
-  }, [project]);
+  }, [project, onClose]);
 
   return (
     <Sheet open={!!project} onOpenChange={(open) => !open && onClose()}>
@@ -340,14 +350,18 @@ export function ProjectSheet({ project, onClose }: ProjectSheetProps) {
               exit={{ opacity: 0, x: 50 }}
               transition={{ duration: 0.3 }}
             >
-              {/* Hero Image - static thumbnail, not video */}
+              {/* Hero Video Preview or Image */}
               <div className="relative">
                 <div className="relative w-full bg-black rounded-b-2xl overflow-hidden" style={{ maxHeight: '60vh' }}>
-                  <img 
-                    src={project.thumbnail} 
-                    alt={project.title}
-                    className="w-full h-auto max-h-[60vh] object-cover"
-                  />
+                  {project.videoPreview ? (
+                    <VideoPlayer src={project.videoPreview} autoPlay />
+                  ) : (
+                    <img 
+                      src={project.thumbnail} 
+                      alt={project.title}
+                      className="w-full h-auto max-h-[60vh] object-cover"
+                    />
+                  )}
                 </div>
                 
                 <motion.button
