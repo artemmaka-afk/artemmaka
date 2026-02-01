@@ -38,9 +38,9 @@
     --radius: 1.5rem;
 
     /* Custom tokens - light theme */
-    --glass-bg: 0 0% 0% / 0.02;
-    --glass-border: 0 0% 0% / 0.15;
-    --glass-highlight: 0 0% 0% / 0.12;
+    --glass-bg: 0 0% 0% / 0.04;
+    --glass-border: 0 0% 0% / 0.18;
+    --glass-highlight: 0 0% 0% / 0.15;
     
     /* Light theme specific borders for forms */
     --form-border: 263 30% 70%;
