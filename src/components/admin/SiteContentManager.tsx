@@ -28,6 +28,7 @@ const contentLabels: Record<string, { label: string; multiline?: boolean; descri
   // Page sections
   portfolio_title: { label: 'Заголовок портфолио', description: 'Заголовок раздела работ', typography: 'H2' },
   portfolio_subtitle: { label: 'Подзаголовок портфолио', description: 'Описание раздела работ', typography: 'Body' },
+  calculator_visible: { label: 'Показывать калькулятор', description: 'Включить/выключить раздел калькулятора', type: 'switch' },
   calculator_title: { label: 'Заголовок калькулятора', description: 'Заголовок раздела калькулятора', typography: 'H2' },
   calculator_subtitle: { label: 'Подзаголовок калькулятора', description: 'Описание раздела калькулятора', typography: 'Body' },
   contact_title: { label: 'Заголовок формы связи', description: 'Заголовок раздела "Оставить заявку"', typography: 'H2' },
