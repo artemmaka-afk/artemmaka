@@ -8,12 +8,16 @@ import { ScrollToTop } from '@/components/ScrollToTop';
 import { Analytics } from '@/components/Analytics';
 import { DynamicMeta } from '@/components/DynamicMeta';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { useSiteContent } from '@/hooks/useSiteData';
 
 // Lazy load below-the-fold components to reduce initial bundle size
 const ServiceCalculator = lazy(() => import('@/components/ServiceCalculator'));
 const ProjectRequestForm = lazy(() => import('@/components/ProjectRequestForm'));
 
 const Index = () => {
+  const { data: siteContent } = useSiteContent();
+  const isCalculatorVisible = siteContent?.find(c => c.id === 'calculator_visible')?.value !== 'false';
+
   return (
     <div className="min-h-screen bg-background mesh-background noise-overlay">
       <DynamicMeta />
@@ -22,9 +26,11 @@ const Index = () => {
         <Hero />
         <BentoAbout />
         <PortfolioGrid />
-        <Suspense fallback={<div className="min-h-[400px]" />}>
-          <ServiceCalculator />
-        </Suspense>
+        {isCalculatorVisible && (
+          <Suspense fallback={<div className="min-h-[400px]" />}>
+            <ServiceCalculator />
+          </Suspense>
+        )}
         <Suspense fallback={<div className="min-h-[300px]" />}>
           <ProjectRequestForm />
         </Suspense>

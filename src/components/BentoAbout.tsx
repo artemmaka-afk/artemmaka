@@ -176,13 +176,13 @@ export function BentoAbout() {
           {/* Card 1: Bio - Large */}
           <motion.div
             variants={cardVariants}
-            className="md:col-span-2 lg:col-span-3 md:row-span-2 glass-card p-6 flex flex-col justify-between group min-h-[200px] h-auto cursor-pointer"
+            className="md:col-span-2 lg:col-span-3 md:row-span-2 glass-card p-6 flex flex-col justify-between group min-h-[200px] h-auto cursor-pointer border border-[hsl(var(--glass-border))]"
             whileHover={{ scale: 1.01, y: -2 }}
             onClick={() => showMoreButton && extendedContent && setIsModalOpen(true)}
           >
             <div className="overflow-hidden">
               <SectionLabel icon={User} text="О себе" />
-              <p className="typography-body leading-relaxed text-muted-foreground break-words">
+              <p className="typography-body leading-relaxed text-foreground/80 break-words">
                 {bio}
               </p>
             </div>
@@ -197,7 +197,7 @@ export function BentoAbout() {
           {/* Card 2: Location - Small */}
           <motion.div
             variants={cardVariants}
-            className="md:col-span-2 lg:col-span-1 glass-card p-5 flex flex-col justify-center items-center text-center min-h-[100px] h-auto"
+            className="md:col-span-2 lg:col-span-1 glass-card p-5 flex flex-col justify-center items-center text-center min-h-[100px] h-auto border border-[hsl(var(--glass-border))]"
             whileHover={{ scale: 1.02, y: -2 }}
           >
             <MapPin className="w-6 h-6 text-violet-400 mb-2" />
@@ -208,7 +208,7 @@ export function BentoAbout() {
           {/* Card 3: Experience - Small */}
           <motion.div
             variants={cardVariants}
-            className="lg:col-span-2 glass-card p-5 flex flex-col justify-center items-center text-center bg-gradient-to-br from-violet-500/10 to-purple-500/5 min-h-[100px] h-auto"
+            className="lg:col-span-2 glass-card p-5 flex flex-col justify-center items-center text-center bg-gradient-to-br from-violet-500/15 to-purple-500/10 border border-violet-500/20 min-h-[100px] h-auto"
             whileHover={{ scale: 1.02, y: -2 }}
           >
             <div className="typography-h2 font-bold gradient-text">3+</div>
@@ -218,7 +218,7 @@ export function BentoAbout() {
           {/* Card 4: Video Tech Stack Marquee - Medium */}
           <motion.div
             variants={cardVariants}
-            className="md:col-span-4 lg:col-span-3 glass-card p-5 overflow-hidden min-h-[100px] h-auto"
+            className="md:col-span-4 lg:col-span-3 glass-card p-5 overflow-hidden min-h-[100px] h-auto border border-[hsl(var(--glass-border))]"
             whileHover={{ scale: 1.01 }}
           >
             <SectionLabel icon={Film} text="Стек для видео" />
@@ -228,7 +228,7 @@ export function BentoAbout() {
           {/* Card 5: Image Tech Stack Marquee - Medium */}
           <motion.div
             variants={cardVariants}
-            className="md:col-span-4 lg:col-span-3 glass-card p-5 overflow-hidden min-h-[100px] h-auto"
+            className="md:col-span-4 lg:col-span-3 glass-card p-5 overflow-hidden min-h-[100px] h-auto border border-[hsl(var(--glass-border))]"
             whileHover={{ scale: 1.01 }}
           >
             <SectionLabel icon={Image} text="Стек для изображений" />
@@ -238,7 +238,7 @@ export function BentoAbout() {
           {/* Card 6: Pipeline - Wide */}
           <motion.div
             variants={cardVariants}
-            className="md:col-span-4 lg:col-span-4 glass-card p-5 min-h-[120px] h-auto"
+            className="md:col-span-4 lg:col-span-4 glass-card p-5 min-h-[120px] h-auto border border-[hsl(var(--glass-border))]"
             whileHover={{ scale: 1.01 }}
           >
             <SectionLabel icon={Workflow} text="Мой пайплайн" />
@@ -269,7 +269,7 @@ export function BentoAbout() {
           {/* Card 7: Available Badge */}
           <motion.div
             variants={cardVariants}
-            className="lg:col-span-2 glass-card p-5 flex flex-col justify-center items-center text-center bg-gradient-to-br from-emerald-500/10 to-green-500/5 min-h-[100px] h-auto"
+            className="lg:col-span-2 glass-card p-5 flex flex-col justify-center items-center text-center bg-gradient-to-br from-emerald-500/15 to-green-500/10 border border-emerald-500/20 min-h-[100px] h-auto"
             whileHover={{ scale: 1.02, y: -2 }}
           >
             <div className="flex items-center gap-2 mb-2">
@@ -283,7 +283,7 @@ export function BentoAbout() {
           <motion.a
             href={`mailto:${email}`}
             variants={cardVariants}
-            className="lg:col-span-4 glass-card p-5 flex items-center justify-between group cursor-pointer min-h-[100px] h-auto"
+            className="lg:col-span-4 glass-card p-5 flex items-center justify-between group cursor-pointer min-h-[100px] h-auto border border-[hsl(var(--glass-border))]"
             whileHover={{ scale: 1.01, y: -2 }}
           >
             <div>
