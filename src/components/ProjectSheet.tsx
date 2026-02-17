@@ -248,11 +248,11 @@ function ContentBlockRenderer({ block, index }: { block: ContentBlock; index: nu
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.1 }}
         >
-          <div className="relative overflow-hidden rounded-2xl aspect-video max-w-3xl w-full">
+          <div className="relative overflow-hidden rounded-2xl max-w-3xl w-full">
             <img
               src={block.beforeSrc}
               alt="До"
-              className="absolute inset-0 w-full h-full object-cover"
+              className="w-full h-auto max-h-[75vh] object-contain"
             />
             
             <div
@@ -262,7 +262,7 @@ function ContentBlockRenderer({ block, index }: { block: ContentBlock; index: nu
               <img
                 src={block.afterSrc}
                 alt="После"
-                className="absolute inset-0 w-full h-full object-cover"
+                className="w-full h-full object-contain"
               />
             </div>
 

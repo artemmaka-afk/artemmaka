@@ -248,9 +248,8 @@ export function useProjectMutations() {
         if (error) throw error;
       }
     },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['projects'] });
-      await queryClient.refetchQueries({ queryKey: ['projects'] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
       toast.success('Проект сохранён');
     },
     onError: (error: Error) => {
@@ -263,9 +262,8 @@ export function useProjectMutations() {
       const { error } = await supabase.from('projects').delete().eq('id', id);
       if (error) throw error;
     },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['projects'] });
-      await queryClient.refetchQueries({ queryKey: ['projects'] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
       toast.success('Проект удалён');
     },
     onError: (error: Error) => {
