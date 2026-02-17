@@ -186,7 +186,7 @@ function ContentBlockRenderer({ block, index }: { block: ContentBlock; index: nu
     case 'text':
       return (
         <motion.div 
-          className="max-w-none"
+          className="max-w-2xl mx-auto"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.1 }}
@@ -200,16 +200,16 @@ function ContentBlockRenderer({ block, index }: { block: ContentBlock; index: nu
     case 'image':
       return (
         <motion.figure 
-          className="space-y-3"
+          className="space-y-3 flex flex-col items-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.1 }}
         >
-          <div className="relative overflow-hidden rounded-2xl">
+          <div className="relative overflow-hidden rounded-2xl max-w-3xl w-full">
             <img
               src={block.src}
               alt={block.caption || 'Изображение проекта'}
-              className="w-full h-auto object-cover"
+              className="w-full h-auto max-h-[75vh] object-contain"
               loading="lazy"
             />
           </div>
@@ -224,12 +224,12 @@ function ContentBlockRenderer({ block, index }: { block: ContentBlock; index: nu
     case 'video':
       return (
         <motion.figure 
-          className="space-y-3"
+          className="space-y-3 flex flex-col items-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.1 }}
         >
-          <div className="relative overflow-hidden rounded-2xl glass-card">
+          <div className="relative overflow-hidden rounded-2xl glass-card max-w-3xl w-full">
             <VideoPlayer src={block.src || ''} />
           </div>
           {block.caption && (
@@ -243,12 +243,12 @@ function ContentBlockRenderer({ block, index }: { block: ContentBlock; index: nu
     case 'comparison':
       return (
         <motion.figure 
-          className="space-y-4"
+          className="space-y-4 flex flex-col items-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.1 }}
         >
-          <div className="relative overflow-hidden rounded-2xl aspect-video">
+          <div className="relative overflow-hidden rounded-2xl aspect-video max-w-3xl w-full">
             <img
               src={block.beforeSrc}
               alt="До"
@@ -350,25 +350,13 @@ export function ProjectSheet({ project, onClose }: ProjectSheetProps) {
               exit={{ opacity: 0, x: 50 }}
               transition={{ duration: 0.3 }}
             >
-              {/* Hero Video Preview or Image */}
+              {/* Close button */}
               <div className="relative">
-                <div className="relative w-full bg-black rounded-b-2xl overflow-hidden" style={{ maxHeight: '60vh' }}>
-                  {project.videoPreview ? (
-                    <VideoPlayer src={project.videoPreview} autoPlay />
-                  ) : (
-                    <img 
-                      src={project.thumbnail} 
-                      alt={project.title}
-                      className="w-full h-auto max-h-[60vh] object-cover"
-                    />
-                  )}
-                </div>
-                
                 <motion.button
                   onClick={onClose}
-                  className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center border border-white/20 z-10"
+                  className="absolute top-4 right-4 w-10 h-10 rounded-full bg-background/50 backdrop-blur-md flex items-center justify-center border border-border z-10"
                   aria-label="Закрыть"
-                  whileHover={{ scale: 1.1, backgroundColor: 'rgba(0,0,0,0.7)' }}
+                  whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
                 >
                   <X className="w-5 h-5" />
@@ -376,8 +364,8 @@ export function ProjectSheet({ project, onClose }: ProjectSheetProps) {
               </div>
 
               {/* Content */}
-              <div className="px-6 py-8 space-y-8">
-                <header className="space-y-4">
+              <div className="px-6 py-8 space-y-8 max-w-4xl mx-auto">
+                <header className="space-y-4 max-w-2xl mx-auto">
                   <div className="flex items-center gap-4 text-sm text-muted-foreground font-mono">
                     <span className="flex items-center gap-1">
                       <Calendar className="w-4 h-4" />
