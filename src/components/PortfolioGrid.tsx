@@ -105,8 +105,8 @@ function ProjectCard({ project, index, onSelect, isLCP = false }: ProjectCardPro
           />
         )}
 
-        {/* Overlay Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent opacity-90" />
+        {/* Overlay Gradient - subtle, only at bottom for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
 
         {/* Content */}
         <div className="absolute inset-0 p-3 sm:p-4 flex flex-col justify-between">
