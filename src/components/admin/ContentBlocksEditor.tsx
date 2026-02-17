@@ -197,22 +197,6 @@ function BlockEditor({
               <label className="text-xs text-muted-foreground">Изображение "До"</label>
               <div className="flex gap-2">
                 <Input
-                  value={block.beforeSrc || ''}
-                  onChange={(e) => onChange({ ...block, beforeSrc: e.target.value })}
-                  placeholder="https://..."
-                  className="bg-background/50 border-[hsl(var(--form-border))] flex-1"
-                />
-                <FileUploadButton
-                  accept="image/*"
-                  label="Загрузить"
-                  onUpload={(url) => onChange({ ...block, beforeSrc: url })}
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <label className="text-xs text-muted-foreground">Изображение "После"</label>
-              <div className="flex gap-2">
-                <Input
                   value={block.afterSrc || ''}
                   onChange={(e) => onChange({ ...block, afterSrc: e.target.value })}
                   placeholder="https://..."
@@ -222,6 +206,22 @@ function BlockEditor({
                   accept="image/*"
                   label="Загрузить"
                   onUpload={(url) => onChange({ ...block, afterSrc: url })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs text-muted-foreground">Изображение "После"</label>
+              <div className="flex gap-2">
+                <Input
+                  value={block.beforeSrc || ''}
+                  onChange={(e) => onChange({ ...block, beforeSrc: e.target.value })}
+                  placeholder="https://..."
+                  className="bg-background/50 border-[hsl(var(--form-border))] flex-1"
+                />
+                <FileUploadButton
+                  accept="image/*"
+                  label="Загрузить"
+                  onUpload={(url) => onChange({ ...block, beforeSrc: url })}
                 />
               </div>
             </div>
